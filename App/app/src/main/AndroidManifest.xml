@@ -28,7 +28,7 @@
             android:name=".view.pages.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".view.pages.SignOutActivity"
+            android:name=".view.pages.SignUpActivity"
             android:exported="false" />
         <activity
             android:name=".view.pages.SignInActivity"
