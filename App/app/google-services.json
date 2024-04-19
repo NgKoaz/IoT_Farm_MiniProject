@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "896003336996",
+    "project_id": "farmapp-9c38e",
+    "storage_bucket": "farmapp-9c38e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896003336996:android:72155271acca83ef67a1b1",
+        "android_client_info": {
+          "package_name": "bku.iot.farmapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfaoYNhoFamfq99kQgNCqi2r-7a6nSmgA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
