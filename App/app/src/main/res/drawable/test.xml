@@ -1,0 +1,12 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="#B33131" /> <!-- Background color -->
+    <corners android:radius="8dp" /> <!-- Rounded corners -->
+
+    <!-- Shadow -->
+    <padding android:bottom="8dp" />
+    <size android:height="20dp" />
+    <stroke android:color="#80000000" android:width="2dp" /> <!-- Shadow color and size -->
+
+</shape>

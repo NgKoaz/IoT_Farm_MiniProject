@@ -2,6 +2,8 @@
 <resources>
     <array name="preloaded_fonts" translatable="false">
         <item>@font/abeezee</item>
+        <item>@font/droid_sans</item>
+        <item>@font/droid_sans_bold</item>
         <item>@font/montserrat_bold</item>
         <item>@font/montserrat_light</item>
         <item>@font/montserrat_semibold</item>
