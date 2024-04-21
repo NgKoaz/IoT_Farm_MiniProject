@@ -63,8 +63,7 @@
                 android:layout_height="50dp"
                 android:background="@drawable/bg_setting_change_password_icon"
                 android:padding="8dp"
-                android:src="@tools:sample/avatars"
-                android:tint="#FDFDFD"
+                app:tint="#FDFDFD"
                 app:srcCompat="@drawable/ic_change_password" />
 
             <TextView
@@ -98,8 +97,7 @@
                 android:layout_height="50dp"
                 android:background="@drawable/bg_setting_sign_out_icon"
                 android:padding="8dp"
-                android:src="@tools:sample/avatars"
-                android:tint="#FDFDFD"
+                app:tint="#FDFDFD"
                 app:srcCompat="@drawable/ic_sign_out" />
 
             <TextView

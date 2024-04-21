@@ -26,7 +26,6 @@
                 android:paddingTop="2dp"
                 android:paddingEnd="6dp"
                 android:paddingBottom="2dp"
-                android:src="@tools:sample/avatars"
                 app:srcCompat="@drawable/ic_back_arrow" />
 
             <TextView

@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.pages.HomeActivity">
+    tools:context=".view.pages.HomeActivity"
+    tools:ignore="HardcodedText" >
 
     <RelativeLayout
         android:id="@+id/background"
@@ -40,29 +41,16 @@
                 android:text="Hello, Khoa!"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/imageView"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintVertical_bias="0.0"
+                 />
 
             <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
-                android:layout_marginEnd="20dp"
-                android:src="@tools:sample/avatars"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/imageView2"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_notification" />
-
-            <ImageView
-                android:id="@+id/imageView2"
+                android:id="@+id/home_settingButton"
                 android:layout_width="38dp"
                 android:layout_height="38dp"
                 android:layout_marginEnd="10dp"
-                android:src="@tools:sample/avatars"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -103,8 +91,7 @@
                     android:id="@+id/imageView5"
                     android:layout_width="50dp"
                     android:layout_height="match_parent"
-                    android:src="@tools:sample/avatars"
-                    android:tint="#FF0000"
+                    app:tint="#FF0000"
                     app:srcCompat="@drawable/ic_temperature" />
 
                 <TextView
@@ -136,8 +123,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:paddingStart="8dp"
-                    android:src="@tools:sample/avatars"
-                    android:tint="#0153E3"
+                    app:tint="#0153E3"
                     app:srcCompat="@drawable/ic_moisturizing" />
 
                 <TextView
@@ -175,29 +161,27 @@
                     android:text="Schedule"
                     android:textSize="24sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/imageView3"
+                    app:layout_constraintEnd_toStartOf="@+id/home_historyTaskButton"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
-                    android:id="@+id/imageView3"
+                    android:id="@+id/home_historyTaskButton"
                     android:layout_width="38dp"
                     android:layout_height="38dp"
                     android:layout_marginEnd="20dp"
-                    android:src="@tools:sample/avatars"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/imageView4"
+                    app:layout_constraintEnd_toStartOf="@+id/home_addScheduleButton"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/ic_history" />
 
                 <ImageView
-                    android:id="@+id/imageView4"
+                    android:id="@+id/home_addScheduleButton"
                     android:layout_width="38dp"
                     android:layout_height="38dp"
                     android:layout_marginEnd="10dp"
-                    android:src="@tools:sample/avatars"
-                    android:tint="#008A37"
+                    app:tint="#008A37"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
