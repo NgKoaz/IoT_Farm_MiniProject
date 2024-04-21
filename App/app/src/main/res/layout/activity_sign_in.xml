@@ -8,16 +8,26 @@
     tools:context=".view.pages.SignInActivity"
     tools:ignore="HardcodedText">
 
-    <RelativeLayout
-        android:id="@+id/signin_background"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/bg_signin">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/signin_background"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:background="@drawable/bg_signin">
+
+        </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -40,14 +50,19 @@
             android:id="@+id/signin_emailLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email">
+            android:layout_marginBottom="10dp"
+            android:hint="Email"
+            app:counterEnabled="true"
+            app:counterMaxLength="50"
+            app:helperText="Require*"
+            app:helperTextTextColor="#FF0000">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/signin_emailText"
+                android:id="@+id/signin_emailInputText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:fontFamily="@font/abeezee" />
+                android:layout_height="match_parent"
+                android:fontFamily="@font/abeezee"
+                android:maxLength="50" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -55,14 +70,21 @@
             android:id="@+id/signin_passwordLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password">
+            android:layout_marginBottom="10dp"
+            android:hint="Password"
+            app:counterEnabled="true"
+            app:counterMaxLength="30"
+            app:errorEnabled="true"
+            app:errorIconDrawable="@drawable/ic_error"
+            app:helperText="Require*"
+            app:helperTextTextColor="#FF0000">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/signin_passwordText"
+                android:id="@+id/signin_passwordInputText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:fontFamily="@font/abeezee" />
+                android:fontFamily="@font/abeezee"
+                android:maxLength="30" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -91,9 +113,11 @@
             android:gravity="center">
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/signin_askIfThereIsAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="false"
                 android:fontFamily="@font/montserrat_light"
                 android:text="You do not have an account yet?"
                 android:textColor="#000000"
@@ -103,9 +127,10 @@
                 android:id="@+id/signin_signUpNavText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/textView2"
+                android:layout_toEndOf="@id/signin_askIfThereIsAccount"
                 android:fontFamily="@font/montserrat_semibold"
-                android:text="  Sign up!" />
+                android:text="  Sign up!"
+                android:textSize="14sp" />
         </RelativeLayout>
     </LinearLayout>
 

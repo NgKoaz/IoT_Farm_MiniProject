@@ -19,7 +19,7 @@
             android:name=".view.pages.SettingActivity"
             android:exported="false" />
         <activity
-            android:name=".view.pages.AddScheduleActivity"
+            android:name=".view.pages.AddOrEditScheduleActivity"
             android:exported="false" />
         <activity
             android:name=".view.pages.HistoryActivity"

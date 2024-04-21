@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".view.pages.AddScheduleActivity"
+    tools:context=".view.pages.AddOrEditScheduleActivity"
     tools:ignore="HardcodedText">
 
     <include
@@ -31,7 +31,7 @@
             android:paddingBottom="10dp">
 
             <LinearLayout
-                android:id="@+id/add_schedule_selectTime1"
+                android:id="@+id/schedule_selectTime1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_add_schedule_upper_half"
@@ -67,7 +67,7 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/textView4"
+                            android:id="@+id/schedule_hourText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_add_schedule_hour_minute_setting"
@@ -104,7 +104,7 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/textView6"
+                            android:id="@+id/schedule_minuteText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_add_schedule_hour_minute_setting"
@@ -127,10 +127,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/add_schedule_selectTime2"
+                android:id="@+id/schedule_selectTime2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/add_schedule_selectTime1"
+                android:layout_below="@id/schedule_selectTime1"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -141,7 +141,7 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/add_schedule_dateInfoText"
+                        android:id="@+id/schedule_dateInfoText"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -151,7 +151,7 @@
                         android:textSize="18sp" />
 
                     <ImageView
-                        android:id="@+id/add_schedule_selectDayButton"
+                        android:id="@+id/schedule_choosingDateButton"
                         android:layout_width="54dp"
                         android:layout_height="40dp"
                         android:paddingStart="12dp"
@@ -164,13 +164,14 @@
                 </LinearLayout>
 
                 <RadioGroup
+                    android:id="@+id/schedule_weekdaysGroup"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:checkedButton="@id/add_schedule_monButton"
+                    android:checkedButton="@id/schedule_monButton"
                     android:orientation="horizontal">
 
                     <RadioButton
-                        android:id="@+id/add_schedule_monButton"
+                        android:id="@+id/schedule_monButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -181,7 +182,7 @@
                         android:text="Mon" />
 
                     <RadioButton
-                        android:id="@+id/add_schedule_tueButton"
+                        android:id="@+id/schedule_tueButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
@@ -193,7 +194,7 @@
                         android:text="Tue" />
 
                     <RadioButton
-                        android:id="@+id/add_schedule_wedButton"
+                        android:id="@+id/schedule_wedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
@@ -205,7 +206,7 @@
                         android:text="Wed" />
 
                     <RadioButton
-                        android:id="@+id/add_schedule_thurButton"
+                        android:id="@+id/schedule_thurButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
@@ -217,7 +218,7 @@
                         android:text="Thur" />
 
                     <RadioButton
-                        android:id="@+id/add_schedule_friButton"
+                        android:id="@+id/schedule_friButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
@@ -229,7 +230,7 @@
                         android:text="Fri" />
 
                     <RadioButton
-                        android:id="@+id/add_schedule_satButton"
+                        android:id="@+id/schedule_satButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
@@ -241,7 +242,7 @@
                         android:text="Sat" />
 
                     <RadioButton
-                        android:id="@+id/add_schedule_sunButton"
+                        android:id="@+id/schedule_sunButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
@@ -282,14 +283,18 @@
                     android:textSize="16sp" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/add_schedule_nameLayout"
+                    android:id="@+id/schedule_nameLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Name">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/schedule_nameInputText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/abeezee"
+                        android:imeOptions="actionDone|actionNext"
+                        android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -303,19 +308,23 @@
                     android:textSize="16sp" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/add_schedule_waterLayout"
+                    android:id="@+id/schedule_waterLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Water (L)">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/schedule_waterInputText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/abeezee"
+                        android:imeOptions="actionNext"
+                        android:inputType="number"
                         android:textSize="16sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
-                    android:id="@+id/add_schedule_mixerHeaderText"
+                    android:id="@+id/schedule_mixerHeaderText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -338,8 +347,12 @@
                         android:hint="Mixer 1 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/schedule_mixer1InputText"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/abeezee"
+                            android:imeOptions="actionNext"
+                            android:inputType="number|numberDecimal"
                             android:textSize="16sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -355,8 +368,12 @@
                         android:hint="Mixer 2 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/schedule_mixer2InputText"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/abeezee"
+                            android:imeOptions="actionNext"
+                            android:inputType="number|numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <View
@@ -371,14 +388,18 @@
                         android:hint="Mixer 3 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/schedule_mixer3InputText"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/abeezee"
+                            android:imeOptions="actionNext"
+                            android:inputType="number|numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/add_schedule_areaHeaderText"
+                    android:id="@+id/schedule_areaHeaderText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat_bold"
@@ -399,8 +420,12 @@
                         android:hint="Area 1 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/schedule_area1InputText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/abeezee"
+                            android:imeOptions="actionNext"
+                            android:inputType="number|numberDecimal"
                             android:textSize="16sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -416,8 +441,12 @@
                         android:hint="Area 2 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/schedule_area2InputText"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/abeezee"
+                            android:imeOptions="actionNext"
+                            android:inputType="number|numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <View
@@ -432,8 +461,12 @@
                         android:hint="Area 3 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/schedule_area3InputText"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/abeezee"
+                            android:imeOptions="actionNext"
+                            android:inputType="number|numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
@@ -441,11 +474,11 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="7dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/add_schedule_deleteButton"
+                        android:id="@+id/schedule_deleteButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -455,12 +488,12 @@
                         android:textSize="16sp" />
 
                     <View
-                        android:id="@+id/view2"
+                        android:id="@+id/schedule_spaceBetweenButtons"
                         android:layout_width="50dp"
                         android:layout_height="wrap_content" />
 
                     <Button
-                        android:id="@+id/add_schedule_saveButton"
+                        android:id="@+id/schedule_saveButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"

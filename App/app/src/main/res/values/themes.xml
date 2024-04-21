@@ -6,4 +6,20 @@
     </style>
 
     <style name="Theme.FarmApp" parent="Base.Theme.FarmApp" />
+
+
+    <style name="myToast">
+        <item name="stTextBold">true</item>
+        <item name="stTextColor">#6fc57f</item>
+        <item name="stTextSize">14sp</item>
+        <item name="stColorBackground">#fff</item>
+        <item name="stSolidBackground">true</item>
+        <item name="stStrokeWidth">3dp</item>
+        <item name="stStrokeColor">#6fc57f</item>
+        <item name="stLength">SHORT</item>
+        <item name="stGravity">center</item>
+        <item name="stRadius">4dp</item>
+    </style>
+
+
 </resources>

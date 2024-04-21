@@ -47,6 +47,7 @@
             android:textSize="18sp" />
 
         <LinearLayout
+            android:id="@+id/setting_changePasswordEntry"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="20dp"
@@ -63,8 +64,8 @@
                 android:layout_height="50dp"
                 android:background="@drawable/bg_setting_change_password_icon"
                 android:padding="8dp"
-                app:tint="#FDFDFD"
-                app:srcCompat="@drawable/ic_change_password" />
+                app:srcCompat="@drawable/ic_change_password"
+                app:tint="#FDFDFD" />
 
             <TextView
                 android:id="@+id/setting_changePasswordText"
@@ -81,6 +82,7 @@
 
 
         <LinearLayout
+            android:id="@+id/setting_signOutEntry"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="15dp"
@@ -97,8 +99,8 @@
                 android:layout_height="50dp"
                 android:background="@drawable/bg_setting_sign_out_icon"
                 android:padding="8dp"
-                app:tint="#FDFDFD"
-                app:srcCompat="@drawable/ic_sign_out" />
+                app:srcCompat="@drawable/ic_sign_out"
+                app:tint="#FDFDFD" />
 
             <TextView
                 android:id="@+id/setting_signOutText"
