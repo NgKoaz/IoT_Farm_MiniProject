@@ -48,4 +48,9 @@ public class SettingActivity extends AppCompatActivity implements InitActivity {
             settingController.signOut();
         });
     }
+
+    @Override
+    public void onBindView() {
+
+    }
 }

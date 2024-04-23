@@ -289,11 +289,11 @@
                     android:hint="Name">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/schedule_nameInputText"
+                        android:id="@+id/schedule_nameInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/abeezee"
-                        android:imeOptions="actionDone|actionNext"
+                        android:imeOptions="actionNext"
                         android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -314,7 +314,7 @@
                     android:hint="Water (L)">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/schedule_waterInputText"
+                        android:id="@+id/schedule_waterInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/abeezee"
@@ -347,7 +347,7 @@
                         android:hint="Mixer 1 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_mixer1InputText"
+                            android:id="@+id/schedule_mixer1Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -368,7 +368,7 @@
                         android:hint="Mixer 2 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_mixer2InputText"
+                            android:id="@+id/schedule_mixer2Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -388,7 +388,7 @@
                         android:hint="Mixer 3 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_mixer3InputText"
+                            android:id="@+id/schedule_mixer3Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -420,7 +420,7 @@
                         android:hint="Area 1 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_area1InputText"
+                            android:id="@+id/schedule_area1Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -441,7 +441,7 @@
                         android:hint="Area 2 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_area2InputText"
+                            android:id="@+id/schedule_area2Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -461,7 +461,7 @@
                         android:hint="Area 3 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_area3InputText"
+                            android:id="@+id/schedule_area3Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"

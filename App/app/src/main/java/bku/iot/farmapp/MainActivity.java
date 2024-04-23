@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
+import bku.iot.farmapp.services.local.LocalStorage;
 import bku.iot.farmapp.view.pages.SignInActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -16,6 +17,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // For LocalStorage instance
+        new LocalStorage(getApplicationContext());
 
         Handler handler = new Handler();
         handler.postDelayed(() -> {

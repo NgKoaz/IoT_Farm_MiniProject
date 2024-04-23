@@ -33,15 +33,12 @@ public class MyFirebaseAuth {
 
     public void signUp(String email, String password, AuthListener listener){
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = getCurrentUser();
-                            listener.onAuthSuccess(user);
-                        } else {
-                            listener.onAuthFailure(Objects.requireNonNull(task.getException()).getMessage());
-                        }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = getCurrentUser();
+                        listener.onAuthSuccess(user);
+                    } else {
+                        listener.onAuthFailure(Objects.requireNonNull(task.getException()).getMessage());
                     }
                 });
     }

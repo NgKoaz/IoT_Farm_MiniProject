@@ -3,6 +3,7 @@ package bku.iot.farmapp.view.pages;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -15,6 +16,7 @@ import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.SignInController;
 import bku.iot.farmapp.utils.InputText;
 import bku.iot.farmapp.utils.Navigation;
+import bku.iot.farmapp.view.pages.loadingPage.LoadingPage;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
 public class SignInActivity extends AppCompatActivity implements InitActivity {
@@ -23,6 +25,7 @@ public class SignInActivity extends AppCompatActivity implements InitActivity {
     private CheckBox rememberMe;
     private Button signInButton;
     private TextView signUpNavText;
+    private LoadingPage loadingPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,8 @@ public class SignInActivity extends AppCompatActivity implements InitActivity {
         rememberMe = findViewById(R.id.signin_rememberMe);
         signInButton = findViewById(R.id.signin_signInButton);
         signUpNavText = findViewById(R.id.signin_signUpNavText);
+
+        loadingPage = new LoadingPage(this);
     }
 
     @Override
@@ -57,5 +62,18 @@ public class SignInActivity extends AppCompatActivity implements InitActivity {
         signUpNavText.setOnClickListener(v -> {
             signInController.navigateToSignUpPage();
         });
+    }
+
+    @Override
+    public void onBindView() {
+
+    }
+
+    public void showLoading(){
+        loadingPage.show();
+    }
+
+    public void hideLoading(){
+        loadingPage.dismiss();
     }
 }

@@ -1,100 +1,92 @@
-//package bku.iot.farmapp.services.global;
-//
-//import android.util.Log;
-//
-//import androidx.annotation.NonNull;
-//
-//import com.google.android.gms.tasks.OnCompleteListener;
-//import com.google.android.gms.tasks.Task;
-//import com.google.firebase.auth.FirebaseUser;
-//import com.google.firebase.firestore.CollectionReference;
-//import com.google.firebase.firestore.DocumentReference;
-//import com.google.firebase.firestore.DocumentSnapshot;
-//import com.google.firebase.firestore.FirebaseFirestore;
-//import com.google.firebase.firestore.Query;
-//import com.google.firebase.firestore.QueryDocumentSnapshot;
-//import com.google.firebase.firestore.QuerySnapshot;
-//
-//import java.util.ArrayList;
-//import java.util.HashMap;
-//import java.util.Map;
-//
-//import bku.iot.myapp.data.BrokerInfo;
-//import bku.iot.myapp.data.StatisticalDataType;
-//
-//public class MyFirestore {
-//    public static MyFirestore instance;
-//    private final static String TAG = MyFirestore.class.getSimpleName();
-//    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-//    private ArrayList<BrokerInfo> brokerList;
-//    private ArrayList<String> publishList;
-//    private ArrayList<String> subscribeList;
-//
-//    public MyFirestore() {
-//
-//    }
-//
-//    public static MyFirestore gI() {
-//        if (instance == null) {
-//            instance = new MyFirestore();
-//        }
-//        return instance;
-//    }
-//
-//    public BrokerInfo getBrokerElementByPosition(int position) {
-//        if (position < 0 || position >= brokerList.size()) return null;
-//        return brokerList.get(position);
-//    }
-//
-//
-//    public void setBrokerServerInfo(FirebaseUser user, String broker, String username, String password) {
-//        if (user == null) {
-//            Log.e(TAG, "Error: `user` is null!");
-//            return;
-//        }
-//
+package bku.iot.farmapp.services.global;
+
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+
+public class MyFirestore {
+    public static MyFirestore instance;
+    private final static String TAG = MyFirestore.class.getSimpleName();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private ArrayList<String> publishList;
+    private ArrayList<String> subscribeList;
+
+    public MyFirestore() {
+
+    }
+
+    public static MyFirestore gI() {
+        if (instance == null) {
+            instance = new MyFirestore();
+        }
+        return instance;
+    }
+
+
+    public void setBrokerServerInfo(FirebaseUser user, String broker, String username, String password) {
+        if (user == null) {
+            Log.e(TAG, "Error: `user` is null!");
+            return;
+        }
+
+        String userId = user.getUid();
+        CollectionReference brokersCollectionRef = db.collection("users").document(userId)
+                .collection("brokers");
+
+        // Construct a query to check if the broker info already exists
+        Query query = brokersCollectionRef.whereEqualTo("broker", broker)
+                .whereEqualTo("username", username);
+
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot querySnapshot = task.getResult();
+                if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                    Log.d(TAG, "Broker info already exists for this user");
+                } else {
+                    // Save the broker info since it doesn't exist yet.
+                    DocumentReference newDocumentRef = brokersCollectionRef.document();
+                    Map<String, Object> info = new HashMap<>();
+                    info.put("broker", broker);
+                    info.put("username", username);
+                    info.put("password", password);
+                    newDocumentRef.set(info)
+                            .addOnSuccessListener(aVoid -> Log.d(TAG, "Broker info saved successfully!!"))
+                            .addOnFailureListener(e -> Log.e(TAG, "Error saving broker info: " + e.getMessage()));
+                }
+            } else {
+                Log.e(TAG, "Error checking for existing broker info: ", task.getException());
+            }
+        });
+    }
+
+    public void setProfile(FirebaseUser user) {
+        if (user == null) {
+            Log.e(TAG, "Error: `user` is null!");
+            return;
+        }
 //        String userId = user.getUid();
-//        CollectionReference brokersCollectionRef = db.collection("users").document(userId)
-//                .collection("brokers");
-//
-//        // Construct a query to check if the broker info already exists
-//        Query query = brokersCollectionRef.whereEqualTo("broker", broker)
-//                .whereEqualTo("username", username);
-//
-//        query.get().addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                QuerySnapshot querySnapshot = task.getResult();
-//                if (querySnapshot != null && !querySnapshot.isEmpty()) {
-//                    Log.d(TAG, "Broker info already exists for this user");
-//                } else {
-//                    // Save the broker info since it doesn't exist yet.
-//                    DocumentReference newDocumentRef = brokersCollectionRef.document();
-//                    Map<String, Object> info = new HashMap<>();
-//                    info.put("broker", broker);
-//                    info.put("username", username);
-//                    info.put("password", password);
-//                    newDocumentRef.set(info)
-//                            .addOnSuccessListener(aVoid -> Log.d(TAG, "Broker info saved successfully!!"))
-//                            .addOnFailureListener(e -> Log.e(TAG, "Error saving broker info: " + e.getMessage()));
-//                }
-//            } else {
-//                Log.e(TAG, "Error checking for existing broker info: ", task.getException());
-//            }
-//        });
-//    }
-//
-//    public void setProfile(FirebaseUser user) {
-//        if (user == null) {
-//            Log.e(TAG, "Error: `user` is null!");
-//            return;
-//        }
-////        String userId = user.getUid();
-////        DocumentReference documentReference = db.collection("users").document(userId);
-////        Map<String, Object> info = new HashMap<>();
-////        info.put("brokerDefault", "");
-////        documentReference.set(info);
-//    }
-//
+//        DocumentReference documentReference = db.collection("users").document(userId);
+//        Map<String, Object> info = new HashMap<>();
+//        info.put("brokerDefault", "");
+//        documentReference.set(info);
+    }
+
 //    public void getFeeds(@NonNull OnGetFeedsComplete listener){
 //        if (publishList != null && subscribeList != null){
 //            listener.onComplete(subscribeList);
@@ -122,7 +114,7 @@
 //            }
 //        });
 //    }
-//
+
 //    public void getBrokerServers(FirebaseUser user, @NonNull OnGetBrokersComplete listener) {
 //        // Already gotten
 //        if (brokerList != null) return;
@@ -166,7 +158,7 @@
 //            }
 //        });
 //    }
-//
+
 //    public void getStatisticalData(@NonNull BrokerInfo brokerInfo, StatisticalDataType dataType, OnGetDataComplete listener){
 //        if (brokerInfo.getBroker().isEmpty() || brokerInfo.getUsername().isEmpty()){
 //            Log.e(TAG, "BrokerServer or Username is empty!!");
@@ -215,7 +207,7 @@
 //            }
 //        });
 //    }
-//
+
 //    public interface OnGetDataComplete{
 //        void onComplete(QuerySnapshot querySnapshot);
 //    }
@@ -227,4 +219,4 @@
 //    public interface OnGetBrokersComplete{
 //        void onComplete(ArrayList<BrokerInfo> brokerList);
 //    }
-//}
+}
