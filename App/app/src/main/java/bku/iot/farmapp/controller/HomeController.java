@@ -1,14 +1,20 @@
 package bku.iot.farmapp.controller;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import bku.iot.farmapp.data.enums.ActivityResultCode;
 import bku.iot.farmapp.services.global.MyMqttClient;
 import bku.iot.farmapp.utils.Navigation;
 import bku.iot.farmapp.utils.ToastManager;
@@ -16,20 +22,39 @@ import bku.iot.farmapp.view.pages.AddOrEditScheduleActivity;
 import bku.iot.farmapp.view.pages.HistoryActivity;
 import bku.iot.farmapp.view.pages.HomeActivity;
 import bku.iot.farmapp.view.pages.SettingActivity;
-import bku.iot.farmapp.view.pages.recyclerView.MyAdapter;
+import bku.iot.farmapp.view.pages.SignInActivity;
 
 public class HomeController {
 
     private final String TAG = HomeController.class.getSimpleName();
     private final HomeActivity homeActivity;
+    private final ActivityResultLauncher<Intent> activityResultLauncher;
 
     public HomeController(HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
+
+        // Before connect to mqtt, we set all event handler first.
+        setHandlerForMqtt();
+        // Connect to default MQTT Broker
         connectToMqttBroker(
                 "tcp://mqtt.ohstem.vn",
                 "FarmApp_IOT",
                 ""
         );
+
+        // This is for startActivityForResult function
+        activityResultLauncher = homeActivity.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == ActivityResultCode.SIGN_OUT) {
+                        navigateToSignInPage();
+                    }
+                }
+        );
+    }
+
+    private void setHandlerForMqtt(){
+        MyMqttClient.gI().setOnMessageArrived(this::onMessageArrived);
     }
 
     private void connectToMqttBroker(String brokerServer, String username, String password){
@@ -74,8 +99,18 @@ public class HomeController {
         }
     }
 
+    private void onMessageArrived(String topic, String payload){
+
+
+    }
+
     public void startToSettingPage(){
-        Navigation.startNewActivity(homeActivity, SettingActivity.class, null);
+        Navigation.startNewActivtyForResult(homeActivity, SettingActivity.class, activityResultLauncher);
+    }
+
+    public void navigateToSignInPage(){
+        Navigation.startNewActivity(homeActivity, SignInActivity.class, null);
+        homeActivity.finish();
     }
 
     public void startToHistoryPage(){

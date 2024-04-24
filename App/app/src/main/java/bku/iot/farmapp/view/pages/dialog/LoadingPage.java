@@ -1,4 +1,4 @@
-package bku.iot.farmapp.view.pages.loadingPage;
+package bku.iot.farmapp.view.pages.dialog;
 
 import android.app.Dialog;
 import android.content.Context;

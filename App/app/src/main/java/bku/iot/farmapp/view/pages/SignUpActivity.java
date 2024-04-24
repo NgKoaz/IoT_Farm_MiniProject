@@ -2,10 +2,7 @@ package bku.iot.farmapp.view.pages;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.renderscript.ScriptGroup;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -13,7 +10,7 @@ import android.widget.TextView;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.SignUpController;
 import bku.iot.farmapp.utils.InputText;
-import bku.iot.farmapp.view.pages.loadingPage.LoadingPage;
+import bku.iot.farmapp.view.pages.dialog.LoadingPage;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
 public class SignUpActivity extends AppCompatActivity implements InitActivity {

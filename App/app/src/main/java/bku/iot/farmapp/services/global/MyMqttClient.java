@@ -150,8 +150,8 @@ public class MyMqttClient implements MqttCallback {
         if (onMessageArrived != null) {
             // Process the message.
             String payload = new String(message.getPayload());
-            Log.e(TAG, topic);
-            Log.e(TAG, payload);
+            Log.d(TAG, "TOPIC: " + topic);
+            Log.d(TAG, "PAYLOAD: " + payload);
             onMessageArrived.onArrived(topic, payload);
         }
     }

@@ -14,25 +14,22 @@ import javax.crypto.spec.SecretKeySpec;
 
 // This is SingleTon class but you have to run constructor first before you use gI().
 public class LocalStorage {
-    private static LocalStorage instance;
     private static final String TAG = LocalStorage.class.getSimpleName();
     private static final String PREF_NAME = "SecureStorage";
     private static final String SECRET_KEY = "rQQ2ZzvGS04q1gzs";
     private final Context context;
     private final SharedPreferences sharedPreferences;
 
-    public static LocalStorage gI(){
-        return instance;
-    }
 
+    // You have to call this function first, before you use gI().
     public LocalStorage(@NonNull Context context){
         this.context = context;
         this.sharedPreferences = this.context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        instance = this;
     }
 
     // Store encrypted string
     public void putString(String key, String value) {
+        Log.d("HELLO", "Key: " + key + "| Value: " + value);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         try {
             SecretKey secretKey = generateSecretKey();

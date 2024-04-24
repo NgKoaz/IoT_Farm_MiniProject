@@ -1,5 +1,6 @@
 package bku.iot.farmapp.controller;
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
@@ -15,9 +16,11 @@ import bku.iot.farmapp.view.pages.SignUpActivity;
 public class SignInController {
     private final String TAG = SignInActivity.class.getSimpleName();
     private final SignInActivity signInActivity;
+    private final LocalStorage localStorage;
 
     public SignInController(SignInActivity signInActivity){
         this.signInActivity = signInActivity;
+        localStorage = new LocalStorage(signInActivity);
     }
 
     private boolean checkCredentialForSignIn(String email, String password){
@@ -34,37 +37,37 @@ public class SignInController {
         return res;
     }
 
-    private void saveSignInInfoIntoLocalStorage(String email, String password){
-        LocalStorage.gI().putString("email", email);
-        LocalStorage.gI().putString("password", password);
+    private void saveCredentialIntoLocalStorage(String email, String password){
+        localStorage.putString("email", email);
+        localStorage.putString("password", password);
     }
 
     private void clearLocalStorage(){
-        LocalStorage.gI().clear();
+        localStorage.clear();
     }
 
     public void signIn(String email, String password, boolean isRememberMe){
         signInActivity.showLoading();
 
         if (!checkCredentialForSignIn(email, password)) {
-            signInActivity.hideLoading();
+            signInActivity.dimissLoading();
             return;
         }
         MyFirebaseAuth.gI().signIn(email, password, new MyFirebaseAuth.AuthListener() {
             @Override
             public void onAuthSuccess(FirebaseUser user) {
                 if (isRememberMe) {
-                    saveSignInInfoIntoLocalStorage(email, password);
+                    saveCredentialIntoLocalStorage(email, password);
                 } else {
                     clearLocalStorage();
                 }
-                signInActivity.hideLoading();
+                signInActivity.dimissLoading();
                 navigateToHomePage();
             }
 
             @Override
             public void onAuthFailure(String errorMessage) {
-                signInActivity.hideLoading();
+                signInActivity.dimissLoading();
                 ToastManager.showToast(signInActivity, errorMessage);
             }
         });

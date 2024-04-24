@@ -1,9 +1,14 @@
 package bku.iot.farmapp.view.pages;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -16,6 +21,7 @@ import java.util.List;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.HomeController;
 import bku.iot.farmapp.controller.ScheduleController;
+import bku.iot.farmapp.data.enums.ActivityResultCode;
 import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.utils.Navigation;
 import bku.iot.farmapp.view.pages.recyclerView.MyAdapter;
@@ -29,13 +35,13 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
     private ImageView historyTaskButton, addScheduleButton;
     private RecyclerView recyclerView;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         homeController = new HomeController(this);
         setContentView(R.layout.activity_home);
+
 
         initViews();
         bindEvents();
@@ -77,5 +83,13 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
     @Override
     public void onBindView() {
 
+    }
+
+    public void updateTempText(String text){
+        tempValueText.setText(text);
+    }
+
+    public void updateMoisText(String text){
+        moisValueText.setText(text);
     }
 }

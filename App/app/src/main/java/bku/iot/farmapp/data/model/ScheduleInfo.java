@@ -6,7 +6,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 public class ScheduleInfo implements Parcelable {
-    public String id;
+    public String email;
+    public String type;
     public String name;
     public double water;
     public double mixer1, mixer2, mixer3;
@@ -19,6 +20,8 @@ public class ScheduleInfo implements Parcelable {
 
 
     protected ScheduleInfo(Parcel in) {
+        email = in.readString();
+        type = in.readString();
         name = in.readString();
         water = in.readDouble();
         mixer1 = in.readDouble();
@@ -45,8 +48,12 @@ public class ScheduleInfo implements Parcelable {
         }
     };
 
-    public ScheduleInfo(String id, String name, double water, double mixer1, double mixer2, double mixer3, double area1, double area2, double area3, byte isDate, String date, String weekday, String time) {
-        this.id = id;
+    public ScheduleInfo(String email, String type, String name, double water,
+                        double mixer1, double mixer2, double mixer3,
+                        double area1, double area2, double area3,
+                        byte isDate, String date, String weekday, String time) {
+        this.email = email;
+        this.type = type;
         this.name = name;
         this.water = water;
         this.mixer1 = mixer1;
@@ -68,6 +75,8 @@ public class ScheduleInfo implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(email);
+        dest.writeString(type);
         dest.writeString(name);
         dest.writeDouble(water);
         dest.writeDouble(mixer1);
