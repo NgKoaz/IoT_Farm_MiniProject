@@ -1,7 +1,12 @@
-from data.enums.SensorDataType import SensorDataType
+from enum import Enum
 
 
-class SensorDataPayload:
+class SensorDataType(Enum):
+    TEMPERATURE = "temp"
+    SOIL_MOISTURE = "mois"
+
+
+class SensorData:
     def __init__(self, sensorDataType: SensorDataType, value: int):
         self.sensorDataType = sensorDataType
         self.value = value

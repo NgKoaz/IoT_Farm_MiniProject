@@ -16,9 +16,9 @@ import java.util.List;
 public class MyMqttClient implements MqttCallback {
     private static MyMqttClient instance;
     private static final String TAG = MyMqttClient.class.getSimpleName();
-    private String broker;
-    private String username;
-    private String password;
+    public String broker;
+    public String username;
+    public String password;
     private String groupPrefix = "";
     private final byte QOS = 1;
     private final String clientId = MqttClient.generateClientId();

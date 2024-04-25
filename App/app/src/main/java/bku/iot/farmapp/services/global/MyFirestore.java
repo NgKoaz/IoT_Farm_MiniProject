@@ -19,13 +19,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import bku.iot.farmapp.data.model.ScheduleInfo;
+
 
 public class MyFirestore {
     public static MyFirestore instance;
     private final static String TAG = MyFirestore.class.getSimpleName();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private ArrayList<String> publishList;
-    private ArrayList<String> subscribeList;
+
 
     public MyFirestore() {
 
@@ -38,6 +39,29 @@ public class MyFirestore {
         return instance;
     }
 
+    public void getScheduleList(FirebaseUser user, String broker, String username, String password, OnCompleteListener<QuerySnapshot> listener){
+        if (user == null) {
+            Log.e(TAG, "ERROR: `user` is null! Please re-auth!");
+            return;
+        }
+        CollectionReference brokersCollectionRef =
+                db.collection("brokers")
+                        .document(broker + "-" + username + "-" + password)
+                        .collection("schedule");
+        brokersCollectionRef.get().addOnCompleteListener(listener);
+    }
+
+    public void getHistoryScheduleList(FirebaseUser user, String broker, String username, String password, OnCompleteListener<QuerySnapshot> listener){
+        if (user == null) {
+            Log.e(TAG, "ERROR: `user` is null! Please re-auth!");
+            return;
+        }
+        CollectionReference brokersCollectionRef =
+                db.collection("brokers")
+                        .document(broker + "-" + username + "-" + password)
+                        .collection("historySchedule");
+        brokersCollectionRef.get().addOnCompleteListener(listener);
+    }
 
     public void setBrokerServerInfo(FirebaseUser user, String broker, String username, String password) {
         if (user == null) {

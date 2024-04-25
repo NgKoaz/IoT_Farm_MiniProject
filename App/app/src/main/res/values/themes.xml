@@ -22,7 +22,6 @@
         <item name="stStrokeWidth">3dp</item>
         <item name="stStrokeColor">#6fc57f</item>
         <item name="stLength">SHORT</item>
-        <item name="stGravity">center</item>
         <item name="stRadius">4dp</item>
     </style>
 

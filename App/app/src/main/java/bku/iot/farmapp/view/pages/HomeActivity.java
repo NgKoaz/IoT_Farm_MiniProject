@@ -41,12 +41,12 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        homeController = new HomeController(this);
         setContentView(R.layout.activity_home);
-
-
         initViews();
         bindEvents();
+        onBindView();
+
+        homeController = new HomeController(this);
     }
 
     @Override

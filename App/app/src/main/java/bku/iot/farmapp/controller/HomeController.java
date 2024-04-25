@@ -8,7 +8,13 @@ import android.util.Log;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,12 +22,15 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 import bku.iot.farmapp.data.enums.ActivityResultCode;
 import bku.iot.farmapp.data.enums.MqttTopic;
 import bku.iot.farmapp.data.enums.SensorType;
 import bku.iot.farmapp.data.model.ScheduleInfo;
+import bku.iot.farmapp.services.global.MyFirebaseAuth;
+import bku.iot.farmapp.services.global.MyFirestore;
 import bku.iot.farmapp.services.global.MyMqttClient;
 import bku.iot.farmapp.utils.Navigation;
 import bku.iot.farmapp.utils.ToastManager;
@@ -60,6 +69,48 @@ public class HomeController implements MyMqttClient.MessageObserver {
                     if (result.getResultCode() == ActivityResultCode.SIGN_OUT) {
                         navigateToSignInPage();
                     }
+                }
+        );
+
+        refreshScheduleList();
+    }
+
+    private void refreshScheduleList(){
+        String[] brokerParts = MyMqttClient.gI().broker.split("/");
+        String broker = brokerParts[brokerParts.length - 1];
+        String username = MyMqttClient.gI().username;
+        String password = MyMqttClient.gI().password;
+
+        MyFirestore.gI().getScheduleList(
+                MyFirebaseAuth.gI().getCurrentUser(),
+                broker,
+                username,
+                password,
+                task -> {
+                    if (!task.isSuccessful()) return;
+                    QuerySnapshot querySnapshot = task.getResult();
+                    if (querySnapshot == null || querySnapshot.isEmpty()){
+                        Log.d(TAG, "No schedule has been set!");
+                        return;
+                    }
+                    for (DocumentSnapshot doc : querySnapshot){
+                        // Get all keys and values
+                        Map<String, Object> docData = doc.getData();
+                        if (docData == null) continue;
+
+                        ScheduleInfo scheduleInfo = new ScheduleInfo();
+                        scheduleInfo.assignAttribute("scheduleId", doc.getId());
+
+                        // Iterate over the entries to print keys and values
+                        for (Map.Entry<String, Object> entry : docData.entrySet()) {
+                            String key = entry.getKey();
+                            String value = entry.getValue().toString();
+                            scheduleInfo.assignAttribute(key, value);
+                        }
+
+                        scheduleInfoList.add(scheduleInfo);
+                    }
+                    homeActivity.updateScheduleList(scheduleInfoList);
                 }
         );
     }

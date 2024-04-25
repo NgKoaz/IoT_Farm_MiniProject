@@ -1,16 +1,18 @@
-import os
-import time
 import json
+import os
+import threading
+import time
 import random
+import datetime
 
 
 from dotenv import load_dotenv
 
-from data.enums.SensorDataType import SensorDataType
-from data.model.mqtt.MqttTopic import MqttTopic
-from data.model.mqtt.ScheduleResponsePayload import ScheduleResponsePayload
-from data.model.mqtt.SensorDataPayload import SensorDataPayload
-from connection.mqtt import Mqtt as MyMqtt
+from model.mqtt.mqtt_topic import MqttTopic
+from model.mqtt.schedule import Schedule, ScheduleType
+from model.mqtt.sensor_data import SensorData, SensorDataType
+from services.mqtt import Mqtt as MyMqtt
+from services.my_firestore import MyFirestore
 
 
 class Main:
@@ -23,7 +25,12 @@ class Main:
         self.PASSWORD = os.getenv("KEY")
         print(self.BROKER, self.USERNAME, self.PASSWORD)
 
-        # Establish MQTT connection
+        # Establish Firebase Connection
+        self.myFirestore = MyFirestore(self.BROKER, self.USERNAME, self.PASSWORD)
+        # This is for local schedule list, always update each 5 minutes.
+        self.scheduleList = []
+
+        # Establish MQTT services
         self.myMqtt = MyMqtt()
         # Set Callback
         self.myMqtt.setCallback(onConnect=self.onConnect, onMessage=self.onMessage)
@@ -42,7 +49,7 @@ class Main:
             print("[ERROR] Connection failed!")
 
     def subscribeTopics(self):
-        for topic in MqttTopic.subscribedTopicList:
+        for topic in MqttTopic.subscriptionList:
             self.myMqtt.subscribe(topic=topic)
 
     def reconnectToMqttBroker(self):
@@ -51,29 +58,59 @@ class Main:
     def onMessage(self, topic, payload):
         topic = topic.split("/")[-1]
         print("Topic: " + topic + "| Payload: " + payload)
+
         if topic == "V2":
-            self.handleScheduleRequest(payload)
+            thread = threading.Thread(target=self.handleScheduleRequest, args=(payload,))
+            thread.daemon = True
+            thread.start()
+
+    def isValidAction(self):
+        # TO DO
+        return True
+
+    def addSchedule(self, schedule: Schedule):
+        formatted_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        schedule.setId(formatted_time)
+
+        # Lack checking
+
+        self.scheduleList.append(schedule)
+        self.myFirestore.putSchedule(formatted_time, json.loads(schedule.toJsonString()))
+
+        self.publishSchedule(schedule)
+
+    def deleteSchedule(self, schedule: Schedule):
+        self.myFirestore.deleteSchedule(schedule.scheduleId)
+
+    def updateSchedule(self, schedule: Schedule):
+        self.myFirestore.updateSchedule(schedule.scheduleId, json.loads(schedule.toJsonString()))
 
     def handleScheduleRequest(self, payload: str):
-        scheduleResponsePayload = ScheduleResponsePayload.importFromJsonString(payload)
-        self.publishScheduleResponse(scheduleResponsePayload)
+        schedule = Schedule.importFromJsonString(payload)
 
-    def publishSensorData(self, sensorDataPayload: SensorDataPayload):
+        if schedule.type == ScheduleType.ADD:
+            self.addSchedule(schedule)
+        elif schedule.type == ScheduleType.DELETE:
+            self.deleteSchedule(schedule)
+        elif schedule.type == ScheduleType.UPDATE:
+            self.updateSchedule(schedule)
+
+    def publishSensorData(self, sensorData: SensorData):
         self.myMqtt.publish(
-            MqttTopic.sensorDataTopic,
-            payload=sensorDataPayload.toStringInJsonForm()
+            MqttTopic.sensorData,
+            payload=sensorData.toStringInJsonForm()
         )
 
-    def publishScheduleResponse(self, scheduleResponsePayload: ScheduleResponsePayload):
+    def publishSchedule(self, schedule: Schedule):
         self.myMqtt.publish(
-            MqttTopic.scheduleTopicResponse,
-            payload=scheduleResponsePayload.toStringJson()
+            MqttTopic.scheduleResponse,
+            payload=schedule.toJsonString()
         )
 
     def loop(self):
         while True:
-            self.publishSensorData(SensorDataPayload(SensorDataType.TEMPERATURE, random.randint(0, 100)))
-            self.publishSensorData(SensorDataPayload(SensorDataType.SOIL_MOISTURE, random.randint(0, 100)))
+            self.publishSensorData(SensorData(SensorDataType.TEMPERATURE, random.randint(0, 100)))
+            self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, random.randint(0, 100)))
             time.sleep(10)
 
 

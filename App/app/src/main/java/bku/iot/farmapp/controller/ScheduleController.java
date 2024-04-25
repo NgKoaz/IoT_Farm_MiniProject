@@ -18,7 +18,7 @@ import bku.iot.farmapp.services.global.MyMqttClient;
 import bku.iot.farmapp.utils.ToastManager;
 import bku.iot.farmapp.view.pages.AddOrEditScheduleActivity;
 
-public class ScheduleController implements MyMqttClient.MessageObserver {
+public class ScheduleController {
 
     private final String TAG = ScheduleController.class.getSimpleName();
     private int isDate;
@@ -91,12 +91,16 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         if (curHour >= hour) {
             currentTime.add(Calendar.DAY_OF_MONTH, 1);
         }
+
         // Set default time
-        this.time = String.format("%d:%d", hour, minute);
-        scheduleActivity.updateTimeDisplay(String.format("%d", hour), String.format("%d", minute));
+        String hourDisplay = String.format((hour < 10) ? "0%d" : "%d", hour);
+        String minuteDisplay = String.format((minute < 10) ? "0%d" : "%d", minute);
+
+        this.time = String.format("%s:%s", hourDisplay, minuteDisplay);
+        scheduleActivity.updateTimeDisplay(hourDisplay, minuteDisplay);
 
         int day = currentTime.get(Calendar.DAY_OF_MONTH);
-            int month = currentTime.get(Calendar.MONTH) + 1;
+        int month = currentTime.get(Calendar.MONTH) + 1;
         int year = currentTime.get(Calendar.YEAR);
 
         // Set default date
@@ -110,10 +114,10 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         // Set default time
         this.time = scheduleInfo.time;
         String[] timeParts = this.time.split(":");
-        int hour = Integer.parseInt(timeParts[0]);
-        int minute = Integer.parseInt(timeParts[1]);
+        String hour = timeParts[0];
+        String minute = timeParts[1];
 
-        scheduleActivity.updateTimeDisplay(String.format("%d", hour), String.format("%d", minute));
+        scheduleActivity.updateTimeDisplay(hour, minute);
 
         // Set default date
         this.isDate = scheduleInfo.isDate;
@@ -128,30 +132,15 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
     }
 
     public void setTime(int hour, int minute){
-//        String[] dateParts = this.date.split("/");
-//        int day = Integer.parseInt(dateParts[0]);
-//        int month = Integer.parseInt(dateParts[1]);
-//        int year = Integer.parseInt(dateParts[2]);
-//
-//        if (!isValidDateTime(minute, hour, day, month, year)){
-//            ToastManager.showToast(scheduleActivity, "Cannot select time in the past");
-//            return;
-//        }
+        // Set default time
+        String hourDisplay = String.format((hour < 10) ? "0%d" : "%d", hour);
+        String minuteDisplay = String.format((minute < 10) ? "0%d" : "%d", minute);
 
-        this.time = String.format("%d:%d", hour, minute);
-        scheduleActivity.updateTimeDisplay(String.format("%d", hour), String.format("%d", minute));
+        this.time = String.format("%s:%s", hourDisplay, minuteDisplay);
+        scheduleActivity.updateTimeDisplay(hourDisplay, minuteDisplay);
     }
 
     public void setDate(int day, int month, int year){
-//        String[] timeParts = this.time.split(":");
-//        int hour = Integer.parseInt(timeParts[0]);
-//        int minute = Integer.parseInt(timeParts[1]);
-//
-//        if (!isValidDateTime(minute, hour, day, month, year)){
-//            ToastManager.showToast(scheduleActivity, "Cannot select date in the past");
-//            return;
-//        }
-
         isDate = 1;
         this.date = String.format("%d/%d/%d", day, month, year);
         scheduleActivity.clearWeekdayCheck();
@@ -198,15 +187,6 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         return MyFirebaseAuth.gI().getCurrentUser().getEmail();
     }
 
-    private void publishScheduleRequest(ScheduleInfo scheduleInfo){
-        try {
-            MyMqttClient.gI().publish(MqttTopic.scheduleRequest, scheduleInfo.toJsonString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-            ToastManager.showToast(scheduleActivity, "Non-expected error! Let try again!");
-        }
-    }
-
     public void saveSchedule(
             boolean isNewAdding,
             String name,
@@ -240,21 +220,6 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                 this.weekday, this.time
         );
 
-//        if (this.isDate == 1){
-//            String[] timeParts = this.time.split(":");
-//            int hour = Integer.parseInt(timeParts[0]);
-//            int minute = Integer.parseInt(timeParts[1]);
-//
-//            String[] dateParts = this.date.split("/");
-//            int day = Integer.parseInt(dateParts[0]);
-//            int month = Integer.parseInt(dateParts[1]);
-//            int year = Integer.parseInt(dateParts[2]);
-//
-//            if (!isValidDateTime(minute, hour, day, month, year)){
-//                ToastManager.showToast(scheduleActivity, "Cannot select date in the past");
-//                return;
-//            }
-//        }
         publishAndWaitAck(scheduleInfo);
 
         mHandler.post(scheduleActivity::dismissLoading);
@@ -269,10 +234,10 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                         JSONObject jsonObject = new JSONObject(payload);
                         String payloadEmail = jsonObject.getString("email");
                         String payloadType = jsonObject.getString("type");
-                        String payloadName = jsonObject.getString("name");
+                        String payloadScheduleId = jsonObject.getString("scheduleId");
                         if (scheduleInfo.email.equals(payloadEmail) &&
                                 scheduleInfo.type.equals(payloadType) &&
-                                scheduleInfo.name.equals(payloadName))
+                                scheduleInfo.scheduleId.equals(payloadScheduleId))
                         {
                             isAck.set(true);
                         }
@@ -311,19 +276,18 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         scheduleActivity.openDatePickerDialog();
     }
 
-    public void deleteSchedule(){
-        Log.d(TAG, "CHOOSE THE DATE!!!!!!!!!!");
+    public void deleteSchedule(ScheduleInfo scheduleInfo){
+        Log.d(TAG, "Delete Schedule!!!!!!");
+        mHandler.post(scheduleActivity::showLoading);
+
+        scheduleInfo.type = "delete";
+        publishAndWaitAck(scheduleInfo);
+
+        mHandler.post(scheduleActivity::dismissLoading);
     }
 
     public void backToPreviousActivity(){
         scheduleActivity.finish();
     }
 
-    @Override
-    public void onMessageReceived(String topic, String payload) {
-        if (topic.equals(MqttTopic.scheduleResponse)){
-
-        }
-
-    }
 }

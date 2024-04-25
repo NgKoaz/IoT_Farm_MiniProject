@@ -1,9 +1,16 @@
 import json
 
 
-class ScheduleResponsePayload:
+class ScheduleType:
+    ADD = "add"
+    DELETE = "delete"
+    UPDATE = "update"
+
+
+class Schedule:
     def __init__(
             self,
+            scheduleId: str = "",
             email: str = "",
             type: str = "",
             name: str = "",
@@ -21,6 +28,7 @@ class ScheduleResponsePayload:
             isError: int = None,
             error: str = ""
     ):
+        self.scheduleId = scheduleId
         self.email = email
         self.type = type
         self.name = name
@@ -38,12 +46,15 @@ class ScheduleResponsePayload:
         self.isError = isError
         self.error = error
 
+    def setId(self, scheduleId: str):
+        self.scheduleId = scheduleId
+
     @classmethod
     def importFromJsonString(cls, json_string):
         json_dict = json.loads(json_string)
         return cls(**json_dict)
 
-    def toStringJson(self):
+    def toJsonString(self):
         # Exclude bytes attributes from serialization
         data = {key: value for key, value in self.__dict__.items() if not isinstance(value, bytes)}
         return json.dumps(data)

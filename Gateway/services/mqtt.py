@@ -68,7 +68,7 @@ class Mqtt:
         try:
             self.client.loop_forever()
         except Exception as e:
-            print("MQTT Error: Perhaps the connection has been interrupted!")
+            print("MQTT Error: Perhaps the services has been interrupted!")
 
     def connect(self, server, port, username, password):
         self.client.username_pw_set(username, password)
@@ -87,7 +87,7 @@ class Mqtt:
         self.password = password
         self.client.connect(server, port)
 
-        # Loop to maintain the connection and process incoming messages
+        # Loop to maintain the services and process incoming messages
         thread = threading.Thread(target=self.loop)
         thread.daemon = True
         thread.start()

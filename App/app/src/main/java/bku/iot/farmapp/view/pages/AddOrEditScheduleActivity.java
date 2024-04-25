@@ -45,6 +45,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
     private TimePickerDialog timePickerDialog;
     private DatePickerDialog datePickerDialog;
     private LoadingPage loadingPage;
+    private ScheduleInfo scheduleInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +113,10 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
             scheduleController.openDatePickerDialog();
         });
         deleteButton.setOnClickListener(v -> {
-            scheduleController.deleteSchedule();
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                scheduleController.deleteSchedule(scheduleInfo);
+            });
         });
         saveButton.setOnClickListener(v -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -199,7 +203,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
 
     private void loadEditSchedulePage(){
         appbar.setHeaderText("Edit Schedule");
-        ScheduleInfo scheduleInfo = getIntent().getParcelableExtra("scheduleInfo");
+        scheduleInfo = getIntent().getParcelableExtra("scheduleInfo");
 
         assert scheduleInfo != null;
         nameInput.setText(scheduleInfo.name);

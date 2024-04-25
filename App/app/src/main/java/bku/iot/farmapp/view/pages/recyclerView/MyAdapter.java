@@ -80,39 +80,40 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             areaField.setText(String.format("%s - %s - %s", info.area1, info.area2, info.area3));
 
             if (info.isDate == 0){
-                setWeekdays(info.weekday);
+                setWeekdays(info.time, info.weekday);
             } else {
-                setDate(info.date);
+                setDate(info.time, info.date);
             }
         }
 
-        private void setDate(String date){
-            timeStartField.setText(date);
+        private void setDate(String time, String date){
+            String text = time + " " + date;
+            timeStartField.setText(text);
         }
 
-        private void setWeekdays(String weekday){
-            String text = "Each ";
+        private void setWeekdays(String time, String weekday){
+            String text = time + "Each ";
             switch (weekday){
                 case Weekdays.MONDAY:
-                    text += "Monday,";
+                    text += "Monday";
                     break;
                 case Weekdays.TUESDAY:
-                    text += "Tuesday,";
+                    text += "Tuesday";
                     break;
                 case Weekdays.WEDNESDAY:
-                    text += "Wednesday,";
+                    text += "Wednesday";
                     break;
                 case Weekdays.THURSDAY:
-                    text += "Thursday,";
+                    text += "Thursday";
                     break;
                 case Weekdays.FRIDAY:
-                    text += "Friday,";
+                    text += "Friday";
                     break;
                 case Weekdays.SATURDAY:
-                    text += "Saturday,";
+                    text += "Saturday";
                     break;
                 case Weekdays.SUNDAY:
-                    text += "Sunday,";
+                    text += "Sunday";
                     break;
                 default:
             }

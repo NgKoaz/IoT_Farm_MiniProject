@@ -13,6 +13,7 @@ import java.util.Iterator;
 
 
 public class ScheduleInfo implements Parcelable {
+    public String scheduleId;
     public String email;
     public String type;
     public String name;
@@ -28,6 +29,7 @@ public class ScheduleInfo implements Parcelable {
 
 
     protected ScheduleInfo(Parcel in) {
+        scheduleId = in.readString();
         email = in.readString();
         type = in.readString();
         name = in.readString();
@@ -46,13 +48,17 @@ public class ScheduleInfo implements Parcelable {
         error = in.readString();
     }
 
+    public ScheduleInfo(){
+
+    }
+
     public ScheduleInfo(JSONObject jsonObject) throws JSONException {
         try {
             // Retrieving all key-value pairs using keys()
             Iterator<String> keys = jsonObject.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
-                Object value = jsonObject.get(key);
+                String value = jsonObject.get(key).toString();
                 assignAttribute(key, value);
             }
         } catch (JSONException e){
@@ -61,55 +67,58 @@ public class ScheduleInfo implements Parcelable {
         }
     }
 
-    private void assignAttribute(String key, Object value){
+    public void assignAttribute(String key, String value){
         switch (key){
+            case "scheduleId":
+                scheduleId = value;
+                break;
             case "email":
-                email = (String) value;
+                email = value;
                 break;
             case "type":
-                type = (String) value;
+                type = value;
                 break;
             case "name":
-                name = (String) value;
+                name = value;
                 break;
             case "water":
-                water = Double.parseDouble(value.toString());
+                water = Double.parseDouble(value);
                 break;
             case "mixer1":
-                mixer1 = Double.parseDouble(value.toString());
+                mixer1 = Double.parseDouble(value);
                 break;
             case "mixer2":
-                mixer2 = Double.parseDouble(value.toString());
+                mixer2 = Double.parseDouble(value);
                 break;
             case "mixer3":
-                mixer3 = Double.parseDouble(value.toString());
+                mixer3 = Double.parseDouble(value);
                 break;
             case "area1":
-                area1 = Double.parseDouble(value.toString());
+                area1 = Double.parseDouble(value);
                 break;
             case "area2":
-                area2 = Double.parseDouble(value.toString());
+                area2 = Double.parseDouble(value);
                 break;
             case "area3":
-                area3 = Double.parseDouble(value.toString());
+                area3 = Double.parseDouble(value);
                 break;
             case "isDate":
-                isDate = (int) value;
+                isDate = Integer.parseInt(value);
                 break;
             case "date":
-                date = (String) value;
+                date = value;
                 break;
             case "weekday":
-                weekday = (String) value;
+                weekday = value;
                 break;
             case "time":
-                time = (String) value;
+                time = value;
                 break;
             case "isError":
-                isError = (int) value;
+                isError = Integer.parseInt(value);
                 break;
             case "error":
-                error = (String) value;
+                error = value;
                 break;
             default:
         }
@@ -131,6 +140,7 @@ public class ScheduleInfo implements Parcelable {
                         double mixer1, double mixer2, double mixer3,
                         double area1, double area2, double area3,
                         int isDate, String date, String weekday, String time) {
+        this.scheduleId = "";
         this.email = email;
         this.type = type;
         this.name = name;
@@ -152,6 +162,7 @@ public class ScheduleInfo implements Parcelable {
     public String toJsonString() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         try {
+            jsonObject.put("scheduleId", scheduleId);
             jsonObject.put("email", email);
             jsonObject.put("type", type);
             jsonObject.put("name", name);
@@ -181,6 +192,7 @@ public class ScheduleInfo implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(scheduleId);
         dest.writeString(email);
         dest.writeString(type);
         dest.writeString(name);
