@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -14,11 +15,17 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.ScheduleController;
 import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.ScheduleInfo;
+import bku.iot.farmapp.utils.InputText;
 import bku.iot.farmapp.view.pages.appbar.AppBar;
+import bku.iot.farmapp.view.pages.dialog.LoadingPage;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
 public class AddOrEditScheduleActivity extends AppCompatActivity implements InitActivity {
@@ -37,6 +44,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
     private View spaceBetweenButtons;
     private TimePickerDialog timePickerDialog;
     private DatePickerDialog datePickerDialog;
+    private LoadingPage loadingPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
         if (getIntent().getExtras() != null)
             typePage = getIntent().getExtras().getString("page");
 
+        loadingPage = new LoadingPage(this);
         scheduleController = new ScheduleController(this);
         setContentView(R.layout.activity_add_or_edit_schedule);
 
@@ -106,9 +115,20 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
             scheduleController.deleteSchedule();
         });
         saveButton.setOnClickListener(v -> {
-//            scheduleController.saveSchedule(
-//                    typePage.equals("ADD"), name,
-//            );
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                scheduleController.saveSchedule(
+                        typePage.equals("ADD"),
+                        InputText.getStringFromInputEditText(nameInput),
+                        Double.parseDouble(InputText.getStringFromInputEditText(waterInput)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(mixer1Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(mixer2Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(mixer3Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(area1Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(area2Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(area3Input))
+                );
+            });
         });
 
         // RADIO GROUP
@@ -151,7 +171,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
 
 
         datePickerDialog.setOnDateSetListener((view, year, month, dayOfMonth) -> {
-            scheduleController.setDate(dayOfMonth, month, year);
+            scheduleController.setDate(dayOfMonth, month + 1, year);
         });
         timePickerDialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
             scheduleController.setTime(hourOfDay, minute);
@@ -160,6 +180,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
 
     @Override
     public void onBindView() {
+        // This is a edit page or add page?
         if (typePage.equals("ADD")){
             loadAddSchedulePage();
         } else {
@@ -168,6 +189,9 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
     }
 
     private void loadAddSchedulePage(){
+        // Set default time, date picker
+        scheduleController.setDefaultDateTime();
+
         appbar.setHeaderText("Add Schedule");
         deleteButton.setVisibility(View.GONE);
         spaceBetweenButtons.setVisibility(View.GONE);
@@ -186,6 +210,8 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
         area1Input.setText(String.valueOf(scheduleInfo.area1));
         area2Input.setText(String.valueOf(scheduleInfo.area2));
         area3Input.setText(String.valueOf(scheduleInfo.area3));
+
+        scheduleController.setDateTimeForEditting(scheduleInfo);
     }
 
     public void openTimePickerDialog(){
@@ -200,7 +226,17 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
         weekDaysRadioGroup.clearCheck();
     }
 
+    public void showLoading(){
+        loadingPage.show();
+    }
+
+    public void dismissLoading(){
+        loadingPage.dismiss();
+    }
+
     public void updateTimeDisplay(String hour, String minute){
+        if (hour.length() == 1) hour = "0" + hour;
+        if (minute.length() == 1) minute = "0" + minute;
         hourText.setText(hour);
         minuteText.setText(minute);
     }

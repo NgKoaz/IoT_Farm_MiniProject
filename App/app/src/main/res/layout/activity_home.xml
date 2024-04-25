@@ -80,6 +80,11 @@
                     android:id="@+id/imageView5"
                     android:layout_width="50dp"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:paddingStart="5dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="10dp"
                     app:srcCompat="@drawable/ic_temperature"
                     app:tint="#FF0000" />
 
@@ -88,10 +93,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="76dp"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:drawablePadding="5dp"
                     android:fontFamily="@font/droid_sans_bold"
                     android:gravity="center"
-                    android:text="100oC"
+                    android:text="100°C"
                     android:textAlignment="center"
                     android:textSize="34sp" />
             </LinearLayout>

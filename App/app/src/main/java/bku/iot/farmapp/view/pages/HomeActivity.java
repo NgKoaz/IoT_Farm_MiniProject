@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,6 +35,7 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
     private TextView tempValueText, moisValueText;
     private ImageView historyTaskButton, addScheduleButton;
     private RecyclerView recyclerView;
+    private MyAdapter myAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +59,7 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
         recyclerView = findViewById(R.id.home_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-//        List<ScheduleInfo> list =
-//                Arrays.asList(
-//
-//                );
-//        MyAdapter myAdapter = new MyAdapter(this, list, true);
-//        recyclerView.setAdapter(myAdapter);
+
     }
 
     @Override
@@ -85,11 +82,22 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
 
     }
 
-    public void updateTempText(String text){
+    public void updateScheduleList(List<ScheduleInfo> scheduleInfoList){
+        if (myAdapter == null){
+            myAdapter = new MyAdapter(this, scheduleInfoList, true);
+            recyclerView.setAdapter(myAdapter);
+        } else {
+            myAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public void updateTempText(String value){
+        String text = value + "°C";
         tempValueText.setText(text);
     }
 
-    public void updateMoisText(String text){
+    public void updateMoisText(String value){
+        String text = value + "%";
         moisValueText.setText(text);
     }
 }

@@ -168,7 +168,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:checkedButton="@id/schedule_monButton"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="invisible">
 
                     <RadioButton
                         android:id="@+id/schedule_monButton"
@@ -319,7 +320,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/abeezee"
                         android:imeOptions="actionNext"
-                        android:inputType="number"
+                        android:inputType="number|numberDecimal"
                         android:textSize="16sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -465,7 +466,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
-                            android:imeOptions="actionNext"
+                            android:imeOptions="actionDone"
                             android:inputType="number|numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
 

@@ -10,6 +10,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MyMqttClient implements MqttCallback {
     private static MyMqttClient instance;
     private static final String TAG = MyMqttClient.class.getSimpleName();
@@ -20,14 +23,14 @@ public class MyMqttClient implements MqttCallback {
     private final byte QOS = 1;
     private final String clientId = MqttClient.generateClientId();
     private final MemoryPersistence memoryPersistence = new MemoryPersistence();
-    private OnMessageArrived onMessageArrived = null;
     private OnDeliveryComplete onDeliveryComplete = null;
     private MqttClient client;
-    MqttConnectOptions opts;
-
+    private final MqttConnectOptions opts;
+    private final List<MessageObserver> onMessageObservers = new ArrayList<>();
     public MyMqttClient(){
         this.opts = new MqttConnectOptions();
     }
+
 
     public static MyMqttClient gI() {
         if (instance == null){
@@ -36,7 +39,35 @@ public class MyMqttClient implements MqttCallback {
         return instance;
     }
 
-    private void saveCurrentBrokerInfo(String broker, String username, String password){
+    // Method to register observers
+    public void registerObserver(MessageObserver observer) {
+        onMessageObservers.add(observer);
+    }
+
+    // Method to unregister observers
+    public void unregisterObserver(MessageObserver observer) {
+        try {
+            onMessageObservers.remove(observer);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    // Method to notify observers when a new message is received
+    public void notifyMessageArrived(String topic, String payload) {
+        String[] parts = topic.split("/");
+        topic = parts[parts.length - 1];
+        for (MessageObserver observer : onMessageObservers) {
+            try {
+                observer.onMessageReceived(topic, payload);
+            } catch (Exception e){
+                e.printStackTrace();
+                unregisterObserver(observer);
+            }
+        }
+    }
+
+    private void saveBrokerCredential(String broker, String username, String password){
         this.broker = broker;
         this.username = username;
         this.password = password;
@@ -47,7 +78,7 @@ public class MyMqttClient implements MqttCallback {
             this.client = new MqttClient(broker, clientId, memoryPersistence);
             this.client.setCallback(this); // Set the callback
 
-            this.saveCurrentBrokerInfo(broker, username, password);
+            this.saveBrokerCredential(broker, username, password);
 
             // Set option
             this.opts.setCleanSession(true);
@@ -103,7 +134,7 @@ public class MyMqttClient implements MqttCallback {
     public void disconnect(HandleDisconnectionResult listener){
         if (this.client == null || !this.client.isConnected()){
             Log.d(TAG, "No connection found to disconnect!");
-            this.saveCurrentBrokerInfo("", "", "");
+            this.saveBrokerCredential("", "", "");
             if (listener != null)
                 listener.onSuccess();
             return;
@@ -111,7 +142,7 @@ public class MyMqttClient implements MqttCallback {
         try {
             this.client.disconnect();
             Log.d(TAG, "Disconnect to broker successfully!");
-            this.saveCurrentBrokerInfo("", "", "");
+            this.saveBrokerCredential("", "", "");
             if (listener != null)
                 listener.onSuccess();
         } catch (MqttException me){
@@ -131,14 +162,6 @@ public class MyMqttClient implements MqttCallback {
         }
     }
 
-    public boolean hasOnMessageArrived(){
-        return (onMessageArrived != null);
-    }
-
-    public void setOnMessageArrived(OnMessageArrived onMessageArrived){
-        this.onMessageArrived = onMessageArrived;
-    }
-
     @Override
     public void connectionLost(Throwable cause) {
         Log.d(TAG, "Connection to MQTT broker lost. Cause: " + cause.getMessage());
@@ -146,14 +169,11 @@ public class MyMqttClient implements MqttCallback {
     }
 
     @Override
-    public void messageArrived(String topic, MqttMessage message) throws Exception {
-        if (onMessageArrived != null) {
-            // Process the message.
-            String payload = new String(message.getPayload());
-            Log.d(TAG, "TOPIC: " + topic);
-            Log.d(TAG, "PAYLOAD: " + payload);
-            onMessageArrived.onArrived(topic, payload);
-        }
+    public void messageArrived(String topic, MqttMessage message) {
+        String payload = new String(message.getPayload());
+        Log.d(TAG, "TOPIC: " + topic);
+        Log.d(TAG, "PAYLOAD: " + payload);
+        notifyMessageArrived(topic, payload);
     }
 
     @Override
@@ -161,6 +181,11 @@ public class MyMqttClient implements MqttCallback {
         if (onDeliveryComplete != null) {
             onDeliveryComplete.onComplete();
         }
+    }
+
+    // Define the observer interface
+    public interface MessageObserver {
+        void onMessageReceived(String topic, String payload);
     }
 
     public interface HandleConnectionResult{
@@ -176,10 +201,6 @@ public class MyMqttClient implements MqttCallback {
     public interface HandleSubscribingResult{
         void onSuccess(String topic);
         void onFailure(String topic, String errorMessage);
-    }
-
-    public interface OnMessageArrived{
-        void onArrived(String topic, String payload);
     }
 
     public interface OnDeliveryComplete{

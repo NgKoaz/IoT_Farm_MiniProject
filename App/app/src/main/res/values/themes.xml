@@ -7,6 +7,11 @@
 
     <style name="Theme.FarmApp" parent="Base.Theme.FarmApp" />
 
+    <style name="CustomTimePickerDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="colorAccent">#0255F8</item>
+<!--        <item name="android:windowBackground">@drawable/dialog_background</item>-->
+        <!-- Add more customizations here -->
+    </style>
 
     <style name="myToast">
         <item name="stTextBold">true</item>

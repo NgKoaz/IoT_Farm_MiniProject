@@ -4,9 +4,9 @@ import json
 class ScheduleResponsePayload:
     def __init__(
             self,
-            email: str = None,
-            type: str = None,
-            name: str = None,
+            email: str = "",
+            type: str = "",
+            name: str = "",
             water: float = None,
             mixer1: float = None,
             mixer2: float = None,
@@ -14,10 +14,12 @@ class ScheduleResponsePayload:
             area1: float = None,
             area2: float = None,
             area3: float = None,
-            isDate: bytes = None,
-            date: str = None,
-            weekday: str = None,
-            time: str = None,
+            isDate: int = None,
+            date: str = "",
+            weekday: str = "",
+            time: str = "",
+            isError: int = None,
+            error: str = ""
     ):
         self.email = email
         self.type = type
@@ -33,10 +35,15 @@ class ScheduleResponsePayload:
         self.date = date
         self.weekday = weekday
         self.time = time
+        self.isError = isError
+        self.error = error
 
-    def importStringInJsonForm(self, jsonString):
-        js = json.dumps(jsonString)
-        print(js)
+    @classmethod
+    def importFromJsonString(cls, json_string):
+        json_dict = json.loads(json_string)
+        return cls(**json_dict)
 
-
-
+    def toStringJson(self):
+        # Exclude bytes attributes from serialization
+        data = {key: value for key, value in self.__dict__.items() if not isinstance(value, bytes)}
+        return json.dumps(data)
