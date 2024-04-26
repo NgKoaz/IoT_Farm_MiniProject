@@ -50,12 +50,13 @@
             android:id="@+id/signin_emailLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:hint="Email"
+            android:layout_marginBottom="10dp"
             app:counterEnabled="true"
             app:counterMaxLength="50"
             app:helperText="Require*"
-            app:helperTextTextColor="#FF0000">
+            app:helperTextTextColor="#FF0000"
+            app:startIconDrawable="@drawable/ic_email">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/signin_emailInputText"
@@ -78,7 +79,8 @@
             app:errorEnabled="true"
             app:errorIconDrawable="@drawable/ic_error"
             app:helperText="Require*"
-            app:helperTextTextColor="#FF0000">
+            app:helperTextTextColor="#FF0000"
+            app:startIconDrawable="@drawable/ic_lock">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/signin_passwordInputText"
