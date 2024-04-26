@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import bku.iot.farmapp.data.enums.MqttTopic;
 import bku.iot.farmapp.data.enums.Weekdays;
@@ -228,6 +229,8 @@ public class ScheduleController {
     private void publishAndWaitAck(ScheduleInfo scheduleInfo){
         try {
             AtomicBoolean isAck = new AtomicBoolean(false);
+            AtomicBoolean isError = new AtomicBoolean(false);
+            AtomicReference<String> error = new AtomicReference<>("");
             MyMqttClient.MessageObserver messageObserver = (topic, payload) -> {
                 if (topic.equals(MqttTopic.scheduleResponse)) {
                     try {
@@ -239,6 +242,10 @@ public class ScheduleController {
                                 scheduleInfo.type.equals(payloadType) &&
                                 scheduleInfo.scheduleId.equals(payloadScheduleId))
                         {
+                            if (scheduleInfo.isError == 1) {
+                                isError.set(true);
+                                error.set(scheduleInfo.error);
+                            }
                             isAck.set(true);
                         }
                     } catch (JSONException e) {
@@ -261,10 +268,13 @@ public class ScheduleController {
             }
             MyMqttClient.gI().unregisterObserver(messageObserver);
             if (isAck.get()) {
-                mHandler.post(this::backToPreviousActivity);
+                if (isError.get()){
+                    mHandler.post(() -> ToastManager.showToast(scheduleActivity, error.get()));
+                } else {
+                    mHandler.post(this::backToPreviousActivity);
+                }
             } else {
                 mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Request time out!"));
-
             }
         } catch (JSONException e) {
             e.printStackTrace();
