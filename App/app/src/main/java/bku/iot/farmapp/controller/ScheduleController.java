@@ -8,6 +8,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Calendar;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -17,67 +19,68 @@ import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyMqttClient;
 import bku.iot.farmapp.utils.ToastManager;
-import bku.iot.farmapp.view.pages.AddOrEditScheduleActivity;
+import bku.iot.farmapp.view.pages.ScheduleActivity;
 
-public class ScheduleController {
-
+public class ScheduleController implements MyMqttClient.MessageObserver {
     private final String TAG = ScheduleController.class.getSimpleName();
     private int isDate;
     private String date;
     private String weekday;
     private String time;
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private boolean hasCurrentTime = false;     // Got current time from gateway yet?
+    private int curHour, curMinute, curDay, curMonth, curYear;
 
 
-    private final AddOrEditScheduleActivity scheduleActivity;
+    private final ScheduleActivity scheduleActivity;
 
-    public ScheduleController(AddOrEditScheduleActivity scheduleActivity) {
+    public ScheduleController(ScheduleActivity scheduleActivity) {
         this.scheduleActivity = scheduleActivity;
+
+        MyMqttClient.gI().registerObserver(this);
     }
 
     public void openTimePickerDialog(){
         scheduleActivity.openTimePickerDialog();
     }
 
-//    private boolean isValidDateTime(int minute, int hour, int day, int month, int year) {
-//        Calendar currentTime = Calendar.getInstance();
-//
-//        int curYear = currentTime.get(Calendar.YEAR);
-//        int curMonth = currentTime.get(Calendar.MONTH) + 1;
-//        int curDay = currentTime.get(Calendar.DAY_OF_MONTH);
-//        int curHour = currentTime.get(Calendar.HOUR);
-//        int curMinute = currentTime.get(Calendar.MINUTE);
-//
-//        Log.d(TAG, String.format("%d:%d %d/%d/%d", hour, minute, day, month, year));
-//        Log.d(TAG, String.format("%d:%d %d/%d/%d", curHour, curMinute, curDay, curMonth, curYear));
-//
-//        // Compare year
-//        if (year < curYear)
-//            return false;
-//        else if (year > curYear)
-//            return true;
-//
-//        // If the years are the same, compare month
-//        if (month < curMonth)
-//            return false;
-//        else if (month > curMonth)
-//            return true;
-//
-//        // If the months are the same, compare day
-//        if (day < curDay)
-//            return false;
-//        else if (day > curDay)
-//            return true;
-//
-//        if (hour < curHour)
-//            return false;
-//        else if (hour > curHour)
-//            return true;
-//
-//        if (minute <= curMinute)
-//            return false;
-//        return true;
-//    }
+    private boolean isValidDateTime() {
+        if (isDate == 0) return true;
+        String[] timeParts = time.split(":");
+        String[] dateParts = date.split("/");
+        int hour = Integer.parseInt(timeParts[0]);
+        int minute = Integer.parseInt(timeParts[1]);
+        int day = Integer.parseInt(dateParts[0]);
+        int month = Integer.parseInt(dateParts[1]);
+        int year = Integer.parseInt(dateParts[2]);
+
+        // Compare year
+        if (year < curYear)
+            return false;
+        else if (year > curYear)
+            return true;
+
+        // If the years are the same, compare month
+        if (month < curMonth)
+            return false;
+        else if (month > curMonth)
+            return true;
+
+        // If the months are the same, compare day
+        if (day < curDay)
+            return false;
+        else if (day > curDay)
+            return true;
+
+        if (hour < curHour)
+            return false;
+        else if (hour > curHour)
+            return true;
+
+        if (minute <= curMinute)
+            return false;
+        return true;
+    }
 
     public void setDefaultDateTime(){
         // Get current time
@@ -189,44 +192,137 @@ public class ScheduleController {
     }
 
     public void saveSchedule(
-            boolean isNewAdding,
             String name,
             double water,
-            double mixer1, double mixer2, double mixer3,
-            double area1, double area2, double area3
+            double mixer1,
+            double mixer2,
+            double mixer3,
+            double area1,
+            double area2,
+            double area3
     ) {
         mHandler.post(scheduleActivity::showLoading);
-
         Log.d(TAG, "Save schedule!!!!!!!");
-        String userEmail = getUserEmail();
-        if (userEmail.equals("")) {
-            ToastManager.showToast(scheduleActivity, "Not found your email, please re-sign in");
+        if (!hasCurrentTime) {
+            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Wait gateway send current time!"));
+            mHandler.post(scheduleActivity::dismissLoading);
+            return;
+        }
+        if (isValidDateTime()){
+            String userEmail = getUserEmail();
+            if (!userEmail.equals("")) {
+                ScheduleInfo scheduleInfo = new ScheduleInfo(
+                        userEmail, "add", name, water,
+                        mixer1, mixer2, mixer3,
+                        area1, area2, area3,
+                        this.isDate, this.date,
+                        this.weekday, this.time
+                );
+                // Send
+                publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
+                    if (isAck) {
+                        if (isError){
+                            mHandler.post(() -> ToastManager.showToast(scheduleActivity, error));
+                        } else {
+                            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Add schedule successful!"));
+                            mHandler.post(this::backToPreviousActivity);
+                        }
+                    } else {
+                        mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Request time out!"));
+                    }
+                });
+            } else {
+                mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Not found your email, please re-sign in"));
+            }
+        } else {
+            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "The time you set is in the past!"));
+        }
+        mHandler.post(scheduleActivity::dismissLoading);
+    }
+
+    public void updateSchedule(
+            ScheduleInfo scheduleInfo,
+            String name,
+            double water,
+            double mixer1,
+            double mixer2,
+            double mixer3,
+            double area1,
+            double area2,
+            double area3
+    ){
+        mHandler.post(scheduleActivity::showLoading);
+        Log.d(TAG, "Update Schedule!!!!!!");
+
+        if (!hasCurrentTime) {
+            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Wait gateway send current time!"));
             mHandler.post(scheduleActivity::dismissLoading);
             return;
         }
 
-        String type;
-        if (isNewAdding)
-            type = "add";
-        else
-            type = "update";
+        if (isValidDateTime()){
+            if (scheduleInfo != null) {
+                // Set attributes
+                scheduleInfo.type = "update";
+                scheduleInfo.name = name;
+                scheduleInfo.water = water;
+                scheduleInfo.mixer1 = mixer1;
+                scheduleInfo.mixer2 = mixer2;
+                scheduleInfo.mixer3 = mixer3;
+                scheduleInfo.area1 = area1;
+                scheduleInfo.area2 = area2;
+                scheduleInfo.area3 = area3;
+                scheduleInfo.isDate = this.isDate;
+                scheduleInfo.date = this.date;
+                scheduleInfo.weekday = this.weekday;
+                scheduleInfo.time = this.time;
 
-        ScheduleInfo scheduleInfo = new ScheduleInfo(
-                userEmail,
-                type,
-                name, water,
-                mixer1, mixer2, mixer3,
-                area1, area2, area3,
-                this.isDate, this.date,
-                this.weekday, this.time
-        );
-
-        publishAndWaitAck(scheduleInfo);
-
+                publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
+                    if (isAck) {
+                        if (isError){
+                            mHandler.post(() -> ToastManager.showToast(scheduleActivity, error));
+                        } else {
+                            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Update schedule successful!"));
+                            mHandler.post(this::backToPreviousActivity);
+                        }
+                    } else {
+                        mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Request time out!"));
+                    }
+                });
+            } else {
+                mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Non-expected error occur: `scheduleInfo` is null"));
+            }
+        } else {
+            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "The time you set is in the past!"));
+        }
         mHandler.post(scheduleActivity::dismissLoading);
     }
 
-    private void publishAndWaitAck(ScheduleInfo scheduleInfo){
+    public void deleteSchedule(ScheduleInfo scheduleInfo){
+        mHandler.post(scheduleActivity::showLoading);
+        Log.d(TAG, "Delete Schedule!!!!!!");
+
+        if (scheduleInfo != null){
+            scheduleInfo.type = "delete";
+            publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
+                if (isAck) {
+                    if (isError){
+                        mHandler.post(() -> ToastManager.showToast(scheduleActivity, error));
+                    } else {
+                        mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Delete schedule successful!"));
+                        mHandler.post(this::backToPreviousActivity);
+                    }
+                } else {
+                    mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Request time out!"));
+                }
+            });
+        } else {
+            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Non-expected error occur: `scheduleInfo` is null"));
+        }
+        mHandler.post(scheduleActivity::dismissLoading);
+    }
+
+    private void publishAndWaitAck(ScheduleInfo scheduleInfo, OnWaitAck listener){
         try {
             AtomicBoolean isAck = new AtomicBoolean(false);
             AtomicBoolean isError = new AtomicBoolean(false);
@@ -238,10 +334,9 @@ public class ScheduleController {
                         String payloadEmail = jsonObject.getString("email");
                         String payloadType = jsonObject.getString("type");
                         String payloadScheduleId = jsonObject.getString("scheduleId");
-                        if (scheduleInfo.email.equals(payloadEmail) &&
-                                scheduleInfo.type.equals(payloadType) &&
-                                scheduleInfo.scheduleId.equals(payloadScheduleId))
-                        {
+                        if (scheduleInfo.email.equals(payloadEmail) && scheduleInfo.type.equals(payloadType) &&
+                                (scheduleInfo.scheduleId.equals(payloadScheduleId) || scheduleInfo.type.equals("add"))
+                        ){
                             if (scheduleInfo.isError == 1) {
                                 isError.set(true);
                                 error.set(scheduleInfo.error);
@@ -267,15 +362,7 @@ public class ScheduleController {
                 i++;
             }
             MyMqttClient.gI().unregisterObserver(messageObserver);
-            if (isAck.get()) {
-                if (isError.get()){
-                    mHandler.post(() -> ToastManager.showToast(scheduleActivity, error.get()));
-                } else {
-                    mHandler.post(this::backToPreviousActivity);
-                }
-            } else {
-                mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Request time out!"));
-            }
+            listener.onComplete(isAck.get(), isError.get(), error.get());
         } catch (JSONException e) {
             e.printStackTrace();
             mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Non-expected error! Let try again!"));
@@ -286,18 +373,61 @@ public class ScheduleController {
         scheduleActivity.openDatePickerDialog();
     }
 
-    public void deleteSchedule(ScheduleInfo scheduleInfo){
-        Log.d(TAG, "Delete Schedule!!!!!!");
-        mHandler.post(scheduleActivity::showLoading);
-
-        scheduleInfo.type = "delete";
-        publishAndWaitAck(scheduleInfo);
-
-        mHandler.post(scheduleActivity::dismissLoading);
-    }
-
     public void backToPreviousActivity(){
+        MyMqttClient.gI().unregisterObserver(this);
         scheduleActivity.finish();
     }
 
+    public void updateCurrentTimeDisplay(){
+        mHandler.post(() -> {
+            String curHourDisplay = String.format((curHour < 10) ? "0%d" : "%d", curHour);
+            String curMinuteDisplay = String.format((curMinute < 10) ? "0%d" : "%d", curMinute);
+            String curDayDisplay = String.format((curDay < 10) ? "0%d" : "%d", curDay);
+            String curMonthDisplay = String.format((curMonth < 10) ? "0%d" : "%d", curMonth);
+            String curYearDisplay = String.format((curYear < 10) ? "0%d" : "%d", curYear);
+
+            scheduleActivity.updateCurrentTime(
+                String.format("%s:%s %s/%s/%s",
+                        curHourDisplay,
+                        curMinuteDisplay,
+                        curDayDisplay,
+                        curMonthDisplay,
+                        curYearDisplay)
+            );
+        });
+    }
+
+    private void handleCurrentTimeMessage(JSONObject jsonObject){
+        try {
+            curHour = jsonObject.getInt("hour");
+            curMinute = jsonObject.getInt("minute");
+            curDay = jsonObject.getInt("day");
+            curMonth = jsonObject.getInt("month");
+            curYear = jsonObject.getInt("year");
+            hasCurrentTime = true;
+            updateCurrentTimeDisplay();
+        } catch (JSONException e) {
+            Log.e(TAG, "handleCurrentTimeMessage get data error!");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onMessageReceived(String topic, String payload) {
+        try {
+            JSONObject jsonObject = new JSONObject(payload);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            if (topic.equals(MqttTopic.currentTime)){
+                executor.submit(() -> {
+                    handleCurrentTimeMessage(jsonObject);
+                });
+            }
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
+
+    private interface OnWaitAck{
+        void onComplete(boolean isAck, boolean isError, String error);
+    }
 }

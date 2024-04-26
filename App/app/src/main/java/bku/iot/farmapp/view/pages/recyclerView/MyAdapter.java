@@ -14,7 +14,7 @@ import bku.iot.farmapp.R;
 import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.utils.Navigation;
-import bku.iot.farmapp.view.pages.AddOrEditScheduleActivity;
+import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
@@ -50,7 +50,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                 Bundle extras = new Bundle();
                 extras.putString("page", "EDIT");
                 extras.putParcelable("scheduleInfo", scheduleInfo);
-                Navigation.startNewActivity(context, AddOrEditScheduleActivity.class, extras);
+                Navigation.startNewActivity(context, ScheduleActivity.class, extras);
             });
     }
 

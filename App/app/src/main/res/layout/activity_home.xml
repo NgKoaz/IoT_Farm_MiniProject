@@ -22,7 +22,7 @@
             android:layout_marginBottom="10dp">
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/home_helloUserText"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_marginStart="10dp"
@@ -47,21 +47,36 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/home_welcomeText"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/home_timeLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/home_header"
-            android:layout_weight="1"
-            android:fontFamily="@font/montserrat_bold"
-            android:text="Check the day"
-            android:textSize="24sp" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/home_welcomeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_bold"
+                android:text="Time:"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/home_timeText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/montserrat_bold"
+                android:gravity="center"
+                android:text="--:--"
+                android:textSize="24sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/home_dataDisplay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/home_welcomeText"
+            android:layout_below="@id/home_timeLayout"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:orientation="horizontal">

@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,10 +26,11 @@ import bku.iot.farmapp.view.pages.appbar.AppBar;
 import bku.iot.farmapp.view.pages.dialog.LoadingPage;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
-public class AddOrEditScheduleActivity extends AppCompatActivity implements InitActivity {
+public class ScheduleActivity extends AppCompatActivity implements InitActivity {
     private ScheduleController scheduleController;
     private AppBar appbar;
     private String typePage;
+    private TextView currentTimeText;
     private TextView hourText, minuteText;
     private TextView dateInfoText;
     private ImageView choosingDateButton;
@@ -40,7 +39,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
     private TextInputEditText nameInput, waterInput;
     private TextInputEditText mixer1Input, mixer2Input, mixer3Input;
     private TextInputEditText area1Input, area2Input, area3Input;
-    private Button deleteButton, saveButton;
+    private Button deleteButton, saveButton, updateButton;
     private View spaceBetweenButtons;
     private TimePickerDialog timePickerDialog;
     private DatePickerDialog datePickerDialog;
@@ -58,7 +57,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
 
         loadingPage = new LoadingPage(this);
         scheduleController = new ScheduleController(this);
-        setContentView(R.layout.activity_add_or_edit_schedule);
+        setContentView(R.layout.activity_schedule);
 
         initViews();
         bindEvents();
@@ -70,6 +69,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
         appbar = new AppBar(this, () -> {
             scheduleController.backToPreviousActivity();
         });
+        currentTimeText = findViewById(R.id.schedule_currentTimeText);
         hourText = findViewById(R.id.schedule_hourText);
         minuteText = findViewById(R.id.schedule_minuteText);
         dateInfoText = findViewById(R.id.schedule_dateInfoText);
@@ -96,6 +96,7 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
 
         deleteButton = findViewById(R.id.schedule_deleteButton);
         saveButton = findViewById(R.id.schedule_saveButton);
+        updateButton = findViewById(R.id.schedule_updateButton);
         spaceBetweenButtons = findViewById(R.id.schedule_spaceBetweenButtons);
 
         datePickerDialog = new DatePickerDialog(this);
@@ -122,7 +123,6 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> {
                 scheduleController.saveSchedule(
-                        typePage.equals("ADD"),
                         InputText.getStringFromInputEditText(nameInput),
                         Double.parseDouble(InputText.getStringFromInputEditText(waterInput)),
                         Double.parseDouble(InputText.getStringFromInputEditText(mixer1Input)),
@@ -134,6 +134,22 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
                 );
             });
         });
+        updateButton.setOnClickListener(v -> {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                scheduleController.updateSchedule(
+                        scheduleInfo,
+                        InputText.getStringFromInputEditText(nameInput),
+                        Double.parseDouble(InputText.getStringFromInputEditText(waterInput)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(mixer1Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(mixer2Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(mixer3Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(area1Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(area2Input)),
+                        Double.parseDouble(InputText.getStringFromInputEditText(area3Input)));
+            });
+        });
+
 
         // RADIO GROUP
         monButton.setOnClickListener(v -> {
@@ -197,12 +213,21 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
         scheduleController.setDefaultDateTime();
 
         appbar.setHeaderText("Add Schedule");
+
+        saveButton.setVisibility(View.VISIBLE);
+        updateButton.setVisibility(View.GONE);
         deleteButton.setVisibility(View.GONE);
         spaceBetweenButtons.setVisibility(View.GONE);
     }
 
     private void loadEditSchedulePage(){
         appbar.setHeaderText("Edit Schedule");
+
+        saveButton.setVisibility(View.GONE);
+        updateButton.setVisibility(View.VISIBLE);
+        deleteButton.setVisibility(View.VISIBLE);
+        spaceBetweenButtons.setVisibility(View.VISIBLE);
+
         scheduleInfo = getIntent().getParcelableExtra("scheduleInfo");
 
         assert scheduleInfo != null;
@@ -247,5 +272,9 @@ public class AddOrEditScheduleActivity extends AppCompatActivity implements Init
 
     public void updateDateDisplay(String dateString){
         dateInfoText.setText(dateString);
+    }
+
+    public void updateCurrentTime(String time){
+        currentTimeText.setText(time);
     }
 }

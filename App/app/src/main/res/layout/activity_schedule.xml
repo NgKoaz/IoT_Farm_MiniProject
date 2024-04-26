@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".view.pages.AddOrEditScheduleActivity"
+    tools:context=".view.pages.ScheduleActivity"
     tools:ignore="HardcodedText">
 
     <include
@@ -41,21 +41,36 @@
                 android:paddingEnd="25dp"
                 android:paddingBottom="5dp">
 
-                <TextView
-                    android:id="@+id/textView3"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
+                    android:layout_height="26dp"
                     android:layout_marginTop="3dp"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginBottom="5dp"
-                    android:fontFamily="@font/roboto"
-                    android:text="Enter Time"
-                    android:textSize="16sp" />
+                    android:layout_marginBottom="3dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="15dp">
+
+                    <TextView
+                        android:id="@+id/textView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:fontFamily="@font/abeezee"
+                        android:gravity="center_vertical"
+                        android:text="Current time:"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/schedule_currentTimeText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:fontFamily="@font/abeezee"
+                        android:gravity="center"
+                        android:text="--:-- --/--/--" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="85dp"
+                    android:layout_height="80dp"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -73,8 +88,8 @@
                             android:background="@drawable/bg_add_schedule_hour_minute_setting"
                             android:fontFamily="@font/roboto"
                             android:gravity="center"
-                            android:paddingTop="5dp"
-                            android:paddingBottom="5dp"
+                            android:paddingTop="1dp"
+                            android:paddingBottom="1dp"
                             android:text="20"
                             android:textSize="45sp" />
 
@@ -82,7 +97,10 @@
                             android:id="@+id/textView8"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="Hour" />
+                            android:fontFamily="@font/abeezee"
+                            android:gravity="center_vertical"
+                            android:text="Hour"
+                            android:textSize="12sp" />
 
                     </LinearLayout>
 
@@ -110,7 +128,8 @@
                             android:background="@drawable/bg_add_schedule_hour_minute_setting"
                             android:fontFamily="@font/roboto"
                             android:gravity="center"
-                            android:paddingTop="5dp"
+                            android:paddingTop="1dp"
+                            android:paddingBottom="1dp"
                             android:text="00"
                             android:textSize="45sp" />
 
@@ -118,8 +137,11 @@
                             android:id="@+id/textView9"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:fontFamily="@font/abeezee"
+                            android:gravity="center_vertical"
                             android:text="Minute"
-                            android:textColor="#49454F" />
+                            android:textColor="#49454F"
+                            android:textSize="12sp" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -501,6 +523,17 @@
                         android:backgroundTint="#2E3830"
                         android:fontFamily="@font/montserrat_bold"
                         android:text="Save"
+                        android:textSize="16sp"
+                        android:visibility="gone" />
+
+                    <Button
+                        android:id="@+id/schedule_updateButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:backgroundTint="#2E3830"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="Update"
                         android:textSize="16sp" />
                 </LinearLayout>
 

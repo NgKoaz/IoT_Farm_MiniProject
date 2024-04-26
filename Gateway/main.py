@@ -80,10 +80,18 @@ class Main:
         self.publishSchedule(schedule)
 
     def deleteSchedule(self, schedule: Schedule):
-        self.myFirestore.deleteSchedule(schedule.scheduleId)
+        if schedule.scheduleId:
+            self.myFirestore.deleteSchedule(schedule.scheduleId)
+            self.publishSchedule(schedule)
+        else:
+            print("[ERROR] deleteSchedule but scheduleId is empty!")
 
     def updateSchedule(self, schedule: Schedule):
-        self.myFirestore.updateSchedule(schedule.scheduleId, json.loads(schedule.toJsonString()))
+        if schedule.scheduleId:
+            self.myFirestore.updateSchedule(schedule.scheduleId, json.loads(schedule.toJsonString()))
+            self.publishSchedule(schedule)
+        else:
+            print("[ERROR] updateSchedule but scheduleId is empty!")
 
     def handleScheduleRequest(self, payload: str):
         schedule = Schedule.importFromJsonString(payload)
@@ -107,11 +115,32 @@ class Main:
             payload=schedule.toJsonString()
         )
 
+    def publishCurrentTime(self):
+        curTime = datetime.datetime.now()
+        data = {
+            "hour": curTime.hour,
+            "minute": curTime.minute,
+            "day": curTime.day,
+            "month": curTime.month,
+            "year": curTime.year
+        }
+        self.myMqtt.publish(MqttTopic.currentTime, payload=json.dumps(data))
+
     def loop(self):
+        counter = 20
+        counterTime = 5
         while True:
-            self.publishSensorData(SensorData(SensorDataType.TEMPERATURE, random.randint(0, 100)))
-            self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, random.randint(0, 100)))
-            time.sleep(10)
+            counter -= 1
+            if counter <= 0:
+                counter = 20
+                self.publishSensorData(SensorData(SensorDataType.TEMPERATURE, random.randint(0, 100)))
+                self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, random.randint(0, 100)))
+
+            counterTime -= 1
+            if counterTime <= 0:
+                counterTime = 5
+                self.publishCurrentTime()
+            time.sleep(1)
 
 
 Main()
