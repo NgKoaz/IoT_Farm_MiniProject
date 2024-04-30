@@ -32,8 +32,8 @@ import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyFirestore;
 import bku.iot.farmapp.services.global.MyMqttClient;
-import bku.iot.farmapp.utils.Navigation;
-import bku.iot.farmapp.utils.ToastManager;
+import bku.iot.farmapp.view.common.Navigation;
+import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
 import bku.iot.farmapp.view.pages.HistoryActivity;
 import bku.iot.farmapp.view.pages.HomeActivity;
@@ -156,19 +156,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
         topicList.add("V1");
         topicList.add("V3");
         topicList.add("V4");
-        for (String topic : topicList){
-            MyMqttClient.gI().subscribe(topic, new MyMqttClient.HandleSubscribingResult() {
-                @Override
-                public void onSuccess(String topic) {
-                    Log.d(TAG, "Subscribed: " + topic);
-                }
-
-                @Override
-                public void onFailure(String topic, String errorMessage) {
-                    Log.d(TAG, "Subscribe fail: " + topic + "| ErrorMessage: " + errorMessage);
-                }
-            });
-        }
+        MyMqttClient.gI().subscribeTopics(topicList);
     }
 
     private void updateSensorDataUI(JSONObject jsonObject){

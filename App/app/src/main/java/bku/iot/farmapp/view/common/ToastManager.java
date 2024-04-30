@@ -1,4 +1,4 @@
-package bku.iot.farmapp.utils;
+package bku.iot.farmapp.view.common;
 
 import android.content.Context;
 import android.widget.Toast;

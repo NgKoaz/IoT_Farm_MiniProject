@@ -1,11 +1,10 @@
 package bku.iot.farmapp.controller;
 
-import android.util.Log;
-
 import bku.iot.farmapp.data.enums.ActivityResultCode;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
+import bku.iot.farmapp.services.global.MyMqttClient;
 import bku.iot.farmapp.services.local.LocalStorage;
-import bku.iot.farmapp.utils.ToastManager;
+import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.SettingActivity;
 
 public class SettingController {
@@ -73,6 +72,7 @@ public class SettingController {
     public void signOut(){
         LocalStorage localStorage = new LocalStorage(settingActivity);
         localStorage.clear();
+        MyMqttClient.gI().disconnect(null);
         settingActivity.setResult(ActivityResultCode.SIGN_OUT);
         settingActivity.finish();
     }

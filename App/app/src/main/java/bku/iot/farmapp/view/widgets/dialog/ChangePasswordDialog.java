@@ -1,11 +1,10 @@
-package bku.iot.farmapp.view.pages.dialog;
+package bku.iot.farmapp.view.widgets.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.renderscript.ScriptGroup;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -15,8 +14,7 @@ import androidx.annotation.NonNull;
 import com.google.android.material.textfield.TextInputEditText;
 
 import bku.iot.farmapp.R;
-import bku.iot.farmapp.utils.InputText;
-import bku.iot.farmapp.utils.Navigation;
+import bku.iot.farmapp.view.common.InputText;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
 public class ChangePasswordDialog extends Dialog implements InitActivity {

@@ -11,7 +11,8 @@ import java.util.List;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.HomeController;
 import bku.iot.farmapp.data.model.ScheduleInfo;
-import bku.iot.farmapp.view.pages.recyclerView.MyAdapter;
+import bku.iot.farmapp.view.common.NetworkNotify;
+import bku.iot.farmapp.view.widgets.recyclerView.MyAdapter;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
 public class HomeActivity extends AppCompatActivity implements InitActivity {
@@ -24,6 +25,7 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
     private ImageView historyTaskButton, addScheduleButton;
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
+    private NetworkNotify networkNotify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,8 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
         addScheduleButton = findViewById(R.id.home_addScheduleButton);
         recyclerView = findViewById(R.id.home_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        networkNotify = new NetworkNotify(this, this);
     }
 
     @Override

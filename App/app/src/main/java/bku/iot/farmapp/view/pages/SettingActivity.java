@@ -7,9 +7,10 @@ import android.widget.LinearLayout;
 
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.SettingController;
-import bku.iot.farmapp.view.pages.appbar.AppBar;
-import bku.iot.farmapp.view.pages.dialog.ChangePasswordDialog;
-import bku.iot.farmapp.view.pages.dialog.LoadingPage;
+import bku.iot.farmapp.view.common.NetworkNotify;
+import bku.iot.farmapp.view.widgets.appbar.AppBar;
+import bku.iot.farmapp.view.widgets.dialog.ChangePasswordDialog;
+import bku.iot.farmapp.view.widgets.dialog.LoadingPage;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
 public class SettingActivity extends AppCompatActivity implements InitActivity {
@@ -19,6 +20,7 @@ public class SettingActivity extends AppCompatActivity implements InitActivity {
     private LinearLayout changePasswordEntry, signOutEntry;
     private ChangePasswordDialog changePasswordDialog;
     private LoadingPage loadingPage;
+    private NetworkNotify networkNotify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,7 @@ public class SettingActivity extends AppCompatActivity implements InitActivity {
         changePasswordEntry = findViewById(R.id.setting_changePasswordEntry);
         signOutEntry = findViewById(R.id.setting_signOutEntry);
 
-
+        networkNotify = new NetworkNotify(this, this);
     }
 
     @Override

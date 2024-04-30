@@ -1,4 +1,4 @@
-package bku.iot.farmapp.view.pages.appbar;
+package bku.iot.farmapp.view.widgets.appbar;
 
 import android.widget.ImageView;
 import android.widget.TextView;

@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.checkerframework.checker.units.qual.N;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,9 +23,10 @@ import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.ScheduleController;
 import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.ScheduleInfo;
-import bku.iot.farmapp.utils.InputText;
-import bku.iot.farmapp.view.pages.appbar.AppBar;
-import bku.iot.farmapp.view.pages.dialog.LoadingPage;
+import bku.iot.farmapp.view.common.InputText;
+import bku.iot.farmapp.view.common.NetworkNotify;
+import bku.iot.farmapp.view.widgets.appbar.AppBar;
+import bku.iot.farmapp.view.widgets.dialog.LoadingPage;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
 public class ScheduleActivity extends AppCompatActivity implements InitActivity {
@@ -45,6 +48,7 @@ public class ScheduleActivity extends AppCompatActivity implements InitActivity 
     private DatePickerDialog datePickerDialog;
     private LoadingPage loadingPage;
     private ScheduleInfo scheduleInfo;
+    private NetworkNotify networkNotify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +104,8 @@ public class ScheduleActivity extends AppCompatActivity implements InitActivity 
         spaceBetweenButtons = findViewById(R.id.schedule_spaceBetweenButtons);
 
         datePickerDialog = new DatePickerDialog(this);
+
+        networkNotify = new NetworkNotify(this, this);
     }
 
     @Override

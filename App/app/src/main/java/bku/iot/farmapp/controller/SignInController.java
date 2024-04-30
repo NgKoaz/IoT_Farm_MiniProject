@@ -1,14 +1,11 @@
 package bku.iot.farmapp.controller;
 
-import android.os.Handler;
-import android.util.Log;
-
 import com.google.firebase.auth.FirebaseUser;
 
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.local.LocalStorage;
-import bku.iot.farmapp.utils.Navigation;
-import bku.iot.farmapp.utils.ToastManager;
+import bku.iot.farmapp.view.common.Navigation;
+import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.HomeActivity;
 import bku.iot.farmapp.view.pages.SignInActivity;
 import bku.iot.farmapp.view.pages.SignUpActivity;

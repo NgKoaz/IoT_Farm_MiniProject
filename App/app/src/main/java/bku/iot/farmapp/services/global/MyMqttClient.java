@@ -1,5 +1,7 @@
 package bku.iot.farmapp.services.global;
 
+import android.health.connect.datatypes.ExerciseLap;
+import android.os.Handler;
 import android.util.Log;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -11,7 +13,11 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MyMqttClient implements MqttCallback {
     private static MyMqttClient instance;
@@ -27,6 +33,9 @@ public class MyMqttClient implements MqttCallback {
     private MqttClient client;
     private final MqttConnectOptions opts;
     private final List<MessageObserver> onMessageObservers = new ArrayList<>();
+    private List<String> subscribeTopicList;
+
+
     public MyMqttClient(){
         this.opts = new MqttConnectOptions();
     }
@@ -131,6 +140,23 @@ public class MyMqttClient implements MqttCallback {
         }
     }
 
+    public void subscribeTopics(List<String> topicList){
+        this.subscribeTopicList = topicList;
+        for (String topic : topicList){
+            subscribe(topic, new HandleSubscribingResult() {
+                @Override
+                public void onSuccess(String topic) {
+                    Log.d(TAG, "Subscribed: " + topic);
+                }
+
+                @Override
+                public void onFailure(String topic, String errorMessage) {
+                    Log.d(TAG, "Subscribe fail: " + topic + "| ErrorMessage: " + errorMessage);
+                }
+            });
+        }
+    }
+
     public void disconnect(HandleDisconnectionResult listener){
         if (this.client == null || !this.client.isConnected()){
             Log.d(TAG, "No connection found to disconnect!");
@@ -155,11 +181,28 @@ public class MyMqttClient implements MqttCallback {
     private void handleConnectionLost(){
         // We can inform user about disconnect right here
         // homeController.handleConnectionLost();
-        try {
-            this.client.connect(opts);
-        } catch (MqttException e){
-            e.printStackTrace();
-        }
+        Log.d(TAG, "Reconnect MQTT Broker!!!");
+        new Thread(() -> {
+            connect(broker, username, password, groupPrefix, new HandleConnectionResult() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "Reconnect successful!");
+                    subscribeTopics(subscribeTopicList);
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    // Retry the connection after a delay
+                    Log.d(TAG, "Reconnect failed! Reconnect again in 3 seconds.");
+                    try {
+                        Thread.sleep(3000); // Wait for 3 seconds before retrying
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    handleConnectionLost(); // Retry the connection
+                }
+            });
+        }).start();
     }
 
     @Override

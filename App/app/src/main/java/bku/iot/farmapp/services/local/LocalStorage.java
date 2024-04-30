@@ -29,7 +29,6 @@ public class LocalStorage {
 
     // Store encrypted string
     public void putString(String key, String value) {
-        Log.d("HELLO", "Key: " + key + "| Value: " + value);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         try {
             SecretKey secretKey = generateSecretKey();

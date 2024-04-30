@@ -1,9 +1,7 @@
-package bku.iot.farmapp.utils;
+package bku.iot.farmapp.view.common;
 
 import android.text.Editable;
 import android.widget.EditText;
-
-import com.google.android.material.textfield.TextInputEditText;
 
 public class InputText {
     public static String getStringFromInputEditText(EditText input) {

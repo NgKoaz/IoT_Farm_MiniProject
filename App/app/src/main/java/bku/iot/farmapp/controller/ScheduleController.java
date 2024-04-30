@@ -18,7 +18,7 @@ import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyMqttClient;
-import bku.iot.farmapp.utils.ToastManager;
+import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class ScheduleController implements MyMqttClient.MessageObserver {

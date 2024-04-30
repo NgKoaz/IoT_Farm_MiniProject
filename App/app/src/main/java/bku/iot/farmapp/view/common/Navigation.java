@@ -1,6 +1,5 @@
-package bku.iot.farmapp.utils;
+package bku.iot.farmapp.view.common;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;

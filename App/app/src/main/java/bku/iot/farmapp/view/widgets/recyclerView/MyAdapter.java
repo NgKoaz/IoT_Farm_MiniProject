@@ -1,4 +1,4 @@
-package bku.iot.farmapp.view.pages.recyclerView;// MyAdapter.java
+package bku.iot.farmapp.view.widgets.recyclerView;// MyAdapter.java
 
 import android.content.Context;
 import android.os.Bundle;
@@ -13,7 +13,7 @@ import java.util.List;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.ScheduleInfo;
-import bku.iot.farmapp.utils.Navigation;
+import bku.iot.farmapp.view.common.Navigation;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
