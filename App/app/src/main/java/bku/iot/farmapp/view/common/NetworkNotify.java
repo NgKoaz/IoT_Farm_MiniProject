@@ -15,7 +15,7 @@ public class NetworkNotify {
     private final NetworkManager networkManager;
     private final NotifyDialog notifyDialog;
 
-
+    
     public NetworkNotify(@NonNull Context context, @NonNull LifecycleOwner lifecycleOwner){
         networkManager = new NetworkManager(context);
         notifyDialog = new NotifyDialog(context);

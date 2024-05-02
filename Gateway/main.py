@@ -13,6 +13,7 @@ from model.mqtt.schedule import Schedule, ScheduleType
 from model.mqtt.sensor_data import SensorData, SensorDataType
 from services.mqtt import Mqtt as MyMqtt
 from services.my_firestore import MyFirestore
+from utils.time_manager import TimeManager
 
 
 class Main:
@@ -140,7 +141,7 @@ class Main:
             if counterTime <= 0:
                 counterTime = 5
                 self.publishCurrentTime()
-            time.sleep(1)
+            TimeManager.millisSleep(1)
 
 
 Main()
