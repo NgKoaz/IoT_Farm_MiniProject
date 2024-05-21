@@ -32,8 +32,6 @@ import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyFirestore;
 import bku.iot.farmapp.services.global.MyMqttClient;
-import bku.iot.farmapp.view.common.Navigation;
-import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
 import bku.iot.farmapp.view.pages.HistoryActivity;
 import bku.iot.farmapp.view.pages.HomeActivity;
@@ -142,7 +140,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
 
                     @Override
                     public void onFailure(String errorMessage) {
-                        ToastManager.showToast(homeActivity, "Connect to MQTT Broker fail! Reconnecting in 3 seconds...");
+                        homeActivity.showToast("Connect to MQTT Broker fail! Reconnecting in 3 seconds...");
                         Handler handler = new Handler();
                         handler.postDelayed(() -> {
                             connectToMqttBroker(brokerServer, username, password);
@@ -208,23 +206,23 @@ public class HomeController implements MyMqttClient.MessageObserver {
     }
 
     public void startToSettingPage(){
-        Navigation.startNewActivtyForResult(homeActivity, SettingActivity.class, activityResultLauncher);
+        homeActivity.startNewActivtyForResult(SettingActivity.class, activityResultLauncher);
     }
 
     public void navigateToSignInPage(){
-        Navigation.startNewActivity(homeActivity, SignInActivity.class, null);
+        homeActivity.startNewActivity(SignInActivity.class, null);
         MyMqttClient.gI().unregisterObserver(this);
         homeActivity.finish();
     }
 
     public void startToHistoryPage(){
-        Navigation.startNewActivity(homeActivity, HistoryActivity.class, null);
+        homeActivity.startNewActivity(HistoryActivity.class, null);
     }
 
     public void startToAddSchedulePage(){
         Bundle extras = new Bundle();
         extras.putString("page", "ADD");
-        Navigation.startNewActivity(homeActivity, ScheduleActivity.class, extras);
+        homeActivity.startNewActivity(ScheduleActivity.class, extras);
     }
 
     public void updateTimeDisplay(JSONObject jsonObject){

@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import com.google.android.material.textfield.TextInputEditText;
 
 import bku.iot.farmapp.R;
-import bku.iot.farmapp.view.common.InputText;
+import bku.iot.farmapp.view.common.Utils;
 import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
 public class ChangePasswordDialog extends Dialog implements InitActivity {
@@ -36,7 +36,6 @@ public class ChangePasswordDialog extends Dialog implements InitActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.change_password_dialog);
 
         setCanceledOnTouchOutside(false);
@@ -69,14 +68,14 @@ public class ChangePasswordDialog extends Dialog implements InitActivity {
     }
 
     public String getOldPassword(){
-        return InputText.getStringFromInputEditText(oldPasswordInput);
+        return Utils.getStringFromInputEditText(oldPasswordInput);
     }
 
     public String getNewPassword(){
-        return InputText.getStringFromInputEditText(newPasswordInput);
+        return Utils.getStringFromInputEditText(newPasswordInput);
     }
 
     public String getConfirmPassword(){
-        return InputText.getStringFromInputEditText(confirmPasswordInput);
+        return Utils.getStringFromInputEditText(confirmPasswordInput);
     }
 }

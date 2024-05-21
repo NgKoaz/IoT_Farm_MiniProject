@@ -46,9 +46,9 @@ public class NotifyDialog extends Dialog {
     }
 
     private void initViews(){
-        titleText = findViewById(R.id.notify_dialog_title);
+        titleText = findViewById(R.id.schedule_input_dialog_title);
         descriptionText = findViewById(R.id.notify_dialog_description);
-        closeButton = findViewById(R.id.notify_dialog_closeButton);
+        closeButton = findViewById(R.id.schedule_info_input_dialog_closeButton);
 
         titleText.setText(title);
         descriptionText.setText(description);

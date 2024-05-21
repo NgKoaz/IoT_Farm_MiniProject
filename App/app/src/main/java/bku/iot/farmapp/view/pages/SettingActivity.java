@@ -1,26 +1,22 @@
 package bku.iot.farmapp.view.pages;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.widget.LinearLayout;
-
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.SettingController;
-import bku.iot.farmapp.view.common.NetworkNotify;
+import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.widgets.appbar.AppBar;
 import bku.iot.farmapp.view.widgets.dialog.ChangePasswordDialog;
-import bku.iot.farmapp.view.widgets.dialog.LoadingPage;
-import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
-public class SettingActivity extends AppCompatActivity implements InitActivity {
+
+
+public class SettingActivity extends MyActivity {
 
     private SettingController settingController;
     private AppBar appbar;
     private LinearLayout changePasswordEntry, signOutEntry;
     private ChangePasswordDialog changePasswordDialog;
-    private LoadingPage loadingPage;
-    private NetworkNotify networkNotify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,25 +24,20 @@ public class SettingActivity extends AppCompatActivity implements InitActivity {
 
         settingController = new SettingController(this);
         setContentView(R.layout.activity_setting);
-
-        initViews();
-        bindEvents();
     }
 
     @Override
-    public void initViews() {
+    protected void initViews() {
         appbar = new AppBar(this, () -> {
             settingController.backToPreviousActivity();
         });
         appbar.setHeaderText("Setting");
         changePasswordEntry = findViewById(R.id.setting_changePasswordEntry);
         signOutEntry = findViewById(R.id.setting_signOutEntry);
-
-        networkNotify = new NetworkNotify(this, this);
     }
 
     @Override
-    public void bindEvents() {
+    protected void setEvents() {
         changePasswordEntry.setOnClickListener(v -> {
             settingController.openChangePasswordDialog();
         });
@@ -55,7 +46,6 @@ public class SettingActivity extends AppCompatActivity implements InitActivity {
             settingController.signOut();
         });
 
-        loadingPage = new LoadingPage(this);
         changePasswordDialog = new ChangePasswordDialog(
                 this,
                 v -> {
@@ -69,19 +59,6 @@ public class SettingActivity extends AppCompatActivity implements InitActivity {
                     );
                 }
         );
-    }
-
-    @Override
-    public void onBindView() {
-
-    }
-
-    public void showLoadingPage(){
-        loadingPage.show();
-    }
-
-    public void dismissLoadingPage(){
-        loadingPage.dismiss();
     }
 
     public void showChangePasswordDialog(){

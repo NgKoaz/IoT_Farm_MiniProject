@@ -18,7 +18,6 @@ import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyMqttClient;
-import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class ScheduleController implements MyMqttClient.MessageObserver {
@@ -204,7 +203,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         mHandler.post(scheduleActivity::showLoading);
         Log.d(TAG, "Save schedule!!!!!!!");
         if (!hasCurrentTime) {
-            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Wait gateway send current time!"));
+            mHandler.post(() -> scheduleActivity.showToast("Wait gateway send current time!"));
             mHandler.post(scheduleActivity::dismissLoading);
             return;
         }
@@ -222,20 +221,20 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                 publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
                     if (isAck) {
                         if (isError){
-                            mHandler.post(() -> ToastManager.showToast(scheduleActivity, error));
+                            mHandler.post(() -> scheduleActivity.showToast(error));
                         } else {
-                            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Add schedule successful!"));
+                            mHandler.post(() -> scheduleActivity.showToast("Add schedule successful!"));
                             mHandler.post(this::backToPreviousActivity);
                         }
                     } else {
-                        mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Request time out!"));
+                        mHandler.post(() -> scheduleActivity.showToast("Request time out!"));
                     }
                 });
             } else {
-                mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Not found your email, please re-sign in"));
+                mHandler.post(() -> scheduleActivity.showToast("Not found your email, please re-sign in"));
             }
         } else {
-            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "The time you set is in the past!"));
+            mHandler.post(() -> scheduleActivity.showToast("The time you set is in the past!"));
         }
         mHandler.post(scheduleActivity::dismissLoading);
     }
@@ -255,7 +254,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         Log.d(TAG, "Update Schedule!!!!!!");
 
         if (!hasCurrentTime) {
-            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Wait gateway send current time!"));
+            mHandler.post(() -> scheduleActivity.showToast("Wait gateway send current time!"));
             mHandler.post(scheduleActivity::dismissLoading);
             return;
         }
@@ -280,20 +279,20 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                 publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
                     if (isAck) {
                         if (isError){
-                            mHandler.post(() -> ToastManager.showToast(scheduleActivity, error));
+                            mHandler.post(() -> scheduleActivity.showToast(error));
                         } else {
-                            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Update schedule successful!"));
+                            mHandler.post(() -> scheduleActivity.showToast("Update schedule successful!"));
                             mHandler.post(this::backToPreviousActivity);
                         }
                     } else {
-                        mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Request time out!"));
+                        mHandler.post(() -> scheduleActivity.showToast("Request time out!"));
                     }
                 });
             } else {
-                mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Non-expected error occur: `scheduleInfo` is null"));
+                mHandler.post(() -> scheduleActivity.showToast("Non-expected error occur: `scheduleInfo` is null"));
             }
         } else {
-            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "The time you set is in the past!"));
+            mHandler.post(() -> scheduleActivity.showToast("The time you set is in the past!"));
         }
         mHandler.post(scheduleActivity::dismissLoading);
     }
@@ -307,17 +306,17 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
             publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
                 if (isAck) {
                     if (isError){
-                        mHandler.post(() -> ToastManager.showToast(scheduleActivity, error));
+                        mHandler.post(() -> scheduleActivity.showToast(error));
                     } else {
-                        mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Delete schedule successful!"));
+                        mHandler.post(() -> scheduleActivity.showToast("Delete schedule successful!"));
                         mHandler.post(this::backToPreviousActivity);
                     }
                 } else {
-                    mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Request time out!"));
+                    mHandler.post(() -> scheduleActivity.showToast("Request time out!"));
                 }
             });
         } else {
-            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Non-expected error occur: `scheduleInfo` is null"));
+            mHandler.post(() -> scheduleActivity.showToast("Non-expected error occur: `scheduleInfo` is null"));
         }
         mHandler.post(scheduleActivity::dismissLoading);
     }
@@ -365,7 +364,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
             listener.onComplete(isAck.get(), isError.get(), error.get());
         } catch (JSONException e) {
             e.printStackTrace();
-            mHandler.post(() -> ToastManager.showToast(scheduleActivity, "Non-expected error! Let try again!"));
+            mHandler.post(() -> scheduleActivity.showToast("Non-expected error! Let try again!"));
         }
     }
 

@@ -12,12 +12,11 @@ import bku.iot.farmapp.services.local.NetworkManager;
 import bku.iot.farmapp.view.widgets.dialog.NotifyDialog;
 
 public class NetworkNotify {
-    private final NetworkManager networkManager;
     private final NotifyDialog notifyDialog;
 
     
     public NetworkNotify(@NonNull Context context, @NonNull LifecycleOwner lifecycleOwner){
-        networkManager = new NetworkManager(context);
+        NetworkManager networkManager = new NetworkManager(context);
         notifyDialog = new NotifyDialog(context);
         notifyDialog.setTitleText("Network Error");
         notifyDialog.setDescriptionText("No connection!");

@@ -44,7 +44,7 @@ class Test:
         while True:
             curTime = datetime.datetime.now()
             curTime += datetime.timedelta(minutes=1)
-            schedule = Schedule(scheduleId="6", isDate=1, date="2/5/2024", time=f"{curTime.hour}:{curTime.minute}")
+            schedule = Schedule(scheduleId="6", isDate=1, date="4/5/2024", time=f"{curTime.hour}:{curTime.minute}")
             privateTask = PrivateTask(schedule)
             self.scheduler.SCH_AddTask(privateTask, 1)
 

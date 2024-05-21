@@ -176,106 +176,103 @@
                         android:id="@+id/schedule_choosingDateButton"
                         android:layout_width="54dp"
                         android:layout_height="40dp"
+                        android:contentDescription="Select day button"
                         android:paddingStart="12dp"
                         android:paddingTop="5dp"
                         android:paddingEnd="12dp"
                         android:paddingBottom="5dp"
-                        app:srcCompat="@drawable/ic_calendar"
-                        android:contentDescription="Select day button" />
+                        app:srcCompat="@drawable/ic_calendar" />
 
                 </LinearLayout>
 
-                <RadioGroup
-                    android:id="@+id/schedule_weekdaysGroup"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:checkedButton="@id/schedule_monButton"
-                    android:orientation="horizontal"
-                    android:visibility="invisible">
+                    android:orientation="horizontal">
 
-                    <RadioButton
-                        android:id="@+id/schedule_monButton"
+                    <CheckBox
+                        android:id="@+id/schedule_mondayBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/bg_add_schedule_weekdays"
                         android:button="@null"
-                        android:fontFamily="@font/montserrat"
+                        android:fontFamily="@font/abeezee"
                         android:gravity="center"
                         android:text="Mon" />
 
-                    <RadioButton
-                        android:id="@+id/schedule_tueButton"
+                    <CheckBox
+                        android:id="@+id/schedule_tuesdayBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_add_schedule_weekdays"
                         android:button="@null"
-                        android:fontFamily="@font/montserrat"
+                        android:fontFamily="@font/abeezee"
                         android:gravity="center"
                         android:text="Tue" />
 
-                    <RadioButton
-                        android:id="@+id/schedule_wedButton"
+                    <CheckBox
+                        android:id="@+id/schedule_wednesdayBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_add_schedule_weekdays"
                         android:button="@null"
-                        android:fontFamily="@font/montserrat"
+                        android:fontFamily="@font/abeezee"
                         android:gravity="center"
                         android:text="Wed" />
 
-                    <RadioButton
-                        android:id="@+id/schedule_thurButton"
+                    <CheckBox
+                        android:id="@+id/schedule_thursdayBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_add_schedule_weekdays"
                         android:button="@null"
-                        android:fontFamily="@font/montserrat"
+                        android:fontFamily="@font/abeezee"
                         android:gravity="center"
                         android:text="Thur" />
 
-                    <RadioButton
-                        android:id="@+id/schedule_friButton"
+                    <CheckBox
+                        android:id="@+id/schedule_fridayBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_add_schedule_weekdays"
                         android:button="@null"
-                        android:fontFamily="@font/montserrat"
+                        android:fontFamily="@font/abeezee"
                         android:gravity="center"
                         android:text="Fri" />
 
-                    <RadioButton
-                        android:id="@+id/schedule_satButton"
+                    <CheckBox
+                        android:id="@+id/schedule_saturdayBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_add_schedule_weekdays"
                         android:button="@null"
-                        android:fontFamily="@font/montserrat"
+                        android:fontFamily="@font/abeezee"
                         android:gravity="center"
                         android:text="Sat" />
 
-                    <RadioButton
-                        android:id="@+id/schedule_sunButton"
+                    <CheckBox
+                        android:id="@+id/schedule_sundayBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_add_schedule_weekdays"
                         android:button="@null"
-                        android:fontFamily="@font/montserrat"
                         android:gravity="center"
-                        android:text="Sun" />
-                </RadioGroup>
+                        android:text="Sun"
+                        android:fontFamily="@font/abeezee" />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -538,6 +535,12 @@
                 </LinearLayout>
 
             </LinearLayout>
+
+            <Button
+                android:id="@+id/testBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Button" />
 
         </RelativeLayout>
 

@@ -3,8 +3,6 @@ package bku.iot.farmapp.controller;
 import com.google.firebase.auth.FirebaseUser;
 
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
-import bku.iot.farmapp.view.common.Navigation;
-import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.SignInActivity;
 import bku.iot.farmapp.view.pages.SignUpActivity;
 
@@ -32,34 +30,34 @@ public class SignUpController {
             message = "Confirm password not match!";
         }
 
-        if (!res) ToastManager.showToast(signUpActivity, message);
+        if (!res) signUpActivity.showToast(message);
         return res;
     }
 
     public void signUp(String email, String password, String confirmPassword){
         signUpActivity.showLoading();
         if (!checkCredentialForSignUp(email, password, confirmPassword)) {
-            signUpActivity.hideLoading();
+            signUpActivity.dismissLoading();
             return;
         }
 
         MyFirebaseAuth.gI().signUp(email, password, new MyFirebaseAuth.AuthListener() {
             @Override
             public void onAuthSuccess(FirebaseUser user) {
-                signUpActivity.hideLoading();
-                ToastManager.showToast(signUpActivity, "Sign up successfully!");
+                signUpActivity.dismissLoading();
+                signUpActivity.showToast("Sign up successfully!");
             }
 
             @Override
             public void onAuthFailure(String errorMessage) {
-                signUpActivity.hideLoading();
-                ToastManager.showToast(signUpActivity, errorMessage);
+                signUpActivity.dismissLoading();
+                signUpActivity.showToast(errorMessage);
             }
         });
     }
 
     public void navigateToSignInPage(){
-        Navigation.startNewActivity(signUpActivity, SignInActivity.class, null);
+        signUpActivity.startNewActivity(SignInActivity.class, null);
         signUpActivity.finish();
     }
 }

@@ -4,7 +4,6 @@ import bku.iot.farmapp.data.enums.ActivityResultCode;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyMqttClient;
 import bku.iot.farmapp.services.local.LocalStorage;
-import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.SettingActivity;
 
 public class SettingController {
@@ -35,7 +34,7 @@ public class SettingController {
             res = false;
             message = "New password is too short, must have length > 6";
         }
-        if (!res) ToastManager.showToast(settingActivity, message);
+        if (!res) settingActivity.showToast(message);
         return res;
     }
 
@@ -53,18 +52,18 @@ public class SettingController {
     }
 
     public void changePassword(String oldPassword, String newPassword, String confirmPassword){
-        settingActivity.showLoadingPage();
+        settingActivity.showLoading();
         if (!checkChangePasswordInput(oldPassword, newPassword, confirmPassword)){
             return;
         }
         MyFirebaseAuth.gI().changePassword(newPassword, isSuccessful -> {
             if (isSuccessful) {
                 settingActivity.dismissChangePasswordDialog();
-                settingActivity.dismissLoadingPage();
-                ToastManager.showToast(settingActivity, "Change password successfully!");
+                settingActivity.dismissLoading();
+                settingActivity.showToast("Change password successfully!");
             } else {
-                settingActivity.dismissLoadingPage();
-                ToastManager.showToast(settingActivity, "Non-expected error!");
+                settingActivity.dismissLoading();
+                settingActivity.showToast("Non-expected error!");
             }
         });
     }

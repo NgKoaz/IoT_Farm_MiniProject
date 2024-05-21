@@ -1,6 +1,5 @@
-package bku.iot.farmapp.view.widgets.recyclerView;// MyAdapter.java
+package bku.iot.farmapp.view.widgets.recyclerView;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,21 +8,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
-
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.ScheduleInfo;
-import bku.iot.farmapp.view.common.Navigation;
+import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     private final List<ScheduleInfo> dataList;
-    private final Context context;
-    private boolean isSetOnListener;
+    private final MyActivity myActivity;
+    private final boolean isSetOnListener;
 
-    public MyAdapter(Context context, List<ScheduleInfo> dataList, boolean isSetOnListener) {
-        this.context = context;
+    public MyAdapter(MyActivity myActivity, List<ScheduleInfo> dataList, boolean isSetOnListener) {
+        this.myActivity = myActivity;
         this.dataList = dataList;
         this.isSetOnListener = isSetOnListener;
     }
@@ -31,7 +29,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.schedule_info, parent, false);
+        View view = LayoutInflater.from(myActivity).inflate(R.layout.schedule_info, parent, false);
         return new ViewHolder(view);
     }
 
@@ -50,7 +48,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                 Bundle extras = new Bundle();
                 extras.putString("page", "EDIT");
                 extras.putParcelable("scheduleInfo", scheduleInfo);
-                Navigation.startNewActivity(context, ScheduleActivity.class, extras);
+                myActivity.startNewActivity(ScheduleActivity.class, extras);
             });
     }
 

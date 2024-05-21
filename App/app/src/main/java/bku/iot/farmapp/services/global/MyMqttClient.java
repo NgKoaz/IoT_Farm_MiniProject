@@ -1,7 +1,5 @@
 package bku.iot.farmapp.services.global;
 
-import android.health.connect.datatypes.ExerciseLap;
-import android.os.Handler;
 import android.util.Log;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -13,11 +11,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MyMqttClient implements MqttCallback {
     private static MyMqttClient instance;
@@ -25,7 +19,7 @@ public class MyMqttClient implements MqttCallback {
     public String broker;
     public String username;
     public String password;
-    private String groupPrefix = "";
+    private String pathPrefix = "";
     private final byte QOS = 1;
     private final String clientId = MqttClient.generateClientId();
     private final MemoryPersistence memoryPersistence = new MemoryPersistence();
@@ -96,7 +90,7 @@ public class MyMqttClient implements MqttCallback {
 
             this.client.connect(opts);
 
-            this.groupPrefix = groupPrefix;
+            this.pathPrefix = groupPrefix;
 
             if (listener != null)
                 listener.onSuccess();
@@ -116,7 +110,7 @@ public class MyMqttClient implements MqttCallback {
         MqttMessage message = new MqttMessage(payload.getBytes());
         message.setQos(this.QOS);
         try {
-            this.client.publish(this.groupPrefix + topic, message);
+            this.client.publish(this.pathPrefix + topic, message);
         } catch (MqttException me) {
             me.printStackTrace();;
         }
@@ -130,7 +124,7 @@ public class MyMqttClient implements MqttCallback {
             return;
         }
         try {
-            this.client.subscribe(this.groupPrefix + topic);
+            this.client.subscribe(this.pathPrefix + topic);
             if (listener != null)
                 listener.onSuccess(topic);
         } catch (MqttException me){
@@ -183,7 +177,7 @@ public class MyMqttClient implements MqttCallback {
         // homeController.handleConnectionLost();
         Log.d(TAG, "Reconnect MQTT Broker!!!");
         new Thread(() -> {
-            connect(broker, username, password, groupPrefix, new HandleConnectionResult() {
+            connect(broker, username, password, pathPrefix, new HandleConnectionResult() {
                 @Override
                 public void onSuccess() {
                     Log.d(TAG, "Reconnect successful!");

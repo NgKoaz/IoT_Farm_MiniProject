@@ -4,8 +4,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.local.LocalStorage;
-import bku.iot.farmapp.view.common.Navigation;
-import bku.iot.farmapp.view.common.ToastManager;
 import bku.iot.farmapp.view.pages.HomeActivity;
 import bku.iot.farmapp.view.pages.SignInActivity;
 import bku.iot.farmapp.view.pages.SignUpActivity;
@@ -30,7 +28,7 @@ public class SignInController {
             res = false;
             message = "Enter your password!";
         }
-        if (!res) ToastManager.showToast(signInActivity, message);
+        if (!res) signInActivity.showToast(message);
         return res;
     }
 
@@ -47,7 +45,7 @@ public class SignInController {
         signInActivity.showLoading();
 
         if (!checkCredentialForSignIn(email, password)) {
-            signInActivity.dimissLoading();
+            signInActivity.dismissLoading();
             return;
         }
         MyFirebaseAuth.gI().signIn(email, password, new MyFirebaseAuth.AuthListener() {
@@ -58,25 +56,25 @@ public class SignInController {
                 } else {
                     clearLocalStorage();
                 }
-                signInActivity.dimissLoading();
+                signInActivity.dismissLoading();
                 navigateToHomePage();
             }
 
             @Override
             public void onAuthFailure(String errorMessage) {
-                signInActivity.dimissLoading();
-                ToastManager.showToast(signInActivity, errorMessage);
+                signInActivity.dismissLoading();
+                signInActivity.showToast(errorMessage);
             }
         });
     }
 
     public void navigateToHomePage(){
-        Navigation.startNewActivity(signInActivity, HomeActivity.class, null);
+        signInActivity.startNewActivity(HomeActivity.class, null);
         signInActivity.finish();
     }
 
     public void navigateToSignUpPage(){
-        Navigation.startNewActivity(signInActivity, SignUpActivity.class, null);
+        signInActivity.startNewActivity(SignUpActivity.class, null);
         signInActivity.finish();
     }
 }

@@ -1,14 +1,12 @@
 package bku.iot.farmapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 
 import android.os.Bundle;
 import android.os.Handler;
 
-import bku.iot.farmapp.view.MainController;
+import bku.iot.farmapp.view.common.MyActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends MyActivity {
     private MainController mainController;
 
     @Override

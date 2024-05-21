@@ -1,19 +1,17 @@
-package bku.iot.farmapp.view;
+package bku.iot.farmapp;
 
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
 
-import bku.iot.farmapp.MainActivity;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.local.LocalStorage;
-import bku.iot.farmapp.view.common.Navigation;
 import bku.iot.farmapp.view.pages.HomeActivity;
 import bku.iot.farmapp.view.pages.SignInActivity;
 
 public class MainController {
     private final String TAG = MainController.class.getSimpleName();
-    private MainActivity mainActivity;
+    private final MainActivity mainActivity;
 
     public MainController(MainActivity mainActivity){
         this.mainActivity = mainActivity;
@@ -28,7 +26,7 @@ public class MainController {
         Log.d(TAG, "Auto Sign In| Email: " + email + "| Password: " + password);
 
         if (email.isEmpty() || password.isEmpty()) {
-            Navigation.startNewActivity(mainActivity, SignInActivity.class, null);
+            mainActivity.startNewActivity(SignInActivity.class, null);
             mainActivity.finish();
             return;
         }
@@ -36,13 +34,13 @@ public class MainController {
         MyFirebaseAuth.gI().signIn(email, password, new MyFirebaseAuth.AuthListener() {
             @Override
             public void onAuthSuccess(FirebaseUser user) {
-                Navigation.startNewActivity(mainActivity, HomeActivity.class, null);
+                mainActivity.startNewActivity(HomeActivity.class, null);
                 mainActivity.finish();
             }
 
             @Override
             public void onAuthFailure(String errorMessage) {
-                Navigation.startNewActivity(mainActivity, SignInActivity.class, null);
+                mainActivity.startNewActivity(SignInActivity.class, null);
                 mainActivity.finish();
             }
         });

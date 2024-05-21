@@ -1,7 +1,6 @@
 package bku.iot.farmapp.view.pages;
 
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
@@ -11,12 +10,11 @@ import java.util.List;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.HomeController;
 import bku.iot.farmapp.data.model.ScheduleInfo;
-import bku.iot.farmapp.view.common.NetworkNotify;
+import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.widgets.recyclerView.MyAdapter;
-import bku.iot.farmapp.view.pages.viewInterface.InitActivity;
 
-public class HomeActivity extends AppCompatActivity implements InitActivity {
 
+public class HomeActivity extends MyActivity {
     private HomeController homeController;
     private ImageView settingButton;
     private TextView helloUserText;
@@ -25,22 +23,16 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
     private ImageView historyTaskButton, addScheduleButton;
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
-    private NetworkNotify networkNotify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_home);
-        initViews();
-        bindEvents();
-        onBindView();
-
         homeController = new HomeController(this);
     }
 
     @Override
-    public void initViews() {
+    protected void initViews() {
         helloUserText = findViewById(R.id.home_helloUserText);
         settingButton = findViewById(R.id.home_settingButton);
         timeText = findViewById(R.id.home_timeText);
@@ -50,12 +42,10 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
         addScheduleButton = findViewById(R.id.home_addScheduleButton);
         recyclerView = findViewById(R.id.home_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        networkNotify = new NetworkNotify(this, this);
     }
 
     @Override
-    public void bindEvents() {
+    protected void setEvents() {
         settingButton.setOnClickListener(v -> {
             homeController.startToSettingPage();
         });
@@ -65,11 +55,6 @@ public class HomeActivity extends AppCompatActivity implements InitActivity {
         addScheduleButton.setOnClickListener(v -> {
             homeController.startToAddSchedulePage();
         });
-    }
-
-    @Override
-    public void onBindView() {
-
     }
 
     public void updateScheduleList(List<ScheduleInfo> scheduleInfoList){
