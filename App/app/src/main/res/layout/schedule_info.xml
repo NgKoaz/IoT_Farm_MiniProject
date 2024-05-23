@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/schedule_info_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
@@ -19,7 +18,6 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/schedule_info_nameTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -42,7 +40,6 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/schedule_info_waterTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -65,7 +62,6 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/schedule_info_MixerTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -88,7 +84,6 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/schedule_info_areaTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -111,7 +106,6 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/schedule_info_timeStartTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"

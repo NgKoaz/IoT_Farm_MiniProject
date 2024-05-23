@@ -28,7 +28,6 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/schedule_input_dialog_inputFields"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -49,6 +48,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/abeezee"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
                     android:maxLength="3" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -64,6 +65,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/abeezee"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
                     android:maxLength="3" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -79,6 +82,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/abeezee"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
                     android:maxLength="3" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -94,6 +99,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/abeezee"
+                    android:imeOptions="actionDone|actionNext"
+                    android:inputType="number"
                     android:maxLength="3" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>

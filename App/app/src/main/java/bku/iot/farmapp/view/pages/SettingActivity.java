@@ -28,6 +28,7 @@ public class SettingActivity extends MyActivity {
 
     @Override
     protected void initViews() {
+        super.initViews();
         appbar = new AppBar(this, () -> {
             settingController.backToPreviousActivity();
         });

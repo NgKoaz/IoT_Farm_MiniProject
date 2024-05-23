@@ -33,6 +33,7 @@ public class HomeActivity extends MyActivity {
 
     @Override
     protected void initViews() {
+        super.initViews();
         helloUserText = findViewById(R.id.home_helloUserText);
         settingButton = findViewById(R.id.home_settingButton);
         timeText = findViewById(R.id.home_timeText);

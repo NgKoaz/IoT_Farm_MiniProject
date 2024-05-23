@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 
 import bku.iot.farmapp.R;
 
-public class NotifyDialog extends Dialog {
+public class NotifyDialog extends MyDialog {
     private TextView titleText;
     private TextView descriptionText;
     private Button closeButton;
@@ -30,22 +30,10 @@ public class NotifyDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.notify_dialog);
-        setCanceledOnTouchOutside(false);
-
-        Window window = getWindow();
-        if (window != null){
-            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            WindowManager.LayoutParams params = window.getAttributes();
-            params.gravity = Gravity.CENTER;
-            window.setAttributes(params);
-        }
-
-        initViews();
-        setEvents();
     }
 
-    private void initViews(){
+    @Override
+    protected void initViews(){
         titleText = findViewById(R.id.schedule_input_dialog_title);
         descriptionText = findViewById(R.id.notify_dialog_description);
         closeButton = findViewById(R.id.schedule_info_input_dialog_closeButton);
@@ -63,7 +51,7 @@ public class NotifyDialog extends Dialog {
         description = descriptionText;
     }
 
-    private void setEvents(){
+    protected void setEvents(){
         closeButton.setOnClickListener(v -> {
             dismiss();
         });

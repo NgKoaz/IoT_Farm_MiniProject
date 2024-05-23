@@ -36,9 +36,7 @@ public class ScheduleActivity extends MyActivity {
     private TextView dateInfoText;
     private ImageView choosingDateButton;
     private final List<CheckBox> weekdayBoxes = new LinkedList<>();
-    private TextInputEditText nameInput, waterInput;
-    private TextInputEditText mixer1Input, mixer2Input, mixer3Input;
-    private TextInputEditText area1Input, area2Input, area3Input;
+    private TextInputEditText nameInput, volumeInput;
     private Button deleteButton, saveButton, updateButton;
     private View spaceBetweenButtons;
     private TimePickerDialog timePickerDialog;
@@ -46,7 +44,9 @@ public class ScheduleActivity extends MyActivity {
     private ScheduleInfo scheduleInfo;
     private MixerInputDialog mixerInputDialog;
     private AreaInputDialog areaInputDialog;
-    private Button testBtn;
+    private ImageView mixerChangeButton, areaChangeButton;
+    private TextView waterText, mixer1Text, mixer2Text, mixer3Text;
+    private TextView area1Text, area2Text, area3Text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,7 @@ public class ScheduleActivity extends MyActivity {
 
     @Override
     protected void initViews() {
+        super.initViews();
         appbar = new AppBar(this, () -> {
             scheduleController.backToPreviousActivity();
         });
@@ -86,13 +87,17 @@ public class ScheduleActivity extends MyActivity {
         weekdayBoxes.add(findViewById(R.id.schedule_sundayBox));
 
         nameInput = findViewById(R.id.schedule_nameInput);
-        waterInput = findViewById(R.id.schedule_waterInput);
-        mixer1Input = findViewById(R.id.schedule_mixer1Input);
-        mixer2Input = findViewById(R.id.schedule_mixer2Input);
-        mixer3Input = findViewById(R.id.schedule_mixer3Input);
-        area1Input = findViewById(R.id.schedule_area1Input);
-        area2Input = findViewById(R.id.schedule_area2Input);
-        area3Input = findViewById(R.id.schedule_area3Input);
+        volumeInput = findViewById(R.id.schedule_volumeInput);
+        waterText = findViewById(R.id.schedule_waterRatio);
+        mixer1Text = findViewById(R.id.schedule_mixer1Ratio);
+        mixer2Text = findViewById(R.id.schedule_mixer2Ratio);
+        mixer3Text = findViewById(R.id.schedule_mixer3Ratio);
+        area1Text = findViewById(R.id.schedule_area1Ratio);
+        area2Text = findViewById(R.id.schedule_area2Ratio);
+        area3Text = findViewById(R.id.schedule_area3Ratio);
+
+        mixerChangeButton = findViewById(R.id.schedule_mixerChangeButton);
+        areaChangeButton = findViewById(R.id.schedule_areaChangeButton);
 
         deleteButton = findViewById(R.id.schedule_deleteButton);
         saveButton = findViewById(R.id.schedule_saveButton);
@@ -105,10 +110,19 @@ public class ScheduleActivity extends MyActivity {
     @Override
     protected void setEvents() {
         mixerInputDialog.setOkButton(v -> {
-            mixerInputDialog.dismiss();
+            scheduleController.setWaterAndMixerRatio(
+                    mixerInputDialog.getWater(),
+                    mixerInputDialog.getMixer1(),
+                    mixerInputDialog.getMixer2(),
+                    mixerInputDialog.getMixer3()
+            );
         });
         areaInputDialog.setOkButton(v -> {
-            areaInputDialog.dismiss();
+            scheduleController.setAreaRatio(
+                    areaInputDialog.getArea1(),
+                    areaInputDialog.getArea2(),
+                    areaInputDialog.getArea3()
+            );
         });
 
         hourText.setOnClickListener(v -> {
@@ -128,33 +142,25 @@ public class ScheduleActivity extends MyActivity {
         });
         saveButton.setOnClickListener(v -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
-                scheduleController.saveSchedule(
-                        Utils.getStringFromInputEditText(nameInput),
-                        Double.parseDouble(Utils.getStringFromInputEditText(waterInput)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(mixer1Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(mixer2Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(mixer3Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(area1Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(area2Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(area3Input))
-                );
-            });
+            scheduleController.addSchedule(
+                    Utils.getStringFromInputEditText(nameInput),
+                    Utils.getStringFromInputEditText(volumeInput)
+            );
         });
         updateButton.setOnClickListener(v -> {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
-                scheduleController.updateSchedule(
-                        scheduleInfo,
-                        Utils.getStringFromInputEditText(nameInput),
-                        Double.parseDouble(Utils.getStringFromInputEditText(waterInput)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(mixer1Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(mixer2Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(mixer3Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(area1Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(area2Input)),
-                        Double.parseDouble(Utils.getStringFromInputEditText(area3Input)));
-            });
+//            ExecutorService executor = Executors.newSingleThreadExecutor();
+//            executor.submit(() -> {
+//                scheduleController.updateSchedule(
+//                        scheduleInfo,
+//                        Utils.getStringFromInputEditText(nameInput),
+//                        Double.parseDouble(Utils.getStringFromInputEditText(waterInput)),
+//                        Double.parseDouble(Utils.getStringFromInputEditText(mixer1Input)),
+//                        Double.parseDouble(Utils.getStringFromInputEditText(mixer2Input)),
+//                        Double.parseDouble(Utils.getStringFromInputEditText(mixer3Input)),
+//                        Double.parseDouble(Utils.getStringFromInputEditText(area1Input)),
+//                        Double.parseDouble(Utils.getStringFromInputEditText(area2Input)),
+//                        Double.parseDouble(Utils.getStringFromInputEditText(area3Input)));
+//            });
         });
 
         // Weekday checkboxes
@@ -173,14 +179,12 @@ public class ScheduleActivity extends MyActivity {
             scheduleController.setTime(hourOfDay, minute);
         }, 6, 0, true);
 
-
-
-
-        testBtn = findViewById(R.id.testBtn);
-        testBtn.setOnClickListener(v -> {
+        mixerChangeButton.setOnClickListener(v -> {
+            mixerInputDialog.show();
+        });
+        areaChangeButton.setOnClickListener(v -> {
             areaInputDialog.show();
         });
-
     }
 
     @Override
@@ -206,26 +210,48 @@ public class ScheduleActivity extends MyActivity {
     }
 
     private void loadEditSchedulePage(){
-        appbar.setHeaderText("Edit Schedule");
+//        appbar.setHeaderText("Edit Schedule");
+//
+//        saveButton.setVisibility(View.GONE);
+//        updateButton.setVisibility(View.VISIBLE);
+//        deleteButton.setVisibility(View.VISIBLE);
+//        spaceBetweenButtons.setVisibility(View.VISIBLE);
+//
+//        scheduleInfo = getIntent().getParcelableExtra("scheduleInfo");
+//
+//        assert scheduleInfo != null;
+//        nameInput.setText(scheduleInfo.name);
+//        waterInput.setText(String.valueOf(scheduleInfo.water));
+//        mixer1Input.setText(String.valueOf(scheduleInfo.mixer1));
+//        mixer2Input.setText(String.valueOf(scheduleInfo.mixer2));
+//        mixer3Input.setText(String.valueOf(scheduleInfo.mixer3));
+//        area1Input.setText(String.valueOf(scheduleInfo.area1));
+//        area2Input.setText(String.valueOf(scheduleInfo.area2));
+//        area3Input.setText(String.valueOf(scheduleInfo.area3));
+//
+//        scheduleController.setDateTimeForEditting(scheduleInfo);
+    }
 
-        saveButton.setVisibility(View.GONE);
-        updateButton.setVisibility(View.VISIBLE);
-        deleteButton.setVisibility(View.VISIBLE);
-        spaceBetweenButtons.setVisibility(View.VISIBLE);
 
-        scheduleInfo = getIntent().getParcelableExtra("scheduleInfo");
+    public void updateAreaRatioText(String area1, String area2, String area3) {
+        area1Text.setText(area1);
+        area2Text.setText(area2);
+        area3Text.setText(area3);
+    }
 
-        assert scheduleInfo != null;
-        nameInput.setText(scheduleInfo.name);
-        waterInput.setText(String.valueOf(scheduleInfo.water));
-        mixer1Input.setText(String.valueOf(scheduleInfo.mixer1));
-        mixer2Input.setText(String.valueOf(scheduleInfo.mixer2));
-        mixer3Input.setText(String.valueOf(scheduleInfo.mixer3));
-        area1Input.setText(String.valueOf(scheduleInfo.area1));
-        area2Input.setText(String.valueOf(scheduleInfo.area2));
-        area3Input.setText(String.valueOf(scheduleInfo.area3));
+    public void updateMixerRatioText(String water, String mixer1, String mixer2, String mixer3) {
+        waterText.setText(water);
+        mixer1Text.setText(mixer1);
+        mixer2Text.setText(mixer2);
+        mixer3Text.setText(mixer3);
+    }
 
-        scheduleController.setDateTimeForEditting(scheduleInfo);
+    public void dismissAreaInputDialog() {
+        areaInputDialog.dismiss();
+    }
+
+    public void dismissMixerInputDialog() {
+        mixerInputDialog.dismiss();
     }
 
     public void openTimePickerDialog(){

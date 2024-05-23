@@ -8,4 +8,13 @@ public class Utils {
         Editable editable = input.getText();
         return (editable != null) ?  editable.toString() : "";
     }
+
+    public static boolean isInteger(String num) {
+        try {
+            Integer.parseInt(num);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
 }

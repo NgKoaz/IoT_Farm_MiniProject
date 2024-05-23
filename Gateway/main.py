@@ -60,10 +60,10 @@ class Main:
         topic = topic.split("/")[-1]
         print("Topic: " + topic + "| Payload: " + payload)
 
-        if topic == "V2":
-            thread = threading.Thread(target=self.handleScheduleRequest, args=(payload,))
-            thread.daemon = True
-            thread.start()
+        # if topic == "V2":
+        #     thread = threading.Thread(target=self.handleScheduleRequest, args=(payload,))
+        #     thread.daemon = True
+        #     thread.start()
 
     def isValidAction(self):
         # TO DO

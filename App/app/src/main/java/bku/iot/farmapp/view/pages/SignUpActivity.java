@@ -28,6 +28,7 @@ public class SignUpActivity extends MyActivity {
 
     @Override
     protected void initViews() {
+        super.initViews();
         inputGmail = findViewById(R.id.signup_inputEmail);
         inputPassword = findViewById(R.id.signup_inputPassword);
         confirmPassword = findViewById(R.id.signup_confirmPassword);

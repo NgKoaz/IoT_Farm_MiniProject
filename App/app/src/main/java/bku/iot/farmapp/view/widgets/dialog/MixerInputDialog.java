@@ -64,5 +64,4 @@ public class MixerInputDialog extends MyDialog {
     public String getMixer3() {
         return Utils.getStringFromInputEditText(mixer3Input);
     }
-
 }

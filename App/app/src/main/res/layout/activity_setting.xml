@@ -8,7 +8,6 @@
     tools:context=".view.pages.SettingActivity">
 
     <RelativeLayout
-        android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/setting_appbar"
@@ -27,7 +26,6 @@
         android:layout_height="wrap_content" />
 
     <LinearLayout
-        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/setting_appbar"
@@ -39,7 +37,6 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/setting_welcomeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/montserrat_semibold"
@@ -59,7 +56,6 @@
             android:paddingBottom="8dp">
 
             <ImageView
-                android:id="@+id/setting_ic_changePassword"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_setting_change_password_icon"
@@ -68,7 +64,6 @@
                 app:tint="#FDFDFD" />
 
             <TextView
-                android:id="@+id/setting_changePasswordText"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -94,7 +89,6 @@
             android:paddingBottom="8dp">
 
             <ImageView
-                android:id="@+id/setting_ic_sign_out"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_setting_sign_out_icon"
@@ -103,7 +97,6 @@
                 app:tint="#FDFDFD" />
 
             <TextView
-                android:id="@+id/setting_signOutText"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

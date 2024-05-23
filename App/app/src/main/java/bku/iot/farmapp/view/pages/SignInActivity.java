@@ -30,6 +30,7 @@ public class SignInActivity extends MyActivity {
 
     @Override
     protected void initViews() {
+        super.initViews();
         emailInputText = findViewById(R.id.signin_emailInputText);
         passwordInputText = findViewById(R.id.signin_passwordInputText);
         rememberMe = findViewById(R.id.signin_rememberMe);

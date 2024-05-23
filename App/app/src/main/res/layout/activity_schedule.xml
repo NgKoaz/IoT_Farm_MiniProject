@@ -51,7 +51,6 @@
                     android:paddingEnd="15dp">
 
                     <TextView
-                        android:id="@+id/textView"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:fontFamily="@font/abeezee"
@@ -94,7 +93,6 @@
                             android:textSize="45sp" />
 
                         <TextView
-                            android:id="@+id/textView8"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:fontFamily="@font/abeezee"
@@ -105,7 +103,6 @@
                     </LinearLayout>
 
                     <TextView
-                        android:id="@+id/textView10"
                         android:layout_width="15dp"
                         android:layout_height="match_parent"
                         android:fontFamily="@font/roboto"
@@ -134,7 +131,6 @@
                             android:textSize="45sp" />
 
                         <TextView
-                            android:id="@+id/textView9"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:fontFamily="@font/abeezee"
@@ -149,7 +145,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/schedule_selectTime2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/schedule_selectTime1"
@@ -292,21 +287,12 @@
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp">
 
-                <TextView
-                    android:id="@+id/textView25"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:fontFamily="@font/montserrat_bold"
-                    android:gravity="center_vertical"
-                    android:text="Name"
-                    android:textSize="16sp" />
-
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/schedule_nameLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Name">
+                    android:hint="Name"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="50">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/schedule_nameInput"
@@ -314,27 +300,259 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/abeezee"
                         android:imeOptions="actionNext"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:maxLength="50" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="20"
+                        android:hint="Volume (ml)"
+                        app:counterEnabled="true"
+                        app:counterMaxLength="6">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/schedule_volumeInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="actionDone"
+                            android:inputType="number"
+                            android:maxLength="6" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
                 <TextView
-                    android:id="@+id/textView26"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/montserrat_bold"
+                    android:gravity="center_vertical"
+                    android:text="Mixer Ratio"
+                    android:textSize="16sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="Water" />
+
+                            <TextView
+                                android:id="@+id/schedule_waterRatio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="0" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="Mixer 1"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/schedule_mixer1Ratio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="0" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="Mixer 2" />
+
+                            <TextView
+                                android:id="@+id/schedule_mixer2Ratio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="0" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="Mixer 3" />
+
+                            <TextView
+                                android:id="@+id/schedule_mixer3Ratio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="0" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/schedule_mixerChangeButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:srcCompat="@drawable/ic_change_setting" />
+                </LinearLayout>
+
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
                     android:fontFamily="@font/montserrat_bold"
                     android:gravity="center_vertical"
-                    android:text="Water"
-                    android:textSize="16sp" />
+                    android:text="Area Ratio"
+                    android:textSize="16sp"
+                    android:visibility="visible" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/schedule_waterLayout"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Water (L)">
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="Area 1"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/schedule_area1Ratio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="0"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="Area 2"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/schedule_area2Ratio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="0"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="Area 3"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/schedule_area3Ratio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:fontFamily="@font/abeezee"
+                                android:text="0"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/schedule_areaChangeButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:srcCompat="@drawable/ic_change_setting" />
+
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Water (L)"
+                    android:visibility="gone">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/schedule_waterInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/abeezee"
@@ -344,21 +562,22 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
-                    android:id="@+id/schedule_mixerHeaderText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:fontFamily="@font/montserrat_bold"
                     android:gravity="center_vertical"
                     android:text="Mixer"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="2dp"
                     android:baselineAligned="true"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
@@ -367,7 +586,6 @@
                         android:hint="Mixer 1 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_mixer1Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -377,7 +595,6 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <View
-                        android:id="@+id/view4"
                         android:layout_width="10dp"
                         android:layout_height="0dp" />
 
@@ -388,7 +605,6 @@
                         android:hint="Mixer 2 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_mixer2Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -397,7 +613,6 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <View
-                        android:id="@+id/view5"
                         android:layout_width="10dp"
                         android:layout_height="20dp" />
 
@@ -408,7 +623,6 @@
                         android:hint="Mixer 3 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_mixer3Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -419,19 +633,20 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/schedule_areaHeaderText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat_bold"
                     android:gravity="center_vertical"
                     android:text="Area"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:baselineAligned="true"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
@@ -440,7 +655,6 @@
                         android:hint="Area 1 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_area1Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -450,7 +664,6 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <View
-                        android:id="@+id/view6"
                         android:layout_width="10dp"
                         android:layout_height="1dp" />
 
@@ -461,7 +674,6 @@
                         android:hint="Area 2 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_area2Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -470,7 +682,6 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <View
-                        android:id="@+id/view7"
                         android:layout_width="10dp"
                         android:layout_height="1dp" />
 
@@ -481,7 +692,6 @@
                         android:hint="Area 3 (L)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/schedule_area3Input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/abeezee"
@@ -493,7 +703,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
@@ -509,8 +719,8 @@
 
                     <View
                         android:id="@+id/schedule_spaceBetweenButtons"
-                        android:layout_width="50dp"
-                        android:layout_height="wrap_content" />
+                        android:layout_width="60dp"
+                        android:layout_height="0dp" />
 
                     <Button
                         android:id="@+id/schedule_saveButton"
@@ -535,12 +745,6 @@
                 </LinearLayout>
 
             </LinearLayout>
-
-            <Button
-                android:id="@+id/testBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
 
         </RelativeLayout>
 
