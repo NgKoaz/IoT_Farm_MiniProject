@@ -1,19 +1,12 @@
 package bku.iot.farmapp.view.widgets.dialog;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
 import bku.iot.farmapp.R;
+
 
 public class NotifyDialog extends MyDialog {
     private TextView titleText;

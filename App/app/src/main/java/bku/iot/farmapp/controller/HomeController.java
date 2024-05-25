@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import bku.iot.farmapp.data.enums.ActivityResultCode;
 import bku.iot.farmapp.data.enums.MqttTopic;
 import bku.iot.farmapp.data.enums.SensorType;
+import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyFirestore;
@@ -45,7 +46,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
     private final HomeActivity homeActivity;
     private final ActivityResultLauncher<Intent> activityResultLauncher;
     private final Handler mHandler;
-    private List<ScheduleInfo> scheduleInfoList = new ArrayList<>();
+    private List<Schedule> scheduleInfoList = new ArrayList<>();
 
 
     public HomeController(HomeActivity homeActivity) {
@@ -105,17 +106,21 @@ public class HomeController implements MyMqttClient.MessageObserver {
                         Map<String, Object> docData = doc.getData();
                         if (docData == null) continue;
 
-                        ScheduleInfo scheduleInfo = new ScheduleInfo();
-                        scheduleInfo.assignAttribute("scheduleId", doc.getId());
+                        Schedule schedule = new Schedule();
+                        schedule.assignAttribute("scheduleId", doc.getId());
 
                         // Iterate over the entries to print keys and values
                         for (Map.Entry<String, Object> entry : docData.entrySet()) {
                             String key = entry.getKey();
                             String value = entry.getValue().toString();
-                            scheduleInfo.assignAttribute(key, value);
+                            schedule.assignAttribute(key, value);
                         }
-
-                        scheduleInfoList.add(scheduleInfo);
+                        try {
+                            Log.d("HELLO", schedule.toJsonString());
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        scheduleInfoList.add(schedule);
                     }
                     homeActivity.updateScheduleList(scheduleInfoList);
                 }
@@ -173,12 +178,12 @@ public class HomeController implements MyMqttClient.MessageObserver {
     }
 
     private void updateScheduleList(ScheduleInfo newSchedule){
-        for (ScheduleInfo oldSchedule : scheduleInfoList) {
-            if (oldSchedule.scheduleId.equals(newSchedule.scheduleId)) {
-                scheduleInfoList.remove(oldSchedule);
-                scheduleInfoList.add(newSchedule);
-            }
-        }
+//        for (ScheduleInfo oldSchedule : scheduleInfoList) {
+//            if (oldSchedule.scheduleId.equals(newSchedule.scheduleId)) {
+//                scheduleInfoList.remove(oldSchedule);
+//                scheduleInfoList.add(newSchedule);
+//            }
+//        }
     }
 
     private void deleteScheduleList(ScheduleInfo newSchedule){
@@ -186,23 +191,23 @@ public class HomeController implements MyMqttClient.MessageObserver {
     }
 
     private void handleScheduleResponseMessage(JSONObject jsonObject){
-        try {
-            ScheduleInfo scheduleInfo = new ScheduleInfo(jsonObject);
-            if (scheduleInfo.isError == 1) return;
-
-            if (scheduleInfo.type.equals("add")){
-                scheduleInfoList.add(scheduleInfo);
-                mHandler.post(() -> homeActivity.updateScheduleList(scheduleInfoList));
-            } else if (scheduleInfo.type.equals("update")){
-                updateScheduleList(scheduleInfo);
-                mHandler.post(() -> homeActivity.updateScheduleList(scheduleInfoList));
-            } else if (scheduleInfo.type.equals("delete")){
-                deleteScheduleList(scheduleInfo);
-                mHandler.post(() -> homeActivity.updateScheduleList(scheduleInfoList));
-            }
-        } catch (JSONException e){
-            e.printStackTrace();
-        }
+//        try {
+//            ScheduleInfo scheduleInfo = new ScheduleInfo(jsonObject);
+//            if (scheduleInfo.isError == 1) return;
+//
+//            if (scheduleInfo.type.equals("add")){
+//                scheduleInfoList.add(scheduleInfo);
+//                mHandler.post(() -> homeActivity.updateScheduleList(scheduleInfoList));
+//            } else if (scheduleInfo.type.equals("update")){
+//                updateScheduleList(scheduleInfo);
+//                mHandler.post(() -> homeActivity.updateScheduleList(scheduleInfoList));
+//            } else if (scheduleInfo.type.equals("delete")){
+//                deleteScheduleList(scheduleInfo);
+//                mHandler.post(() -> homeActivity.updateScheduleList(scheduleInfoList));
+//            }
+//        } catch (JSONException e){
+//            e.printStackTrace();
+//        }
     }
 
     public void startToSettingPage(){

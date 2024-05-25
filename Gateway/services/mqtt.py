@@ -1,8 +1,6 @@
 import threading
-import subprocess
 
 import paho.mqtt.client as mqtt
-from Adafruit_IO.errors import MQTTError
 from paho.mqtt.enums import CallbackAPIVersion, MQTTErrorCode
 
 

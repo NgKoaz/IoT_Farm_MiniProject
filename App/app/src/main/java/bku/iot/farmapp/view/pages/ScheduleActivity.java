@@ -142,11 +142,14 @@ public class ScheduleActivity extends MyActivity {
         });
         saveButton.setOnClickListener(v -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            scheduleController.addSchedule(
-                    Utils.getStringFromInputEditText(nameInput),
-                    Utils.getStringFromInputEditText(volumeInput)
-            );
+            executor.submit(() -> {
+                scheduleController.addSchedule(
+                        Utils.getStringFromInputEditText(nameInput),
+                        Utils.getStringFromInputEditText(volumeInput)
+                );
+            });
         });
+
         updateButton.setOnClickListener(v -> {
 //            ExecutorService executor = Executors.newSingleThreadExecutor();
 //            executor.submit(() -> {

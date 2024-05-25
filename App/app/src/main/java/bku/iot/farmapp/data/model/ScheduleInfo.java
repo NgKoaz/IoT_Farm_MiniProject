@@ -2,13 +2,9 @@ package bku.iot.farmapp.data.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.Iterator;
 
 

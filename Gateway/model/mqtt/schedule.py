@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 
 class ScheduleType:
@@ -14,36 +15,22 @@ class Schedule:
             email: str = "",
             type: str = "",
             name: str = "",
-            water: float = None,
-            mixer1: float = None,
-            mixer2: float = None,
-            mixer3: float = None,
-            area1: float = None,
-            area2: float = None,
-            area3: float = None,
-            isDate: int = None,
+            volume: str = "",
+            ratio: str = "",
             date: str = "",
             weekday: str = "",
             time: str = "",
-            isError: int = None,
             error: str = ""
     ):
         self.scheduleId = scheduleId
         self.email = email
         self.type = type
         self.name = name
-        self.water = water
-        self.mixer1 = mixer1
-        self.mixer2 = mixer2
-        self.mixer3 = mixer3
-        self.area1 = area1
-        self.area2 = area2
-        self.area3 = area3
-        self.isDate = isDate
+        self.volume = volume
+        self.ratio = eval(ratio)
         self.date = date
         self.weekday = weekday
         self.time = time
-        self.isError = isError
         self.error = error
 
     def setId(self, scheduleId: str):

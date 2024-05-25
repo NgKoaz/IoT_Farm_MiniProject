@@ -4,42 +4,28 @@ import threading
 import time
 import random
 import datetime
-
+import schedule
 
 from dotenv import load_dotenv
 
 from model.mqtt.mqtt_topic import MqttTopic
 from model.mqtt.schedule import Schedule, ScheduleType
 from model.mqtt.sensor_data import SensorData, SensorDataType
-from services.mqtt import Mqtt as MyMqtt
+from services.mqtt import Mqtt
 from services.my_firestore import MyFirestore
 from utils.time_manager import TimeManager
 
 
-class Main:
-
-    def __init__(self):
-        # Load environment variables
-        load_dotenv()
-        self.BROKER = os.getenv("BROKER")
-        self.USERNAME = os.getenv("USER")
-        self.PASSWORD = os.getenv("KEY")
-        print(self.BROKER, self.USERNAME, self.PASSWORD)
-
-        # Establish Firebase Connection
-        self.myFirestore = MyFirestore(self.BROKER, self.USERNAME, self.PASSWORD)
-        # This is for local schedule list, always update each 5 minutes.
-        self.scheduleList = []
-
-        # Establish MQTT services
-        self.myMqtt = MyMqtt()
+class MyMqtt:
+    def __init__(self, broker, username, password):
+        # Save credential
+        self.broker = broker
+        self.username = username
+        self.password = password
+        # Intialization
+        self.mqtt = Mqtt()
         # Set Callback
-        self.myMqtt.setCallback(onConnect=self.onConnect, onMessage=self.onMessage)
-        # Connect
-        self.myMqtt.connect(self.BROKER, 1883, self.USERNAME, self.PASSWORD)
-
-        # We need one infinity loop to maintain program
-        self.loop()
+        self.mqtt.setCallback(onConnect=self.onConnect)
 
     def onConnect(self, isSuccessful):
         # After connect is successful.
@@ -51,19 +37,50 @@ class Main:
 
     def subscribeTopics(self):
         for topic in MqttTopic.subscriptionList:
-            self.myMqtt.subscribe(topic=topic)
+            self.mqtt.subscribe(topic=topic)
 
     def reconnectToMqttBroker(self):
-        self.myMqtt.connect(self.BROKER, 1883, self.USERNAME, self.PASSWORD)
+        self.mqtt.connect(self.broker, 1883, self.username, self.password)
+
+    def addOnMessage(self, onMessage):
+        self.mqtt.setCallback(onMessage=onMessage)
+
+    def connect(self):
+        self.mqtt.connect(self.broker, 1883, self.username, self.password)
+
+
+
+
+class Main:
+    def __init__(self):
+        # Load environment variables
+        load_dotenv()
+        self.BROKER = os.getenv("BROKER")
+        self.USERNAME = os.getenv("USER")
+        self.PASSWORD = os.getenv("KEY")
+        print(self.BROKER, self.USERNAME, self.PASSWORD)
+
+        # Establish Firebase Connection
+        self.myFirestore = MyFirestore(self.BROKER, self.USERNAME, self.PASSWORD)
+        # This is for local schedule list, always update for Firebase each 5 minutes.
+        self.scheduleList = []
+
+        # Establish MQTT services
+        self.myMqtt = MyMqtt(self.BROKER, self.USERNAME, self.PASSWORD)
+        self.myMqtt.addOnMessage(onMessage=self.onMessage)
+        self.myMqtt.connect()
+
+        # We need one infinity loop to maintain program
+        self.loop()
 
     def onMessage(self, topic, payload):
         topic = topic.split("/")[-1]
         print("Topic: " + topic + "| Payload: " + payload)
 
-        # if topic == "V2":
-        #     thread = threading.Thread(target=self.handleScheduleRequest, args=(payload,))
-        #     thread.daemon = True
-        #     thread.start()
+        if topic == "V2":
+            thread = threading.Thread(target=self.handleScheduleRequest, args=(payload,))
+            thread.daemon = True
+            thread.start()
 
     def isValidAction(self):
         # TO DO
@@ -74,7 +91,6 @@ class Main:
         schedule.setId(formatted_time)
 
         # Lack checking
-
         self.scheduleList.append(schedule)
         self.myFirestore.putSchedule(formatted_time, json.loads(schedule.toJsonString()))
 
@@ -96,13 +112,12 @@ class Main:
 
     def handleScheduleRequest(self, payload: str):
         schedule = Schedule.importFromJsonString(payload)
-
         if schedule.type == ScheduleType.ADD:
             self.addSchedule(schedule)
-        elif schedule.type == ScheduleType.DELETE:
-            self.deleteSchedule(schedule)
-        elif schedule.type == ScheduleType.UPDATE:
-            self.updateSchedule(schedule)
+        # elif schedule.type == ScheduleType.DELETE:
+        #     self.deleteSchedule(schedule)
+        # elif schedule.type == ScheduleType.UPDATE:
+        #     self.updateSchedule(schedule)
 
     def publishSensorData(self, sensorData: SensorData):
         self.myMqtt.publish(

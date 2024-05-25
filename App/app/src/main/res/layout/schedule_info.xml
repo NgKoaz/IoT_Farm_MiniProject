@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
     android:background="@drawable/bg_schedule_info_even"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:paddingStart="10dp"
     android:paddingTop="6dp"
     android:paddingEnd="10dp"
@@ -15,112 +15,83 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:fontFamily="@font/montserrat_semibold"
-            android:text="Name:"
-            android:textSize="14sp" />
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/schedule_info_nameField"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:fontFamily="@font/montserrat"
-            android:text="TextView" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="Name:"
+                android:textSize="14sp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            <TextView
+                android:id="@+id/schedule_info_nameField"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="TextView" />
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:fontFamily="@font/montserrat_semibold"
-            android:text="Water:"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/schedule_info_waterField"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:fontFamily="@font/montserrat"
-            android:text="TextView" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:fontFamily="@font/montserrat_semibold"
-            android:text="Mixer 1 - 2 - 3:"
-            android:textSize="14sp" />
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/schedule_info_mixerField"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:fontFamily="@font/montserrat"
-            android:text="TextView" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="Time:"
+                android:textSize="14sp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            <TextView
+                android:id="@+id/schedule_info_time"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="TextView" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:fontFamily="@font/montserrat_semibold"
-            android:text="Area 1 - 2 - 3:"
-            android:textSize="14sp" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/schedule_info_areaField"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:fontFamily="@font/montserrat"
-            android:text="TextView" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:fontFamily="@font/montserrat_semibold"
-            android:text="Time start:"
-            android:textSize="14sp" />
+            android:orientation="horizontal" >
 
-        <TextView
-            android:id="@+id/schedule_info_timeStartField"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:fontFamily="@font/montserrat"
-            android:text="TextView" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="Day:"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/schedule_info_day"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="TextView" />
+        </LinearLayout>
+
     </LinearLayout>
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:showText="false" />
 
 
 </LinearLayout>

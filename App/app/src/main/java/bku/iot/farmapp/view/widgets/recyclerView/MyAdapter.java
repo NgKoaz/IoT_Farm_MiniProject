@@ -1,6 +1,5 @@
 package bku.iot.farmapp.view.widgets.recyclerView;
 
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,17 +9,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.data.enums.Weekdays;
-import bku.iot.farmapp.data.model.ScheduleInfo;
+import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.view.common.MyActivity;
-import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
-    private final List<ScheduleInfo> dataList;
+    private final List<Schedule> dataList;
     private final MyActivity myActivity;
     private final boolean isSetOnListener;
 
-    public MyAdapter(MyActivity myActivity, List<ScheduleInfo> dataList, boolean isSetOnListener) {
+    public MyAdapter(MyActivity myActivity, List<Schedule> dataList, boolean isSetOnListener) {
         this.myActivity = myActivity;
         this.dataList = dataList;
         this.isSetOnListener = isSetOnListener;
@@ -40,16 +38,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         else
             holder.root.setBackgroundResource(R.drawable.bg_schedule_info_even);
 
-        ScheduleInfo scheduleInfo = dataList.get(position);
-        holder.bind(scheduleInfo);
+        Schedule schedule = dataList.get(position);
+        holder.bind(schedule);
 
-        if (isSetOnListener)
-            holder.root.setOnClickListener(v -> {
-                Bundle extras = new Bundle();
-                extras.putString("page", "EDIT");
-                extras.putParcelable("scheduleInfo", scheduleInfo);
-                myActivity.startNewActivity(ScheduleActivity.class, extras);
-            });
+//        if (isSetOnListener)
+//            holder.root.setOnClickListener(v -> {
+//                Bundle extras = new Bundle();
+//                extras.putString("page", "EDIT");
+//                extras.putParcelable("scheduleInfo", scheduleInfo);
+//                myActivity.startNewActivity(ScheduleActivity.class, extras);
+//            });
     }
 
     @Override
@@ -59,38 +57,28 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final View root;
-        private final TextView nameField, waterField, mixerField, areaField, timeStartField;
+        private final TextView nameText, timeText, dayText;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             root = itemView;
-            nameField = itemView.findViewById(R.id.schedule_info_nameField);
-            waterField = itemView.findViewById(R.id.schedule_info_waterField);
-            mixerField = itemView.findViewById(R.id.schedule_info_mixerField);
-            areaField = itemView.findViewById(R.id.schedule_info_areaField);
-            timeStartField = itemView.findViewById(R.id.schedule_info_timeStartField);
+            nameText = itemView.findViewById(R.id.schedule_info_nameField);
+            timeText = itemView.findViewById(R.id.schedule_info_time);
+            dayText = itemView.findViewById(R.id.schedule_info_day);
         }
 
-        public void bind(ScheduleInfo info) {
-            nameField.setText(info.name);
-            waterField.setText(String.valueOf(info.water));
-            mixerField.setText(String.format("%s - %s - %s", info.mixer1, info.mixer2, info.mixer3));
-            areaField.setText(String.format("%s - %s - %s", info.area1, info.area2, info.area3));
-
-            if (info.isDate == 0){
-                setWeekdays(info.time, info.weekday);
+        public void bind(Schedule schedule) {
+            nameText.setText(schedule._name);
+            timeText.setText(schedule._time);
+            if (!schedule.weekday.isEmpty()){
+                setWeekdays(schedule.weekday);
             } else {
-                setDate(info.time, info.date);
+                dayText.setText(schedule.date);
             }
         }
 
-        private void setDate(String time, String date){
-            String text = time + " " + date;
-            timeStartField.setText(text);
-        }
-
-        private void setWeekdays(String time, String weekday){
-            String text = time + "Each ";
+        private void setWeekdays(String weekday){
+            String text = "Each ";
             switch (weekday){
                 case Weekdays.MONDAY:
                     text += "Monday";
@@ -115,7 +103,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                     break;
                 default:
             }
-            timeStartField.setText(text);
+            dayText.setText(text);
         }
     }
 }

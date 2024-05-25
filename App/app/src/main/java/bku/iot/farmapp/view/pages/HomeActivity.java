@@ -9,7 +9,7 @@ import android.widget.TextView;
 import java.util.List;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.HomeController;
-import bku.iot.farmapp.data.model.ScheduleInfo;
+import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.widgets.recyclerView.MyAdapter;
 
@@ -58,9 +58,9 @@ public class HomeActivity extends MyActivity {
         });
     }
 
-    public void updateScheduleList(List<ScheduleInfo> scheduleInfoList){
+    public void updateScheduleList(List<Schedule> scheduleList){
         if (myAdapter == null){
-            myAdapter = new MyAdapter(this, scheduleInfoList, true);
+            myAdapter = new MyAdapter(this, scheduleList, true);
             recyclerView.setAdapter(myAdapter);
         } else {
             myAdapter.notifyDataSetChanged();

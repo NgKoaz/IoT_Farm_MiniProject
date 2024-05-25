@@ -5,12 +5,16 @@ import android.os.Looper;
 import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import bku.iot.farmapp.data.enums.MqttTopic;
 import bku.iot.farmapp.data.enums.Weekdays;
+import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyMqttClient;
@@ -233,16 +237,16 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
 
     private boolean checkSchedule() {
         if (!hasCurrentTime) {
-            scheduleActivity.showToast("Wait gateway send current time at Gateway's location!");
+            mHandler.post(() -> scheduleActivity.showToast("Wait gateway send current time at Gateway's location!"));
             return false;
         }
         if (!isValidDateTime()) {
-            scheduleActivity.showToast("The time you set is in the past!");
+            mHandler.post(() -> scheduleActivity.showToast("The time you set is in the past!"));
             return false;
         }
         String userEmail = getUserEmail();
         if (userEmail.equals("")) {
-            scheduleActivity.showToast("Not found your email, please re-sign in");
+            mHandler.post(() -> scheduleActivity.showToast("Not found your email, please re-sign in"));
             return false;
         }
         return true;
@@ -250,37 +254,47 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
 
     public void addSchedule(String name, String volume) {
         // Check before send.
+        if (name.isEmpty()) {
+            mHandler.post(() -> scheduleActivity.showToast("Put a schedule name!"));
+            return;
+        }
         if (!Utils.isInteger(volume)) {
-            scheduleActivity.showToast("Non-expected error occurred!");
+            mHandler.post(() -> scheduleActivity.showToast("Volume is not integer!"));
             return;
         }
         if (!checkSchedule()) return;
 
         // Prepare before send
-        scheduleActivity.showLoading();
+        mHandler.post(scheduleActivity::showLoading);
 
-        ScheduleInfo scheduleInfo = new ScheduleInfo(
-                        getUserEmail(), "add", name, waterRatio,
-                        mixer1Ratio, mixer2Ratio, mixer3Ratio,
-                        area1Ratio, area2Ratio, area3Ratio,
-                        this.isDate, this.date,
-                        this.weekday, this.time
-                );
-        publishAndWaitAck(scheduleInfo, (isAck, error) -> {
+        List<Integer> ratio = new ArrayList<>();
+        ratio.add(waterRatio);
+        ratio.add(mixer1Ratio);
+        ratio.add(mixer2Ratio);
+        ratio.add(mixer3Ratio);
+        ratio.add(area1Ratio);
+        ratio.add(area2Ratio);
+        ratio.add(area3Ratio);
+
+        Schedule schedule = new Schedule(getUserEmail(), "add", name, Integer.parseInt(volume), ratio, this.date, this.weekday, this.time);
+
+        publishAndWaitAck(schedule, (isAck, error) -> {
             if (!isAck) {
                 mHandler.post(() -> {
                     scheduleActivity.showToast("Time out message!");
                 });
                 mHandler.post(scheduleActivity::dismissLoading);
-            } else if (scheduleInfo.error.isEmpty()) {
+            } else if (schedule.error != null && schedule.error.isEmpty()) {
                 mHandler.post(() -> {
-                    scheduleActivity.showToast(scheduleInfo.error);
+                    scheduleActivity.showToast(schedule.error);
+                    scheduleActivity.dismissLoading();
                 });
-                mHandler.post(scheduleActivity::dismissLoading);
             } else {
-                scheduleActivity.showToast("Successful!");
-                mHandler.post(scheduleActivity::dismissLoading);
-                scheduleActivity.finish();
+                mHandler.post(() -> {
+                    scheduleActivity.showToast("Successful!");
+                    scheduleActivity.dismissLoading();
+                    scheduleActivity.finish();
+                });
             }
         });
     }
@@ -416,7 +430,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
 //        mHandler.post(scheduleActivity::dismissLoading);
     }
 
-    private void publishAndWaitAck(ScheduleInfo scheduleInfo, OnWaitAck listener){
+    private void publishAndWaitAck(Schedule schedule, OnWaitAck listener){
         try {
             AtomicBoolean isAck = new AtomicBoolean(false);
             MyMqttClient.MessageObserver messageObserver = new MyMqttClient.MessageObserver() {
@@ -427,16 +441,15 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                             JSONObject jsonObject = new JSONObject(payload);
                             String payloadEmail = jsonObject.getString("email");
                             String payloadType = jsonObject.getString("type");
-                            String payloadScheduleId = jsonObject.getString("scheduleId");
-                            if (scheduleInfo.email.equals(payloadEmail) && scheduleInfo.type.equals(payloadType) &&
-                                    (scheduleInfo.scheduleId.equals(payloadScheduleId) || scheduleInfo.type.equals("add"))
-                            ){
+
+                            if (schedule.email.equals(payloadEmail) && schedule.type.equals(payloadType)){
                                 isAck.set(true);
                                 MyMqttClient.gI().unregisterObserver(this);
-                                listener.onComplete(isAck.get(), scheduleInfo.error);
+                                listener.onComplete(isAck.get(), schedule.error);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
+                            MyMqttClient.gI().unregisterObserver(this);
                         }
                     }
                 }
@@ -454,7 +467,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                 }
             });
             thread.start();
-            MyMqttClient.gI().publish(MqttTopic.scheduleRequest, scheduleInfo.toJsonString());
+            MyMqttClient.gI().publish(MqttTopic.scheduleRequest, schedule.toJsonString());
         } catch (JSONException e) {
             e.printStackTrace();
             scheduleActivity.showToast("Non-expected error! Let try again!");

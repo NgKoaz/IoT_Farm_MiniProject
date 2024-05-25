@@ -10,6 +10,7 @@ public class Utils {
     }
 
     public static boolean isInteger(String num) {
+        if (num.isEmpty()) return false;
         try {
             Integer.parseInt(num);
         } catch (NumberFormatException e) {
