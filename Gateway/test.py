@@ -2,7 +2,7 @@ import time
 import datetime
 
 from model.mqtt.schedule import Schedule
-from scheduler.scheduler import Scheduler, PrivateTask
+from scheduler.scheduler123 import Scheduler, PrivateTask
 
 
 class Test:

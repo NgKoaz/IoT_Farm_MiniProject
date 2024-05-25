@@ -1,7 +1,7 @@
 import threading
 import time
-from scheduler.private_task import PrivateTask
-from scheduler.task import Task, TaskArgument
+from scheduler123.private_task import PrivateTask
+from scheduler123.task import Task, TaskArgument
 from utils.time_manager import TimeManager
 
 
