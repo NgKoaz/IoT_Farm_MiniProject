@@ -16,10 +16,11 @@ class Schedule:
             type: str = "",
             name: str = "",
             volume: str = "",
-            ratio: str = "",
+            ratio: str = "[]",
             date: str = "",
             weekday: str = "",
             time: str = "",
+            isOn: int = 1,
             error: str = ""
     ):
         self.scheduleId = scheduleId
@@ -31,6 +32,7 @@ class Schedule:
         self.date = date
         self.weekday = weekday
         self.time = time
+        self.isOn = isOn
         self.error = error
 
     def setId(self, scheduleId: str):

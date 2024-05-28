@@ -1,27 +1,35 @@
 package bku.iot.farmapp.view.widgets.recyclerView;
 
+import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.json.JSONException;
+
 import java.util.List;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.view.common.MyActivity;
+import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     private final List<Schedule> dataList;
     private final MyActivity myActivity;
-    private final boolean isSetOnListener;
+    private SwitchListener switchListener;
 
-    public MyAdapter(MyActivity myActivity, List<Schedule> dataList, boolean isSetOnListener) {
+    public MyAdapter(MyActivity myActivity, List<Schedule> dataList, SwitchListener switchListener) {
         this.myActivity = myActivity;
         this.dataList = dataList;
-        this.isSetOnListener = isSetOnListener;
+        this.switchListener = switchListener;
     }
 
     @NonNull
@@ -39,15 +47,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             holder.root.setBackgroundResource(R.drawable.bg_schedule_info_even);
 
         Schedule schedule = dataList.get(position);
+
         holder.bind(schedule);
 
-//        if (isSetOnListener)
-//            holder.root.setOnClickListener(v -> {
-//                Bundle extras = new Bundle();
-//                extras.putString("page", "EDIT");
-//                extras.putParcelable("scheduleInfo", scheduleInfo);
-//                myActivity.startNewActivity(ScheduleActivity.class, extras);
-//            });
+        holder.root.setOnClickListener(v -> {
+            Bundle extras = new Bundle();
+            extras.putString("page", "EDIT");
+            extras.putParcelable("schedule", schedule);
+            myActivity.startNewActivity(ScheduleActivity.class, extras);
+        });
+
+        if (switchListener != null)
+            holder.aSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                switchListener.onChange(buttonView, isChecked, schedule, position);
+            });
     }
 
     @Override
@@ -58,6 +71,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final View root;
         private final TextView nameText, timeText, dayText;
+        private final Switch aSwitch;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -65,6 +79,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             nameText = itemView.findViewById(R.id.schedule_info_nameField);
             timeText = itemView.findViewById(R.id.schedule_info_time);
             dayText = itemView.findViewById(R.id.schedule_info_day);
+            aSwitch = itemView.findViewById(R.id.schedule_info_switch);
         }
 
         public void bind(Schedule schedule) {
@@ -75,6 +90,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             } else {
                 dayText.setText(schedule.date);
             }
+
+            aSwitch.setChecked(schedule.isOn == 1);
+        }
+
+        public void updateSwitch(boolean isChecked) {
+            aSwitch.setChecked(isChecked);
         }
 
         private void setWeekdays(String weekday){
@@ -106,4 +127,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             dayText.setText(text);
         }
     }
+
+    public interface SwitchListener {
+        void onChange(CompoundButton buttonView, boolean isCheck, Schedule schedule, int position);
+    }
+
 }

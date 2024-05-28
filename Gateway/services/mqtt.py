@@ -37,8 +37,9 @@ class Mqtt:
     def on_subscribe(self, client, userdata, mid, granted_qos):
         print("Subscribed to topic!")
 
-    def on_publish(client, userdata, mid, granted_qos):
-        print("Publish: OK!")
+    @staticmethod
+    def on_publish(client, userdata, mid):
+        pass
 
     def on_disconnect(self, client, userdata, rc):
         print(f"Disconnected with result code: {rc}")
@@ -67,6 +68,7 @@ class Mqtt:
             self.client.loop_forever()
         except Exception as e:
             print("MQTT Error: Perhaps the services has been interrupted!")
+            print(e)
 
     def connect(self, server, port, username, password):
         self.client.username_pw_set(username, password)
@@ -75,7 +77,7 @@ class Mqtt:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_subscribe = self.on_subscribe
-        self.client.on_publish = self.on_publish
+        # self.client.on_publish = self.on_publish
         self.client.on_disconnect = self.on_disconnect
 
         # Connect to the MQTT broker

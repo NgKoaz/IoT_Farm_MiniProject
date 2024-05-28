@@ -19,6 +19,16 @@ class MyFirestore:
     def updateSchedule(self, docId, js):
         self.rootDoc.collection("schedule").document(docId).update(js)
 
+    def getSchedules(self):
+        return self.rootDoc.collection("schedule").get()
+
+    def isScheduleExist(self, docId):
+        doc = self.rootDoc.collection("schedule").document(docId).get()
+        if doc.exists:
+            return True
+        else:
+            return False
+
     def putHistorySchedule(self, docId, js):
         self.rootDoc.collection("historySchedule").document(docId).set(js)
 

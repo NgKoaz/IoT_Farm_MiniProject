@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import bku.iot.farmapp.data.enums.MqttTopic;
 import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.Schedule;
-import bku.iot.farmapp.data.model.ScheduleInfo;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyMqttClient;
 import bku.iot.farmapp.view.common.Utils;
@@ -23,6 +22,7 @@ import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class ScheduleController implements MyMqttClient.MessageObserver {
     private final String TAG = ScheduleController.class.getSimpleName();
+    private final int WAIT_ACK_DURATION = 5000; // 3000ms
     private int waterRatio = 0, mixer1Ratio = 0, mixer2Ratio = 0, mixer3Ratio = 0;
     private int area1Ratio = 0, area2Ratio = 0, area3Ratio = 0;
     private int isDate;
@@ -116,9 +116,9 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         scheduleActivity.updateDateDisplay(this.date);
     }
 
-    public void setDateTimeForEditting(ScheduleInfo scheduleInfo){
+    public void setDateTimeForEditting(Schedule schedule){
         // Set default time
-        this.time = scheduleInfo.time;
+        this.time = schedule._time;
         String[] timeParts = this.time.split(":");
         String hour = timeParts[0];
         String minute = timeParts[1];
@@ -126,14 +126,13 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         scheduleActivity.updateTimeDisplay(hour, minute);
 
         // Set default date
-        this.isDate = scheduleInfo.isDate;
-        if (isDate == 1) {
-            this.date = scheduleInfo.date;
+        if (!schedule.date.isEmpty()) {
+            this.date = schedule.date;
             scheduleActivity.clearWeekdayCheck();
             scheduleActivity.updateDateDisplay(this.date);
         } else {
-            this.weekday = scheduleInfo.weekday;
-            setWeekday(scheduleInfo.weekday);
+            this.weekday = schedule.weekday;
+            setWeekday(schedule.weekday);
         }
     }
 
@@ -277,6 +276,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         ratio.add(area3Ratio);
 
         Schedule schedule = new Schedule(getUserEmail(), "add", name, Integer.parseInt(volume), ratio, this.date, this.weekday, this.time);
+        schedule.isOn = 1;
 
         publishAndWaitAck(schedule, (isAck, error) -> {
             if (!isAck) {
@@ -284,150 +284,100 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                     scheduleActivity.showToast("Time out message!");
                 });
                 mHandler.post(scheduleActivity::dismissLoading);
-            } else if (schedule.error != null && schedule.error.isEmpty()) {
+            } else if (!error.isEmpty()) {
                 mHandler.post(() -> {
-                    scheduleActivity.showToast(schedule.error);
+                    scheduleActivity.showToast(error);
                     scheduleActivity.dismissLoading();
                 });
             } else {
                 mHandler.post(() -> {
                     scheduleActivity.showToast("Successful!");
                     scheduleActivity.dismissLoading();
-                    scheduleActivity.finish();
+                    backToPreviousActivity();
                 });
             }
         });
     }
 
-//    public void saveSchedule(
-//            String name,
-//            double water,
-//            double mixer1,
-//            double mixer2,
-//            double mixer3,
-//            double area1,
-//            double area2,
-//            double area3
-//    ) {
-//        mHandler.post(scheduleActivity::showLoading);
-//        Log.d(TAG, "Save schedule!!!!!!!");
-//        if (!hasCurrentTime) {
-//            mHandler.post(() -> scheduleActivity.showToast("Wait gateway send current time!"));
-//            mHandler.post(scheduleActivity::dismissLoading);
-//            return;
-//        }
-//        if (isValidDateTime()){
-//            String userEmail = getUserEmail();
-//            if (!userEmail.equals("")) {
-//                ScheduleInfo scheduleInfo = new ScheduleInfo(
-//                        userEmail, "add", name, water,
-//                        mixer1, mixer2, mixer3,
-//                        area1, area2, area3,
-//                        this.isDate, this.date,
-//                        this.weekday, this.time
-//                );
-//                // Send
-//                publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
-//                    if (isAck) {
-//                        if (isError){
-//                            mHandler.post(() -> scheduleActivity.showToast(error));
-//                        } else {
-//                            mHandler.post(() -> scheduleActivity.showToast("Add schedule successful!"));
-//                            mHandler.post(this::backToPreviousActivity);
-//                        }
-//                    } else {
-//                        mHandler.post(() -> scheduleActivity.showToast("Request time out!"));
-//                    }
-//                });
-//            } else {
-//                mHandler.post(() -> scheduleActivity.showToast("Not found your email, please re-sign in"));
-//            }
-//        } else {
-//            mHandler.post(() -> scheduleActivity.showToast("The time you set is in the past!"));
-//        }
-//        mHandler.post(scheduleActivity::dismissLoading);
-//    }
+    public void updateSchedule(Schedule schedule, String name, String volume){
+        // Check before send.
+        if (name.isEmpty()) {
+            mHandler.post(() -> scheduleActivity.showToast("Put a schedule name!"));
+            return;
+        }
+        if (!Utils.isInteger(volume)) {
+            mHandler.post(() -> scheduleActivity.showToast("Volume is not integer!"));
+            return;
+        }
+        if (!checkSchedule()) return;
 
-    public void updateSchedule(
-            ScheduleInfo scheduleInfo,
-            String name,
-            double water,
-            double mixer1,
-            double mixer2,
-            double mixer3,
-            double area1,
-            double area2,
-            double area3
-    ){
-//        mHandler.post(scheduleActivity::showLoading);
-//        Log.d(TAG, "Update Schedule!!!!!!");
-//
-//        if (!hasCurrentTime) {
-//            mHandler.post(() -> scheduleActivity.showToast("Wait gateway send current time!"));
-//            mHandler.post(scheduleActivity::dismissLoading);
-//            return;
-//        }
-//
-//        if (isValidDateTime()){
-//            if (scheduleInfo != null) {
-//                // Set attributes
-//                scheduleInfo.type = "update";
-//                scheduleInfo.name = name;
-//                scheduleInfo.water = water;
-//                scheduleInfo.mixer1 = mixer1;
-//                scheduleInfo.mixer2 = mixer2;
-//                scheduleInfo.mixer3 = mixer3;
-//                scheduleInfo.area1 = area1;
-//                scheduleInfo.area2 = area2;
-//                scheduleInfo.area3 = area3;
-//                scheduleInfo.isDate = this.isDate;
-//                scheduleInfo.date = this.date;
-//                scheduleInfo.weekday = this.weekday;
-//                scheduleInfo.time = this.time;
-//
-//                publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
-//                    if (isAck) {
-//                        if (isError){
-//                            mHandler.post(() -> scheduleActivity.showToast(error));
-//                        } else {
-//                            mHandler.post(() -> scheduleActivity.showToast("Update schedule successful!"));
-//                            mHandler.post(this::backToPreviousActivity);
-//                        }
-//                    } else {
-//                        mHandler.post(() -> scheduleActivity.showToast("Request time out!"));
-//                    }
-//                });
-//            } else {
-//                mHandler.post(() -> scheduleActivity.showToast("Non-expected error occur: `scheduleInfo` is null"));
-//            }
-//        } else {
-//            mHandler.post(() -> scheduleActivity.showToast("The time you set is in the past!"));
-//        }
-//        mHandler.post(scheduleActivity::dismissLoading);
+        // Prepare before send
+        mHandler.post(scheduleActivity::showLoading);
+        schedule.email = getUserEmail();
+        schedule.type = "update";
+        schedule._name = name;
+        schedule.volume = Integer.parseInt(volume);
+        List<Integer> ratio = new ArrayList<>();
+        ratio.add(waterRatio);
+        ratio.add(mixer1Ratio);
+        ratio.add(mixer2Ratio);
+        ratio.add(mixer3Ratio);
+        ratio.add(area1Ratio);
+        ratio.add(area2Ratio);
+        ratio.add(area3Ratio);
+        schedule.date = date;
+        schedule.weekday = weekday;
+        schedule._time = time;
+        schedule.isOn = 1;
+
+        publishAndWaitAck(schedule, (isAck, error) -> {
+            if (!isAck) {
+                mHandler.post(() -> {
+                    scheduleActivity.showToast("Time out message!");
+                });
+                mHandler.post(scheduleActivity::dismissLoading);
+            } else if (!error.isEmpty()) {
+                mHandler.post(() -> {
+                    scheduleActivity.showToast(error);
+                    scheduleActivity.dismissLoading();
+                });
+            } else {
+                mHandler.post(() -> {
+                    scheduleActivity.showToast("Successfully!");
+                    scheduleActivity.dismissLoading();
+                    backToPreviousActivity();
+                });
+            }
+        });
     }
 
-    public void deleteSchedule(ScheduleInfo scheduleInfo){
-//        mHandler.post(scheduleActivity::showLoading);
-//        Log.d(TAG, "Delete Schedule!!!!!!");
-//
-//        if (scheduleInfo != null){
-//            scheduleInfo.type = "delete";
-//            publishAndWaitAck(scheduleInfo, (isAck, isError, error) -> {
-//                if (isAck) {
-//                    if (isError){
-//                        mHandler.post(() -> scheduleActivity.showToast(error));
-//                    } else {
-//                        mHandler.post(() -> scheduleActivity.showToast("Delete schedule successful!"));
-//                        mHandler.post(this::backToPreviousActivity);
-//                    }
-//                } else {
-//                    mHandler.post(() -> scheduleActivity.showToast("Request time out!"));
-//                }
-//            });
-//        } else {
-//            mHandler.post(() -> scheduleActivity.showToast("Non-expected error occur: `scheduleInfo` is null"));
-//        }
-//        mHandler.post(scheduleActivity::dismissLoading);
+    public void deleteSchedule(Schedule schedule){
+        mHandler.post(scheduleActivity::showLoading);
+
+        if (schedule != null){
+            schedule.type = "delete";
+            publishAndWaitAck(schedule, (isAck, error) -> {
+                if (!isAck) {
+                    mHandler.post(() -> {
+                        scheduleActivity.showToast("Time out message!");
+                        scheduleActivity.dismissLoading();
+                    });
+                } else if (!error.isEmpty()) {
+                    mHandler.post(() -> {
+                        scheduleActivity.showToast(error);
+                        scheduleActivity.dismissLoading();
+                    });
+                } else {
+                    mHandler.post(() -> {
+                        scheduleActivity.showToast("Delete successfully!");
+                        scheduleActivity.dismissLoading();
+                        backToPreviousActivity();
+                    });
+                }
+            });
+        } else {
+            mHandler.post(() -> scheduleActivity.showToast("Non-expected error occur: `schedule` is null"));
+        }
     }
 
     private void publishAndWaitAck(Schedule schedule, OnWaitAck listener){
@@ -442,10 +392,10 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                             String payloadEmail = jsonObject.getString("email");
                             String payloadType = jsonObject.getString("type");
 
-                            if (schedule.email.equals(payloadEmail) && schedule.type.equals(payloadType)){
+                            if (schedule.email.equals(payloadEmail) && schedule.type.equals(payloadType)) {
                                 isAck.set(true);
                                 MyMqttClient.gI().unregisterObserver(this);
-                                listener.onComplete(isAck.get(), schedule.error);
+                                listener.onComplete(isAck.get(), jsonObject.getString("error"));
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -456,18 +406,21 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
             };
             MyMqttClient.gI().registerObserver(messageObserver);
             Thread thread = new Thread(() -> {
+                Log.d(TAG, "Start sleep!");
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(WAIT_ACK_DURATION);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+                Log.d(TAG, "End sleep!");
+
                 if (!isAck.get()) {
                     MyMqttClient.gI().unregisterObserver(messageObserver);
                     listener.onComplete(isAck.get(), "");
                 }
             });
-            thread.start();
             MyMqttClient.gI().publish(MqttTopic.scheduleRequest, schedule.toJsonString());
+            thread.start();
         } catch (JSONException e) {
             e.printStackTrace();
             scheduleActivity.showToast("Non-expected error! Let try again!");

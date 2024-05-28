@@ -1,26 +1,26 @@
 package bku.iot.farmapp.data.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class Schedule {
-    public String scheduleId;
-    public String email;
-    public String type;
-    public String _name;
+public class Schedule implements Parcelable {
+    public String scheduleId = "";
+    public String email = "";
+    public String type = "";
+    public String _name = "";
     public int volume;
     public List<Integer> ratio;
-    public String date;
-    public String weekday;
-    public String _time;
-    public String error;
+    public String date = "";
+    public String weekday = "";
+    public String _time = "";
+    public int isOn = 0;
+    public String error = "";
 
     public Schedule() {}
 
@@ -66,7 +66,7 @@ public class Schedule {
                 volume = Integer.parseInt(value);
                 break;
             case "ratio":
-                String[] parts = value.substring(1, value.length() - 1).split(", ");
+                String[] parts = value.substring(1, value.length() - 1).replace(" ", "").split(",");
                 ratio = new ArrayList<>();
                 for (String part : parts) {
                     if (!part.isEmpty()) {
@@ -83,12 +83,34 @@ public class Schedule {
             case "time":
                 _time = value;
                 break;
+            case "isOn":
+                isOn = Integer.parseInt(value);
+                break;
             case "error":
                 error = value;
                 break;
             default:
                 Log.e("Schedule Model", "WRONG TYPE NAME!");
         }
+    }
+
+    public Schedule(JSONObject jsonObject) throws JSONException {
+        try {
+            // Retrieving all key-value pairs using keys()
+            Iterator<String> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String value = jsonObject.get(key).toString();
+                assignAttribute(key, value);
+            }
+        } catch (JSONException e){
+            e.printStackTrace();
+            throw new JSONException(e.getMessage());
+        }
+    }
+
+    public void setIsOn(int value) {
+        isOn = value;
     }
 
     public String toJsonString() throws JSONException {
@@ -103,6 +125,7 @@ public class Schedule {
             jsonObject.put("date", date);
             jsonObject.put("weekday", weekday);
             jsonObject.put("time", _time);
+            jsonObject.put("isOn", isOn);
             jsonObject.put("error", error);
         } catch (JSONException e) {
             throw new JSONException(e.getMessage());
@@ -110,4 +133,50 @@ public class Schedule {
         return jsonObject.toString();
     }
 
+    protected Schedule(Parcel in) {
+        scheduleId = in.readString();
+        email = in.readString();
+        type = in.readString();
+        _name = in.readString();
+        volume = in.readInt();
+        ratio = new ArrayList<>();
+        in.readList(ratio, Integer.class.getClassLoader());
+        date = in.readString();
+        weekday = in.readString();
+        _time = in.readString();
+        isOn = in.readInt();
+        error = in.readString();
+    }
+
+    public static final Creator<Schedule> CREATOR = new Creator<Schedule>() {
+        @Override
+        public Schedule createFromParcel(Parcel in) {
+            return new Schedule(in);
+        }
+
+        @Override
+        public Schedule[] newArray(int size) {
+            return new Schedule[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(scheduleId);
+        parcel.writeString(email);
+        parcel.writeString(type);
+        parcel.writeString(_name);
+        parcel.writeInt(volume);
+        parcel.writeList(ratio);
+        parcel.writeString(date);
+        parcel.writeString(weekday);
+        parcel.writeString(_time);
+        parcel.writeInt(isOn);
+        parcel.writeString(error);
+    }
 }

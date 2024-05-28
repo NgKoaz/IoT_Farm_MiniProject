@@ -9,9 +9,6 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.android.material.textfield.TextInputEditText;
-
-import org.checkerframework.checker.units.qual.Area;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +16,7 @@ import java.util.concurrent.Executors;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.ScheduleController;
 import bku.iot.farmapp.data.enums.Weekdays;
-import bku.iot.farmapp.data.model.ScheduleInfo;
+import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.common.Utils;
 import bku.iot.farmapp.view.widgets.appbar.AppBar;
@@ -37,11 +34,11 @@ public class ScheduleActivity extends MyActivity {
     private ImageView choosingDateButton;
     private final List<CheckBox> weekdayBoxes = new LinkedList<>();
     private TextInputEditText nameInput, volumeInput;
+    private Schedule schedule;
     private Button deleteButton, saveButton, updateButton;
     private View spaceBetweenButtons;
     private TimePickerDialog timePickerDialog;
     private DatePickerDialog datePickerDialog;
-    private ScheduleInfo scheduleInfo;
     private MixerInputDialog mixerInputDialog;
     private AreaInputDialog areaInputDialog;
     private ImageView mixerChangeButton, areaChangeButton;
@@ -137,7 +134,7 @@ public class ScheduleActivity extends MyActivity {
         deleteButton.setOnClickListener(v -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> {
-                scheduleController.deleteSchedule(scheduleInfo);
+                scheduleController.deleteSchedule(schedule);
             });
         });
         saveButton.setOnClickListener(v -> {
@@ -151,19 +148,14 @@ public class ScheduleActivity extends MyActivity {
         });
 
         updateButton.setOnClickListener(v -> {
-//            ExecutorService executor = Executors.newSingleThreadExecutor();
-//            executor.submit(() -> {
-//                scheduleController.updateSchedule(
-//                        scheduleInfo,
-//                        Utils.getStringFromInputEditText(nameInput),
-//                        Double.parseDouble(Utils.getStringFromInputEditText(waterInput)),
-//                        Double.parseDouble(Utils.getStringFromInputEditText(mixer1Input)),
-//                        Double.parseDouble(Utils.getStringFromInputEditText(mixer2Input)),
-//                        Double.parseDouble(Utils.getStringFromInputEditText(mixer3Input)),
-//                        Double.parseDouble(Utils.getStringFromInputEditText(area1Input)),
-//                        Double.parseDouble(Utils.getStringFromInputEditText(area2Input)),
-//                        Double.parseDouble(Utils.getStringFromInputEditText(area3Input)));
-//            });
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                scheduleController.updateSchedule(
+                        schedule,
+                        Utils.getStringFromInputEditText(nameInput),
+                        Utils.getStringFromInputEditText(volumeInput)
+                    );
+            });
         });
 
         // Weekday checkboxes
@@ -213,26 +205,26 @@ public class ScheduleActivity extends MyActivity {
     }
 
     private void loadEditSchedulePage(){
-//        appbar.setHeaderText("Edit Schedule");
-//
-//        saveButton.setVisibility(View.GONE);
-//        updateButton.setVisibility(View.VISIBLE);
-//        deleteButton.setVisibility(View.VISIBLE);
-//        spaceBetweenButtons.setVisibility(View.VISIBLE);
-//
-//        scheduleInfo = getIntent().getParcelableExtra("scheduleInfo");
-//
-//        assert scheduleInfo != null;
-//        nameInput.setText(scheduleInfo.name);
-//        waterInput.setText(String.valueOf(scheduleInfo.water));
-//        mixer1Input.setText(String.valueOf(scheduleInfo.mixer1));
-//        mixer2Input.setText(String.valueOf(scheduleInfo.mixer2));
-//        mixer3Input.setText(String.valueOf(scheduleInfo.mixer3));
-//        area1Input.setText(String.valueOf(scheduleInfo.area1));
-//        area2Input.setText(String.valueOf(scheduleInfo.area2));
-//        area3Input.setText(String.valueOf(scheduleInfo.area3));
-//
-//        scheduleController.setDateTimeForEditting(scheduleInfo);
+        appbar.setHeaderText("Edit Schedule");
+
+        saveButton.setVisibility(View.GONE);
+        updateButton.setVisibility(View.VISIBLE);
+        deleteButton.setVisibility(View.VISIBLE);
+        spaceBetweenButtons.setVisibility(View.VISIBLE);
+
+        schedule = getIntent().getParcelableExtra("schedule");
+
+        nameInput.setText(schedule._name);
+        volumeInput.setText(String.valueOf(schedule.volume));
+        waterText.setText(String.valueOf(schedule.ratio.get(0)));
+        mixer1Text.setText(String.valueOf(schedule.ratio.get(1)));
+        mixer2Text.setText(String.valueOf(schedule.ratio.get(2)));
+        mixer3Text.setText(String.valueOf(schedule.ratio.get(3)));
+        area1Text.setText(String.valueOf(schedule.ratio.get(4)));
+        area2Text.setText(String.valueOf(schedule.ratio.get(5)));
+        area3Text.setText(String.valueOf(schedule.ratio.get(6)));
+
+        scheduleController.setDateTimeForEditting(schedule);
     }
 
 

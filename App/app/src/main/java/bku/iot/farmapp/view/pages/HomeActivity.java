@@ -4,6 +4,7 @@ package bku.iot.farmapp.view.pages;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.List;
@@ -58,9 +59,17 @@ public class HomeActivity extends MyActivity {
         });
     }
 
+    @Override
+    protected void onBindViews() {
+        super.onBindViews();
+        homeController.refreshRecyclerView();
+    }
+
     public void updateScheduleList(List<Schedule> scheduleList){
         if (myAdapter == null){
-            myAdapter = new MyAdapter(this, scheduleList, true);
+            myAdapter = new MyAdapter(this, scheduleList, (buttonView, isCheck, schedule, position) -> {
+                homeController.handleSwitch(buttonView, isCheck, schedule, position);
+            });
             recyclerView.setAdapter(myAdapter);
         } else {
             myAdapter.notifyDataSetChanged();

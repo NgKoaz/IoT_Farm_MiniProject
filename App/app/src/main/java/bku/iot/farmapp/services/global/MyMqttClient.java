@@ -13,6 +13,8 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.util.ArrayList;
 import java.util.List;
 
+import bku.iot.farmapp.data.enums.MqttTopic;
+
 public class MyMqttClient implements MqttCallback {
     private static MyMqttClient instance;
     private static final String TAG = MyMqttClient.class.getSimpleName();
@@ -208,8 +210,10 @@ public class MyMqttClient implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage message) {
         String payload = new String(message.getPayload());
-        Log.d(TAG, "TOPIC: " + topic);
-        Log.d(TAG, "PAYLOAD: " + payload);
+        if (topic.contains(MqttTopic.currentTime)) {
+            Log.d(TAG, "TOPIC: " + topic);
+            Log.d(TAG, "PAYLOAD: " + payload);
+        }
         notifyMessageArrived(topic, payload);
     }
 
