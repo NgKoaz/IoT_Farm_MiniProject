@@ -7,7 +7,7 @@ class TimeManager:
 
     # it must be >= 0.01. Best is >= 0.1
     @staticmethod
-    def millisSleep(duration):
+    def sleep(duration):
         start = time.time()
         while time.time() - start < duration:
             time.sleep(0.007)

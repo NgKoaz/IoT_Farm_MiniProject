@@ -11,8 +11,8 @@ class Task:
     def __init__(
             self,
             pTask,
-            delay: int,
-            period: int,
+            delay,
+            period,
             args: TaskArgument = None
     ):
         self.pTask = pTask
@@ -50,9 +50,9 @@ class Task:
 # SCH_Update and SCH_Dispatch run concurrently by using lock.
 # We try to make SCH_Update, SCH_AddTask, SCH_DeleteTask has higher priority to run than SCH_Dispatch.
 class Scheduler1:
-    TIMER_CYCLE = 1
-    IDLE_SLEEP = 0.02
-    PRIORITY_WAIT = 0.01
+    TIMER_CYCLE = 0.05
+    IDLE_SLEEP = 0.1
+    PRIORITY_WAIT = 0.02
     MAX_TASK = 40
 
     def __init__(self):
@@ -67,6 +67,8 @@ class Scheduler1:
 
         # For delay
         self._time = TimeManager()
+
+        self.numTaskRunning = 0
 
         # Number for priority.
         # This is the number show the scheduler function need to be done.
@@ -94,8 +96,8 @@ class Scheduler1:
         self._priorityFunc += 1
         # Critical section !!!
         with self._lock:
-            task.setTaskId(self._taskIds[0])
-            self._taskIds.pop(0)
+            self.numTaskRunning += 1
+            task.setTaskId(self._taskIds.pop())
             self._addTaskSortedByDelay(task)
         # End critical section !!!
         self._priorityFunc -= 1
@@ -118,6 +120,7 @@ class Scheduler1:
         self._priorityFunc += 1
         # Critical section !!!
         with self._lock:
+            self.numTaskRunning += -1
             res = self.deleteTask(taskId)
         # End critical section !!!
         self._priorityFunc -= 1
@@ -135,21 +138,24 @@ class Scheduler1:
             idx += 1
         return False
 
+    def isReady(self):
+        if self._taskList:
+            return self._taskList[0].delay <= 0
+        return False
+
     def SCH_Dispatch(self):
         if self._priorityFunc > 0:
             # Sleep about = 16ms
-            TimeManager.millisSleep(self.PRIORITY_WAIT)
+            TimeManager.sleep(self.PRIORITY_WAIT)
             return
 
         self.isNoTask = False
         # Critical section !!!
         with self._lock:
-            if len(self._taskList) > 0:
-                task = self._taskList[0]
-                if task and task.delay <= 0:
-                    # Pop (remove) task out of queue
-                    self._taskList.pop(0)
-                    self._taskIds.append(task.taskId)
+            if self._taskList and self.isReady():
+                task = self._taskList.pop(0)
+                self._taskIds.append(task.taskId)
+                print(task.taskId, self._taskIds, len(self._taskList))
             else:
                 self.isNoTask = True
                 return
@@ -164,12 +170,11 @@ class Scheduler1:
             if task.canContinue():
                 self.SCH_AddTask(task)
 
-
     def SCH_Update(self):
         self._priorityFunc += 1
         # Critical section !!!
         with self._lock:
-            if len(self._taskList) > 0:
+            if self._taskList:
                 if self._taskList[0].delay > 0:
                     self._taskList[0].delay -= 1
         # End critical section !!!
@@ -185,3 +190,6 @@ class Scheduler1:
     def LoopInfinity(self):
         while True:
             self.SCH_Dispatch()
+
+            if self.isNoTask:
+                TimeManager.sleep(self.IDLE_SLEEP)

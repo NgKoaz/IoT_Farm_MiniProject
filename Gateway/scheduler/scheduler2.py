@@ -2,14 +2,18 @@ import threading
 from model.mqtt.schedule import Schedule
 from utils.time_manager import TimeManager
 import datetime
+from services.uart import *
 
 
 class ScheduleTask:
     def __init__(
             self,
+            pTask,
             schedule: Schedule
     ):
+        self.pTask = pTask
         self.schedule = schedule
+        self.latestRunInWeekday = -1
 
     def getScheduleId(self):
         return self.schedule.scheduleId
@@ -36,8 +40,16 @@ class ScheduleTask:
                     return False
             elif self.schedule.weekday:
                 cur_time = datetime.datetime.now()
-                do_time = datetime.datetime()
-                return True
+                if cur_time.weekday() != self.latestRunInWeekday and cur_time.weekday() in self.schedule.weekday:
+                    do_time = datetime.datetime(cur_time.year, cur_time.month, cur_time.day, int(hour), int(minute))
+                    time_difference = do_time - cur_time
+                    delay = round(time_difference.total_seconds())
+                    if delay <= 0:
+                        self.latestRunInWeekday = cur_time.weekday()
+                        return True
+                    else:
+                        return False
+                return False
             else:
                 return False
         except Exception as e:
@@ -45,8 +57,7 @@ class ScheduleTask:
             return False
 
     def doTask(self):
-        TimeManager.millisSleep(5)
-        print(self.schedule.scheduleId, self.schedule.time, self.schedule.date)
+        self.pTask(self.schedule)
 
 
 # 1 Thread: LoopInfinity
@@ -67,12 +78,12 @@ class Scheduler2:
         # Number for priority.
         # This is the number show the scheduler function need to be done.
         # Assume we have SCH_Dispatch always acquire lock of SCH_Update, make starvation.
-        # We prior SCH_AddTask, SCH_DeleteTask than SCH_Dispatch.
+        # We prior to do SCH_AddTask, SCH_DeleteTask than SCH_Dispatch.
         self._priorityFunc = 0
 
-        self.runningScheduleId = ""
-
         self.on_task_done = None
+
+        self.on_save_history = None
 
         # Start loop
         thread = threading.Thread(target=self._LoopInfinity)
@@ -81,6 +92,9 @@ class Scheduler2:
 
     def setOnTaskDone(self, on_task_done):
         self.on_task_done = on_task_done
+
+    def setOnSaveHistory(self, on_save_history):
+        self.on_save_history = on_save_history
 
     def SCH_AddTask(self, scheduleTask: ScheduleTask):
         self._priorityFunc += 1
@@ -129,6 +143,8 @@ class Scheduler2:
             else:
                 if self.on_task_done:
                     self.on_task_done(haveToDoTask)
+            if self.on_save_history:
+                self.on_save_history(haveToDoTask)
 
     def _LoopInfinity(self):
         while True:
@@ -136,8 +152,8 @@ class Scheduler2:
 
             if self._priorityFunc > 0:
                 # Sleep about = 16ms
-                TimeManager.millisSleep(self.PRIORITY_WAIT)
+                TimeManager.sleep(self.PRIORITY_WAIT)
 
             if len(self._scheduleList) <= 0:
-                TimeManager.millisSleep(self.IDLE_SLEEP)
+                TimeManager.sleep(self.IDLE_SLEEP)
 

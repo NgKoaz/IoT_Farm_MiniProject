@@ -3,19 +3,19 @@ package bku.iot.farmapp.view.pages;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.android.material.textfield.TextInputEditText;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.ScheduleController;
-import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.common.Utils;
@@ -32,7 +32,7 @@ public class ScheduleActivity extends MyActivity {
     private TextView hourText, minuteText;
     private TextView dateInfoText;
     private ImageView choosingDateButton;
-    private final List<CheckBox> weekdayBoxes = new LinkedList<>();
+    private final List<CheckBox> weekdayBoxes = new ArrayList<>();
     private TextInputEditText nameInput, volumeInput;
     private Schedule schedule;
     private Button deleteButton, saveButton, updateButton;
@@ -159,11 +159,11 @@ public class ScheduleActivity extends MyActivity {
         });
 
         // Weekday checkboxes
-        for (CheckBox box : weekdayBoxes) {
+        for (int i = 0; i < 7; i++) {
+            CheckBox box = weekdayBoxes.get(i);
+            final int finalI = i;
             box.setOnClickListener(v -> {
-                if (box.isChecked()) {
-                    scheduleController.setWeekday(Weekdays.MONDAY);
-                }
+                scheduleController.setWeekday(box.isChecked(), finalI);
             });
         }
 
@@ -227,6 +227,11 @@ public class ScheduleActivity extends MyActivity {
         scheduleController.setDateTimeForEditting(schedule);
     }
 
+    public void updateCheckBox(List<Integer> weekday){
+        for (Integer wd : weekday) {
+            weekdayBoxes.get(wd).setChecked(true);
+        }
+    }
 
     public void updateAreaRatioText(String area1, String area2, String area3) {
         area1Text.setText(area1);

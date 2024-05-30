@@ -85,8 +85,18 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         public void bind(Schedule schedule) {
             nameText.setText(schedule._name);
             timeText.setText(schedule._time);
-            if (!schedule.weekday.isEmpty()){
-                setWeekdays(schedule.weekday);
+            if (schedule.weekday != null && schedule.weekday.size() > 1){
+                if (schedule.weekday.size() == 7) {
+                    dayText.setText("Everyday");
+                    return;
+                }
+                StringBuilder sb = new StringBuilder();
+                sb.append(getWeekday(schedule.weekday.get(0)));
+                for (int i = 1; i < schedule.weekday.size(); i++) {
+                    sb.append(", ");
+                    sb.append(getWeekday(i));
+                }
+                dayText.setText(sb.toString());
             } else {
                 dayText.setText(schedule.date);
             }
@@ -94,37 +104,34 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             aSwitch.setChecked(schedule.isOn == 1);
         }
 
-        public void updateSwitch(boolean isChecked) {
-            aSwitch.setChecked(isChecked);
-        }
-
-        private void setWeekdays(String weekday){
-            String text = "Each ";
-            switch (weekday){
-                case Weekdays.MONDAY:
-                    text += "Monday";
+        private String getWeekday(Integer wd){
+            String text;
+            switch (wd){
+                case 0:
+                    text = "Mon";
                     break;
-                case Weekdays.TUESDAY:
-                    text += "Tuesday";
+                case 1:
+                    text = "Tue";
                     break;
-                case Weekdays.WEDNESDAY:
-                    text += "Wednesday";
+                case 2:
+                    text = "Wed";
                     break;
-                case Weekdays.THURSDAY:
-                    text += "Thursday";
+                case 3:
+                    text = "Thur";
                     break;
-                case Weekdays.FRIDAY:
-                    text += "Friday";
+                case 4:
+                    text = "Fri";
                     break;
-                case Weekdays.SATURDAY:
-                    text += "Saturday";
+                case 5:
+                    text = "Sat";
                     break;
-                case Weekdays.SUNDAY:
-                    text += "Sunday";
+                case 6:
+                    text = "Sun";
                     break;
                 default:
+                    text = "";
             }
-            dayText.setText(text);
+            return text;
         }
     }
 

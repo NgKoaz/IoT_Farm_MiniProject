@@ -13,6 +13,7 @@ from services.my_firestore import MyFirestore
 from utils.time_manager import TimeManager
 from scheduler.scheduler2 import Scheduler2, ScheduleTask
 from scheduler.scheduler1 import Scheduler1, Task, TaskArgument
+from services.uart import Uart
 
 
 class MyMqtt:
@@ -66,14 +67,23 @@ class Main:
         self.myFirestore = MyFirestore(self.BROKER, self.USERNAME, self.PASSWORD)
         # This is for local schedule list, always update for Firebase each 5 minutes.
         self.scheduleList = []
+        self.scheduleIdRunning = ""
 
         # Create scheduler for handling schedule from app.
         self.scheduler1 = Scheduler1()
+        # Initialize Uart
+        self.uart = Uart(self.scheduler1)
+
+        # Add 2 tasks for reading sensor
+        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=0, period=3))
+        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=0.02, period=3))
+
         self.scheduler2 = Scheduler2()
         self.scheduler2.setOnTaskDone(on_task_done=self.onTaskDone)
+        self.scheduler2.setOnSaveHistory(on_save_history=self.onSaveHistory)
 
         # Initialize scheduler2
-        self.initializeScheduler2()
+        self.setOffAllScheduleInDatabase()
 
         # Establish MQTT services
         self.myMqtt = MyMqtt(self.BROKER, self.USERNAME, self.PASSWORD)
@@ -86,10 +96,22 @@ class Main:
     def onTaskDone(self, scheduleTask: ScheduleTask):
         scheduleTask.schedule.isOn = 0
         scheduleTask.schedule.type = ScheduleType.UPDATE
-        self.myFirestore.updateSchedule(scheduleTask.schedule.scheduleId, json.loads(scheduleTask.schedule.toJsonString()))
+        js = json.loads(scheduleTask.schedule.toJsonString())
+        del js["email"]
+        del js["type"]
+        del js["error"]
+        self.myFirestore.updateSchedule(scheduleTask.schedule.scheduleId, js)
         self.publishSchedule(scheduleTask.schedule)
 
-    def initializeScheduler2(self):
+    def onSaveHistory(self, scheduleTask: ScheduleTask):
+        js = json.loads(scheduleTask.schedule.toJsonString())
+        del js["email"]
+        del js["type"]
+        del js["isOn"]
+        del js["error"]
+        self.myFirestore.putHistory(js)
+
+    def setOffAllScheduleInDatabase(self):
         col = self.myFirestore.getSchedules()
         for doc in col:
             schedule = Schedule(
@@ -97,13 +119,36 @@ class Main:
                 volume=doc.get("volume"),
                 ratio=str(doc.get("ratio")),
                 date=doc.get("date"),
-                weekday=doc.get("weekday"),
+                weekday=str(doc.get("weekday")),
                 time=doc.get("time"),
                 isOn=doc.get("isOn")
             )
             if schedule.isOn == 1:
-                self.scheduler2.SCH_AddTask(ScheduleTask(schedule))
-                print("Id: " + schedule.date + " has been added!")
+                schedule.isOn = 0
+                self.myFirestore.updateSchedule(schedule.scheduleId, json.loads(schedule.toJsonString()))
+
+    def taskScheduler2(self, schedule):
+        self.scheduleIdRunning = schedule.scheduleId
+        print(schedule.scheduleId)
+        # Start adding task
+        # TO DO
+        # Schedule:
+        # schedule.volume: Total will be pumped
+        # schedule.ratio[0]: ratio of water in total.
+        # schedule.ratio[1]: ratio of mixer1 in total.
+        # schedule.ratio[2]: ratio of mixer2 in total.
+        # schedule.ratio[3]: ratio of mixer3 in total.
+        # schedule.ratio[4]: ratio of area1 in total.
+        # schedule.ratio[5]: ratio of area2 in total.
+        # schedule.ratio[6]: ratio of area3 in total.
+
+        #
+
+        # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.setMixer1, args=TaskArgument(state=1), delay=1, period=0))
+
+        # TO DO
+        # End adding task
+        pass
 
     def onMessage(self, topic, payload):
         topic = topic.split("/")[-1]
@@ -114,24 +159,25 @@ class Main:
             thread.daemon = True
             thread.start()
 
-    def isValidAction(self):
-        # TO DO
-        return True
-
     def addScheduleRequest(self, schedule: Schedule):
         formatted_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         schedule.setId(formatted_time)
 
-        # Add schedule Task
-        scheduleTask = ScheduleTask(schedule=schedule)
+        # Add schedule Task here
+        scheduleTask = ScheduleTask(pTask=self.taskScheduler2, schedule=schedule)
         self.scheduler2.SCH_AddTask(scheduleTask)
 
-        self.myFirestore.putSchedule(formatted_time, json.loads(schedule.toJsonString()))
+        js = json.loads(schedule.toJsonString())
+        del js["email"]
+        del js["type"]
+        del js["error"]
+        self.myFirestore.putSchedule(formatted_time, js)
+
         self.publishSchedule(schedule)
 
     def deleteSchedule(self, schedule: Schedule):
         if schedule.scheduleId:
-            if self.scheduler2.runningScheduleId == schedule.scheduleId:
+            if self.scheduler1.numTaskRunning > 2 and self.scheduleIdRunning == schedule.scheduleId:
                 schedule.error = "This schedule is executing, you can delete until it's done"
             elif self.myFirestore.isScheduleExist(schedule.scheduleId):
                 self.scheduler2.SCH_DeleteScheduleTask(schedule.scheduleId)
@@ -144,11 +190,18 @@ class Main:
 
     def updateSchedule(self, schedule: Schedule):
         if schedule.scheduleId:
-            if self.myFirestore.isScheduleExist(schedule.scheduleId):
+            if self.scheduler1.numTaskRunning > 2 and self.scheduleIdRunning == schedule.scheduleId:
+                schedule.error = "This schedule is executing, you can delete until it's done"
+            elif self.myFirestore.isScheduleExist(schedule.scheduleId):
                 if schedule.isOn == 1:
                     self.scheduler2.SCH_DeleteScheduleTask(schedule.scheduleId)
-                    self.scheduler2.SCH_AddTask(ScheduleTask(schedule))
-                self.myFirestore.updateSchedule(schedule.scheduleId, json.loads(schedule.toJsonString()))
+                    self.scheduler2.SCH_AddTask(ScheduleTask(pTask=self.taskScheduler2, schedule=schedule))
+
+                js = json.loads(schedule.toJsonString())
+                del js["email"]
+                del js["type"]
+                del js["error"]
+                self.myFirestore.updateSchedule(schedule.scheduleId, js)
             else:
                 schedule.error = "This schedule doesn't exist!"
             self.publishSchedule(schedule)
@@ -188,20 +241,22 @@ class Main:
         self.myMqtt.publish(MqttTopic.currentTime, payload=json.dumps(data))
 
     def loop(self):
-        counter = 20
+        counter = 5
         counterTime = 5
         while True:
             counter -= 1
             if counter <= 0:
-                counter = 20
-                self.publishSensorData(SensorData(SensorDataType.TEMPERATURE, random.randint(0, 100)))
-                self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, random.randint(0, 100)))
+                counter = 5
+                # self.publishSensorData(SensorData(SensorDataType.TEMPERATURE, self.uart.tempValue))
+                # self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, self.uart.moisValue))
+                print("Temp: " + str(self.uart.tempValue))
+                print("Mois: " + str(self.uart.moisValue))
 
             counterTime -= 1
             if counterTime <= 0:
                 counterTime = 5
                 self.publishCurrentTime()
-            TimeManager.millisSleep(1)
+            TimeManager.sleep(1)
 
 
 Main()

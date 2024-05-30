@@ -17,14 +17,14 @@ public class Schedule implements Parcelable {
     public int volume;
     public List<Integer> ratio;
     public String date = "";
-    public String weekday = "";
+    public List<Integer> weekday;
     public String _time = "";
     public int isOn = 0;
     public String error = "";
 
     public Schedule() {}
 
-    public Schedule(String email, String type, String _name, int volume, List<Integer> ratio, String date, String weekday, String _time) {
+    public Schedule(String email, String type, String _name, int volume, List<Integer> ratio, String date, List<Integer> weekday, String _time) {
         this.email = email;
         this.type = type;
         this._name = _name;
@@ -35,7 +35,7 @@ public class Schedule implements Parcelable {
         this._time = _time;
     }
 
-    public Schedule(String scheduleId, String email, String type, String _name, int volume, List<Integer> ratio, String date, String weekday, String _time, String error) {
+    public Schedule(String scheduleId, String email, String type, String _name, int volume, List<Integer> ratio, String date, List<Integer> weekday, String _time, String error) {
         this.scheduleId = scheduleId;
         this.email = email;
         this.type = type;
@@ -66,6 +66,7 @@ public class Schedule implements Parcelable {
                 volume = Integer.parseInt(value);
                 break;
             case "ratio":
+                if (value.isEmpty()) return;
                 String[] parts = value.substring(1, value.length() - 1).replace(" ", "").split(",");
                 ratio = new ArrayList<>();
                 for (String part : parts) {
@@ -78,7 +79,14 @@ public class Schedule implements Parcelable {
                 date = value;
                 break;
             case "weekday":
-                weekday = value;
+                if (value.isEmpty()) return;
+                String[] weekdays = value.substring(1, value.length() - 1).replace(" ", "").split(",");
+                weekday = new ArrayList<>();
+                for (String part : weekdays) {
+                    if (!part.isEmpty()) {
+                        weekday.add(Integer.parseInt(part));
+                    }
+                }
                 break;
             case "time":
                 _time = value;
@@ -107,6 +115,20 @@ public class Schedule implements Parcelable {
             e.printStackTrace();
             throw new JSONException(e.getMessage());
         }
+    }
+
+    public void shallowCopy(Schedule schedule) {
+        this.scheduleId = schedule.scheduleId;
+        this.email = schedule.email;
+        this.type = schedule.type;
+        this._name = schedule._name;
+        this.volume = schedule.volume;
+        this.ratio = schedule.ratio;
+        this.date = schedule.date;
+        this.weekday = schedule.weekday;
+        this._time = schedule._time;
+        this.isOn = schedule.isOn;
+        this.error = schedule.error;
     }
 
     public void setIsOn(int value) {
@@ -142,7 +164,8 @@ public class Schedule implements Parcelable {
         ratio = new ArrayList<>();
         in.readList(ratio, Integer.class.getClassLoader());
         date = in.readString();
-        weekday = in.readString();
+        weekday = new ArrayList<>();
+        in.readList(weekday, Integer.class.getClassLoader());
         _time = in.readString();
         isOn = in.readInt();
         error = in.readString();
@@ -174,7 +197,7 @@ public class Schedule implements Parcelable {
         parcel.writeInt(volume);
         parcel.writeList(ratio);
         parcel.writeString(date);
-        parcel.writeString(weekday);
+        parcel.writeList(weekday);
         parcel.writeString(_time);
         parcel.writeInt(isOn);
         parcel.writeString(error);

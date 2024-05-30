@@ -209,11 +209,10 @@ public class HomeController implements MyMqttClient.MessageObserver {
                 if (oldSchedule.isOn != newSchedule.isOn) {
                     debounce = true;
                 }
-                scheduleList.remove(oldSchedule);
+                oldSchedule.shallowCopy(newSchedule);
                 break;
             }
         }
-        scheduleList.add(newSchedule);
         sortScheduleList();
     }
 
@@ -261,6 +260,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
                 mHandler.post(() -> {
                     homeActivity.showToast("Time out!");
                     schedule.setIsOn(!isCheck ? 1 : 0);
+                    debounce = true;
                     buttonView.setChecked(!isCheck);
                     homeActivity.dismissLoading();
                 });
@@ -268,6 +268,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
                 mHandler.post(() -> {
                     homeActivity.showToast(error);
                     schedule.setIsOn(!isCheck ? 1 : 0);
+                    debounce = true;
                     buttonView.setChecked(!isCheck);
                     homeActivity.dismissLoading();
                 });

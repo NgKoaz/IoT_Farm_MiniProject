@@ -13,6 +13,9 @@ class MyFirestore:
     def putSchedule(self, docId, js):
         self.rootDoc.collection("schedule").document(docId).set(js)
 
+    def putHistory(self, js):
+        self.rootDoc.collection("history").document().set(js)
+
     def deleteSchedule(self, docId):
         self.rootDoc.collection("schedule").document(docId).delete()
 

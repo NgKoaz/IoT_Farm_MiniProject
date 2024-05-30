@@ -27,7 +27,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
     private int area1Ratio = 0, area2Ratio = 0, area3Ratio = 0;
     private int isDate;
     private String date;
-    private String weekday;
+    private List<Integer> weekday = new ArrayList<>();
     private String time;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private boolean hasCurrentTime = false;     // Got current time from gateway yet?
@@ -132,7 +132,9 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
             scheduleActivity.updateDateDisplay(this.date);
         } else {
             this.weekday = schedule.weekday;
-            setWeekday(schedule.weekday);
+            this.date = "";
+            scheduleActivity.updateDateDisplay("Each");
+            scheduleActivity.updateCheckBox(this.weekday);
         }
     }
 
@@ -153,36 +155,17 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
     }
 
     // weekday params has been taken from Weekdays class
-    public void setWeekday(String weekday){
-        isDate = 0;
-        this.weekday = weekday;
-        date = "";
-        String text = "Monday";
-        switch(weekday){
-            case Weekdays.MONDAY:
-                text = "Monday";
-                break;
-            case Weekdays.TUESDAY:
-                text = "Tuesday";
-                break;
-            case Weekdays.WEDNESDAY:
-                text = "Wednesday";
-                break;
-            case Weekdays.THURSDAY:
-                text = "Thursday";
-                break;
-            case Weekdays.FRIDAY:
-                text = "Friday";
-                break;
-            case Weekdays.SATURDAY:
-                text = "Saturday";
-                break;
-            case Weekdays.SUNDAY:
-                text = "Sunday";
-                break;
-            default:
+    public void setWeekday(boolean isChecked, int numWeekday){
+        if (isChecked) {
+            this.weekday.add(numWeekday);
+            this.weekday.sort((o1, o2) -> {
+                int o11 = o1;
+                int o22 = o2;
+                return o11 - o22;
+            });
         }
-        scheduleActivity.updateDateDisplay(String.format("%s %s,", "Each", text));
+        date = "";
+        scheduleActivity.updateDateDisplay("Each");
     }
 
     private String getUserEmail(){
@@ -239,7 +222,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
             mHandler.post(() -> scheduleActivity.showToast("Wait gateway send current time at Gateway's location!"));
             return false;
         }
-        if (!isValidDateTime()) {
+        if (!this.date.isEmpty() && !isValidDateTime()) {
             mHandler.post(() -> scheduleActivity.showToast("The time you set is in the past!"));
             return false;
         }
@@ -325,6 +308,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         ratio.add(area1Ratio);
         ratio.add(area2Ratio);
         ratio.add(area3Ratio);
+        schedule.ratio = ratio;
         schedule.date = date;
         schedule.weekday = weekday;
         schedule._time = time;

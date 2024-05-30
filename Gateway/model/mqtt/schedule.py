@@ -18,7 +18,7 @@ class Schedule:
             volume: str = "",
             ratio: str = "[]",
             date: str = "",
-            weekday: str = "",
+            weekday: str = "[]",
             time: str = "",
             isOn: int = 1,
             error: str = ""
@@ -30,7 +30,7 @@ class Schedule:
         self.volume = volume
         self.ratio = eval(ratio)
         self.date = date
-        self.weekday = weekday
+        self.weekday = eval(weekday)
         self.time = time
         self.isOn = isOn
         self.error = error
