@@ -60,7 +60,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
         // Connect to default MQTT Broker
         connectToMqttBroker(
                 "tcp://mqtt.ohstem.vn",
-                "FarmApp_IOT",
+                "FarmApp_IOT3",
                 ""
         );
 
