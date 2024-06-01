@@ -25,6 +25,9 @@ class MyFirestore:
     def getSchedules(self):
         return self.rootDoc.collection("schedule").get()
 
+    def getSchedule(self, docId):
+        return self.rootDoc.collection("schedule").document(docId).get()
+
     def isScheduleExist(self, docId):
         doc = self.rootDoc.collection("schedule").document(docId).get()
         if doc.exists:

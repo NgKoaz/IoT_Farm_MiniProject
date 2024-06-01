@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.CompoundButton;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -46,6 +47,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
     private final Handler mHandler;
     private final List<Schedule> scheduleList = new ArrayList<>();
     private boolean debounce = false;
+    public boolean inUpdate = false;
 
     public HomeController(HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
@@ -247,12 +249,16 @@ public class HomeController implements MyMqttClient.MessageObserver {
         }
     }
 
-    public void handleSwitch(CompoundButton buttonView, boolean isCheck, Schedule schedule, int position) {
+    public void handleSwitch(View view, boolean isCheck, Schedule schedule, int position) {
+        if (inUpdate) {
+            return;
+        }
         if (debounce) {
             debounce = false;
             return;
         }
         homeActivity.showLoading();
+        CompoundButton buttonView = (CompoundButton) view;
         schedule.type = "update";
         schedule.setIsOn(isCheck ? 1 : 0);
         publishAndWaitAck(schedule, (isAck, error) -> {

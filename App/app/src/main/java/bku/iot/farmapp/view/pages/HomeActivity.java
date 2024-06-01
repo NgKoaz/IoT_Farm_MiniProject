@@ -67,8 +67,8 @@ public class HomeActivity extends MyActivity {
 
     public void updateScheduleList(List<Schedule> scheduleList){
         if (myAdapter == null){
-            myAdapter = new MyAdapter(this, scheduleList, (buttonView, isCheck, schedule, position) -> {
-                homeController.handleSwitch(buttonView, isCheck, schedule, position);
+            myAdapter = new MyAdapter(this, scheduleList, (view, isCheck, schedule, position) -> {
+                homeController.handleSwitch(view, isCheck, schedule, position);
             });
             recyclerView.setAdapter(myAdapter);
         } else {

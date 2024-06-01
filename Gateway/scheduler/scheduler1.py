@@ -21,6 +21,8 @@ class Task:
         self.period = int(period / Scheduler1.TIMER_CYCLE)
         self.taskId = 0
 
+        print(self.delay)
+
     def setTaskId(self, newId: int):
         self.taskId = newId
 
@@ -78,6 +80,9 @@ class Scheduler1:
 
         # For SCH_Update()
         self._runUpdate = 0
+
+        # In irrigation process
+        self.inProcess = False
 
         # Notify no task, loopInfinity thread can be sleep
         self.isNoTask = 0
@@ -155,7 +160,6 @@ class Scheduler1:
             if self._taskList and self.isReady():
                 task = self._taskList.pop(0)
                 self._taskIds.append(task.taskId)
-                print(task.taskId, self._taskIds, len(self._taskList))
             else:
                 self.isNoTask = True
                 return

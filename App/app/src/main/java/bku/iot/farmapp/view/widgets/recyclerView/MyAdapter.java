@@ -1,21 +1,17 @@
 package bku.iot.farmapp.view.widgets.recyclerView;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.json.JSONException;
-
 import java.util.List;
 import bku.iot.farmapp.R;
-import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
@@ -57,10 +53,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             myActivity.startNewActivity(ScheduleActivity.class, extras);
         });
 
-        if (switchListener != null)
-            holder.aSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                switchListener.onChange(buttonView, isChecked, schedule, position);
-            });
+        holder.aSwitch.setOnClickListener(view -> {
+            switchListener.onClicked(view, schedule.isOn != 1 , schedule, position);
+        });
     }
 
     @Override
@@ -136,7 +131,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     }
 
     public interface SwitchListener {
-        void onChange(CompoundButton buttonView, boolean isCheck, Schedule schedule, int position);
+        void onClicked(View buttonView, boolean isCheck, Schedule schedule, int position);
     }
 
 }

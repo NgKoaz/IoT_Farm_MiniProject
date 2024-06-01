@@ -73,14 +73,15 @@ class Main:
         self.scheduler1 = Scheduler1()
         # Initialize Uart
         self.uart = Uart(self.scheduler1)
+        self.uart.setOnProcessDone(self.onProcessDone)
 
         # Add 2 tasks for reading sensor
-        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=0, period=3))
-        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=0.02, period=3))
+        # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=0, period=3))
+        # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=0.02, period=3))
 
         self.scheduler2 = Scheduler2()
-        self.scheduler2.setOnTaskDone(on_task_done=self.onTaskDone)
-        self.scheduler2.setOnSaveHistory(on_save_history=self.onSaveHistory)
+        # self.scheduler2.setOnTaskDone(on_task_done=self.onTaskDone)
+        # self.scheduler2.setOnSaveHistory(on_save_history=self.onSaveHistory)
 
         # Initialize scheduler2
         self.setOffAllScheduleInDatabase()
@@ -93,18 +94,43 @@ class Main:
         # We need one infinity loop to maintain program
         self.loop()
 
-    def onTaskDone(self, scheduleTask: ScheduleTask):
-        scheduleTask.schedule.isOn = 0
-        scheduleTask.schedule.type = ScheduleType.UPDATE
-        js = json.loads(scheduleTask.schedule.toJsonString())
+    def onProcessDone(self, isSuccessful):
+        if isSuccessful:
+            print("Process ran successfully!")
+            doc = self.myFirestore.getSchedule(self.scheduleIdRunning)
+            self.scheduleIdRunning = ""
+            if doc.exists:
+                schedule = Schedule(
+                    scheduleId=doc.get("scheduleId"),
+                    name=doc.get("name"),
+                    type="update",
+                    volume=doc.get("volume"),
+                    ratio=str(doc.get("ratio")),
+                    date=doc.get("date"),
+                    weekday=str(doc.get("weekday")),
+                    time=doc.get("time"),
+                    isOn=0
+                )
+                self.onTaskDone(schedule)
+                self.onSaveHistory(schedule)
+        else:
+            print("<==============ERROR================>")
+            print("[ERROR] Irrigation process hasn't run like expectation!")
+            print("<==============ERROR================>")
+            exit()
+
+    def onTaskDone(self, schedule: Schedule):
+        schedule.isOn = 0
+        schedule.type = ScheduleType.UPDATE
+        js = json.loads(schedule.toJsonString())
         del js["email"]
         del js["type"]
         del js["error"]
-        self.myFirestore.updateSchedule(scheduleTask.schedule.scheduleId, js)
-        self.publishSchedule(scheduleTask.schedule)
+        self.myFirestore.updateSchedule(schedule.scheduleId, js)
+        self.publishSchedule(schedule)
 
-    def onSaveHistory(self, scheduleTask: ScheduleTask):
-        js = json.loads(scheduleTask.schedule.toJsonString())
+    def onSaveHistory(self, schedule: Schedule):
+        js = json.loads(schedule.toJsonString())
         del js["email"]
         del js["type"]
         del js["isOn"]
@@ -128,27 +154,22 @@ class Main:
                 self.myFirestore.updateSchedule(schedule.scheduleId, json.loads(schedule.toJsonString()))
 
     def taskScheduler2(self, schedule):
-        self.scheduleIdRunning = schedule.scheduleId
-        print(schedule.scheduleId)
-        # Start adding task
-        # TO DO
-        # Schedule:
-        # schedule.volume: Total will be pumped
-        # schedule.ratio[0]: ratio of water in total.
-        # schedule.ratio[1]: ratio of mixer1 in total.
-        # schedule.ratio[2]: ratio of mixer2 in total.
-        # schedule.ratio[3]: ratio of mixer3 in total.
-        # schedule.ratio[4]: ratio of area1 in total.
-        # schedule.ratio[5]: ratio of area2 in total.
-        # schedule.ratio[6]: ratio of area3 in total.
-
-        #
-
-        # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.setMixer1, args=TaskArgument(state=1), delay=1, period=0))
-
-        # TO DO
-        # End adding task
-        pass
+        if not self.scheduleIdRunning:
+            self.scheduleIdRunning = schedule.scheduleId
+            print("SCHEDULER 2 TASK RUN: " + schedule.scheduleId)
+            if not self.uart.initializeIrrigationProcess(schedule):
+                self.scheduleIdRunning = ""
+        else:
+            print("[ERROR] Other tasks is running!")
+            # schedule.isOn = 0
+            # schedule.type = ScheduleType.UPDATE
+            # schedule.error = "Other tasks is running!"
+            # js = json.loads(schedule.toJsonString())
+            # del js["email"]
+            # del js["type"]
+            # del js["error"]
+            # self.myFirestore.updateSchedule(schedule.scheduleId, js)
+            # self.publishSchedule(schedule)
 
     def onMessage(self, topic, payload):
         topic = topic.split("/")[-1]
@@ -177,7 +198,7 @@ class Main:
 
     def deleteSchedule(self, schedule: Schedule):
         if schedule.scheduleId:
-            if self.scheduler1.numTaskRunning > 2 and self.scheduleIdRunning == schedule.scheduleId:
+            if self.scheduleIdRunning == schedule.scheduleId:
                 schedule.error = "This schedule is executing, you can delete until it's done"
             elif self.myFirestore.isScheduleExist(schedule.scheduleId):
                 self.scheduler2.SCH_DeleteScheduleTask(schedule.scheduleId)
@@ -190,7 +211,7 @@ class Main:
 
     def updateSchedule(self, schedule: Schedule):
         if schedule.scheduleId:
-            if self.scheduler1.numTaskRunning > 2 and self.scheduleIdRunning == schedule.scheduleId:
+            if self.scheduleIdRunning == schedule.scheduleId:
                 schedule.error = "This schedule is executing, you can delete until it's done"
             elif self.myFirestore.isScheduleExist(schedule.scheduleId):
                 if schedule.isOn == 1:
@@ -249,8 +270,8 @@ class Main:
                 counter = 5
                 # self.publishSensorData(SensorData(SensorDataType.TEMPERATURE, self.uart.tempValue))
                 # self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, self.uart.moisValue))
-                print("Temp: " + str(self.uart.tempValue))
-                print("Mois: " + str(self.uart.moisValue))
+                # print("Temp: " + str(self.uart.tempValue))
+                # print("Mois: " + str(self.uart.moisValue))
 
             counterTime -= 1
             if counterTime <= 0:
