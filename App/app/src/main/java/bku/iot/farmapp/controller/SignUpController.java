@@ -46,6 +46,7 @@ public class SignUpController {
             public void onAuthSuccess(FirebaseUser user) {
                 signUpActivity.dismissLoading();
                 signUpActivity.showToast("Sign up successfully!");
+                navigateToSignInPage();
             }
 
             @Override

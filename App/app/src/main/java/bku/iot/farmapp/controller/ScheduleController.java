@@ -6,55 +6,43 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import bku.iot.farmapp.data.enums.MqttTopic;
-import bku.iot.farmapp.data.enums.Weekdays;
 import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.global.MyMqttClient;
 import bku.iot.farmapp.view.common.Utils;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
 
-public class ScheduleController implements MyMqttClient.MessageObserver {
+public class ScheduleController {
     private final String TAG = ScheduleController.class.getSimpleName();
     private final int WAIT_ACK_DURATION = 5000; // 3000ms
     private int waterRatio = 0, mixer1Ratio = 0, mixer2Ratio = 0, mixer3Ratio = 0;
     private int area1Ratio = 0, area2Ratio = 0, area3Ratio = 0;
+    private int hour, minute;
     private int isDate;
-    private String date;
+    private int day, month, year;
     private List<Integer> weekday = new ArrayList<>();
-    private String time;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private boolean hasCurrentTime = false;     // Got current time from gateway yet?
     private int curHour, curMinute, curDay, curMonth, curYear;
-
-
     private final ScheduleActivity scheduleActivity;
 
     public ScheduleController(ScheduleActivity scheduleActivity) {
         this.scheduleActivity = scheduleActivity;
-
-        MyMqttClient.gI().registerObserver(this);
     }
 
     public void openTimePickerDialog(){
-        scheduleActivity.openTimePickerDialog();
+        scheduleActivity.openTimePickerDialog(hour, minute);
     }
 
     private boolean isValidDateTime() {
         if (isDate == 0) return true;
-        String[] timeParts = time.split(":");
-        String[] dateParts = date.split("/");
-        int hour = Integer.parseInt(timeParts[0]);
-        int minute = Integer.parseInt(timeParts[1]);
-        int day = Integer.parseInt(dateParts[0]);
-        int month = Integer.parseInt(dateParts[1]);
-        int year = Integer.parseInt(dateParts[2]);
 
         // Compare year
         if (year < curYear)
@@ -84,74 +72,74 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         return true;
     }
 
-    public void setDefaultDateTime(){
-        // Get current time
+    public void setDefaultDateTime() {
         Calendar currentTime = Calendar.getInstance();
-        int curHour = currentTime.get(Calendar.HOUR_OF_DAY);
 
-        // Default hour
-        int hour = 6;
-        int minute = 0;
+        hour = currentTime.get(Calendar.HOUR_OF_DAY);
+        minute = currentTime.get(Calendar.MINUTE);
 
-        // If time is in the past, add one day.
-        if (curHour >= hour) {
-            currentTime.add(Calendar.DAY_OF_MONTH, 1);
-        }
+        day = currentTime.get(Calendar.DAY_OF_MONTH);
+        month = currentTime.get(Calendar.MONTH) + 1;
+        year = currentTime.get(Calendar.YEAR);
 
-        // Set default time
-        String hourDisplay = String.format((hour < 10) ? "0%d" : "%d", hour);
-        String minuteDisplay = String.format((minute < 10) ? "0%d" : "%d", minute);
-
-        this.time = String.format("%s:%s", hourDisplay, minuteDisplay);
-        scheduleActivity.updateTimeDisplay(hourDisplay, minuteDisplay);
-
-        int day = currentTime.get(Calendar.DAY_OF_MONTH);
-        int month = currentTime.get(Calendar.MONTH) + 1;
-        int year = currentTime.get(Calendar.YEAR);
-
-        // Set default date
+        // Set date is default instead of weekdays.
         isDate = 1;
-        this.date = String.format("%d/%d/%d", day, month, year);
+
+        // Clear weekday value, because we set day.
+        weekday.clear();
+
+        // Update UI
+        scheduleActivity.updateTimeDisplay(hour, minute);
+        scheduleActivity.updateDateDisplay(year, month, day);
         scheduleActivity.clearWeekdayCheck();
-        scheduleActivity.updateDateDisplay(this.date);
     }
 
-    public void setDateTimeForEditting(Schedule schedule){
+    public void setDateTimeForEditing(Schedule schedule){
         // Set default time
-        this.time = schedule._time;
-        String[] timeParts = this.time.split(":");
-        String hour = timeParts[0];
-        String minute = timeParts[1];
+        String[] timeParts = schedule._time.split(":");
+        hour = Integer.parseInt(timeParts[0]);
+        minute = Integer.parseInt(timeParts[1]);
 
         scheduleActivity.updateTimeDisplay(hour, minute);
 
         // Set default date
         if (!schedule.date.isEmpty()) {
-            this.date = schedule.date;
+            String[] dateParts = schedule.date.split("/");
+            isDate = 1;
+            day = Integer.parseInt(dateParts[0]);
+            month = Integer.parseInt(dateParts[1]);
+            year = Integer.parseInt(dateParts[2]);
+
+            // Update UI
+            weekday.clear();
             scheduleActivity.clearWeekdayCheck();
-            scheduleActivity.updateDateDisplay(this.date);
+            scheduleActivity.updateDateDisplay(year, month, day);
         } else {
-            this.weekday = schedule.weekday;
-            this.date = "";
-            scheduleActivity.updateDateDisplay("Each");
+            isDate = 0;
+            weekday = schedule.weekday;
+            scheduleActivity.updateWeekdayDisplay("Each");
             scheduleActivity.updateCheckBox(this.weekday);
         }
     }
 
     public void setTime(int hour, int minute){
-        // Set default time
-        String hourDisplay = String.format((hour < 10) ? "0%d" : "%d", hour);
-        String minuteDisplay = String.format((minute < 10) ? "0%d" : "%d", minute);
-
-        this.time = String.format("%s:%s", hourDisplay, minuteDisplay);
-        scheduleActivity.updateTimeDisplay(hourDisplay, minuteDisplay);
+        this.hour = hour;
+        this.minute = minute;
+        scheduleActivity.updateTimeDisplay(hour, minute);
     }
 
-    public void setDate(int day, int month, int year){
+    public void setDate(int year, int month, int day){
         isDate = 1;
-        this.date = String.format("%d/%d/%d", day, month, year);
+        this.year = year;
+        this.month = month;
+        this.day = day;
+
+        // Clear weekday
+        weekday.clear();
+
+        // Update UI
         scheduleActivity.clearWeekdayCheck();
-        scheduleActivity.updateDateDisplay(this.date);
+        scheduleActivity.updateDateDisplay(year, month, day);
     }
 
     // weekday params has been taken from Weekdays class
@@ -164,8 +152,8 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
                 return o11 - o22;
             });
         }
-        date = "";
-        scheduleActivity.updateDateDisplay("Each");
+        this.isDate = 0;
+        scheduleActivity.updateWeekdayDisplay("Each");
     }
 
     private String getUserEmail(){
@@ -173,6 +161,17 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
             return "";
         }
         return MyFirebaseAuth.gI().getCurrentUser().getEmail();
+    }
+
+    private String getTimeIsSetInStringType() {
+        return String.format(hour < 10 ? "0%s" : "%s", hour) + ":" +
+                String.format(minute < 10 ? "0%s" : "%s", minute);
+    }
+
+    private String getDateIsSetInStringType() {
+        return String.format(String.format(day < 10 ? "0%s" : "%s", day)) + "/" +
+                String.format(month < 10 ? "0%s" : "%s", month) + "/" +
+                year;
     }
 
     public void setWaterAndMixerRatio(String water, String mixer1, String mixer2, String mixer3) {
@@ -218,11 +217,7 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
     }
 
     private boolean checkSchedule() {
-        if (!hasCurrentTime) {
-            mHandler.post(() -> scheduleActivity.showToast("Wait gateway send current time at Gateway's location!"));
-            return false;
-        }
-        if (!this.date.isEmpty() && !isValidDateTime()) {
+        if (!isValidDateTime()) {
             mHandler.post(() -> scheduleActivity.showToast("The time you set is in the past!"));
             return false;
         }
@@ -258,7 +253,16 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         ratio.add(area2Ratio);
         ratio.add(area3Ratio);
 
-        Schedule schedule = new Schedule(getUserEmail(), "add", name, Integer.parseInt(volume), ratio, this.date, this.weekday, this.time);
+        Schedule schedule = new Schedule(
+                getUserEmail(),
+                "add",
+                name,
+                Integer.parseInt(volume),
+                ratio,
+                getDateIsSetInStringType(),
+                this.weekday,
+                getTimeIsSetInStringType()
+        );
         schedule.isOn = 1;
 
         publishAndWaitAck(schedule, (isAck, error) -> {
@@ -309,9 +313,9 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
         ratio.add(area2Ratio);
         ratio.add(area3Ratio);
         schedule.ratio = ratio;
-        schedule.date = date;
+        schedule.date = getDateIsSetInStringType();
         schedule.weekday = weekday;
-        schedule._time = time;
+        schedule._time = getTimeIsSetInStringType();
         schedule.isOn = 1;
 
         publishAndWaitAck(schedule, (isAck, error) -> {
@@ -412,61 +416,56 @@ public class ScheduleController implements MyMqttClient.MessageObserver {
     }
 
     public void openDatePickerDialog(){
-        scheduleActivity.openDatePickerDialog();
+        scheduleActivity.openDatePickerDialog(year, month, day);
     }
 
     public void backToPreviousActivity(){
-        MyMqttClient.gI().unregisterObserver(this);
         scheduleActivity.finish();
     }
 
-    public void updateCurrentTimeDisplay(){
-        mHandler.post(() -> {
-            String curHourDisplay = String.format((curHour < 10) ? "0%d" : "%d", curHour);
-            String curMinuteDisplay = String.format((curMinute < 10) ? "0%d" : "%d", curMinute);
-            String curDayDisplay = String.format((curDay < 10) ? "0%d" : "%d", curDay);
-            String curMonthDisplay = String.format((curMonth < 10) ? "0%d" : "%d", curMonth);
-            String curYearDisplay = String.format((curYear < 10) ? "0%d" : "%d", curYear);
+    public void loadEditSchedulePage(Schedule schedule) {
+        waterRatio = schedule.ratio.get(0);
+        mixer1Ratio = schedule.ratio.get(1);
+        mixer2Ratio = schedule.ratio.get(2);
+        mixer3Ratio = schedule.ratio.get(3);
+        area1Ratio = schedule.ratio.get(4);
+        area2Ratio = schedule.ratio.get(5);
+        area3Ratio = schedule.ratio.get(6);
 
-            scheduleActivity.updateCurrentTime(
-                String.format("%s:%s %s/%s/%s",
-                        curHourDisplay,
-                        curMinuteDisplay,
-                        curDayDisplay,
-                        curMonthDisplay,
-                        curYearDisplay)
-            );
-        });
+        // Update UI
+        scheduleActivity.updateNameText(schedule._name);
+        scheduleActivity.updateVolumeText(String.valueOf(schedule.volume));
+        scheduleActivity.updateMixerRatioText(
+                String.valueOf(waterRatio),
+                String.valueOf(mixer1Ratio),
+                String.valueOf(mixer2Ratio),
+                String.valueOf(mixer3Ratio)
+        );
+        scheduleActivity.updateAreaRatioText(
+                String.valueOf(area1Ratio),
+                String.valueOf(area2Ratio),
+                String.valueOf(area3Ratio)
+        );
     }
 
-    private void handleCurrentTimeMessage(JSONObject jsonObject){
-        try {
-            curHour = jsonObject.getInt("hour");
-            curMinute = jsonObject.getInt("minute");
-            curDay = jsonObject.getInt("day");
-            curMonth = jsonObject.getInt("month");
-            curYear = jsonObject.getInt("year");
-            hasCurrentTime = true;
-            updateCurrentTimeDisplay();
-        } catch (JSONException e) {
-            Log.e(TAG, "handleCurrentTimeMessage get data error!");
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onMessageReceived(String topic, String payload) {
-        try {
-            JSONObject jsonObject = new JSONObject(payload);
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            if (topic.equals(MqttTopic.currentTime)){
-                executor.submit(() -> {
-                    handleCurrentTimeMessage(jsonObject);
-                });
+    public void startThreadUpdateCurrentTime() {
+        Thread thread = new Thread(() -> {
+            while (true) {
+                updateCurrentTimeDisplay();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
-        } catch (JSONException e){
-            e.printStackTrace();
-        }
+        });
+        thread.start();
+    }
+
+    private void updateCurrentTimeDisplay(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm dd/MM/yy", Locale.getDefault());
+        String currentTime = dateFormat.format(new Date());
+        mHandler.post(() -> scheduleActivity.updateCurrentTime(currentTime));
     }
 
     private interface OnWaitAck{

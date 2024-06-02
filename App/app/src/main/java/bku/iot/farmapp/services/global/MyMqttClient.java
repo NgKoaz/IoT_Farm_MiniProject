@@ -210,10 +210,8 @@ public class MyMqttClient implements MqttCallback {
     @Override
     public void messageArrived(String topic, MqttMessage message) {
         String payload = new String(message.getPayload());
-        if (topic.contains(MqttTopic.currentTime)) {
-            Log.d(TAG, "TOPIC: " + topic);
-            Log.d(TAG, "PAYLOAD: " + payload);
-        }
+        Log.d(TAG, "TOPIC: " + topic);
+        Log.d(TAG, "PAYLOAD: " + payload);
         notifyMessageArrived(topic, payload);
     }
 

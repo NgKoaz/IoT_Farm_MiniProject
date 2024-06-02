@@ -3,7 +3,6 @@ package bku.iot.farmapp.view.pages;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -168,7 +167,7 @@ public class ScheduleActivity extends MyActivity {
         }
 
         datePickerDialog.setOnDateSetListener((view, year, month, dayOfMonth) -> {
-            scheduleController.setDate(dayOfMonth, month + 1, year);
+            scheduleController.setDate(year, month + 1, dayOfMonth);
         });
         timePickerDialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
             scheduleController.setTime(hourOfDay, minute);
@@ -190,6 +189,8 @@ public class ScheduleActivity extends MyActivity {
         } else {
             loadEditSchedulePage();
         }
+
+        scheduleController.startThreadUpdateCurrentTime();
     }
 
     private void loadAddSchedulePage(){
@@ -213,18 +214,17 @@ public class ScheduleActivity extends MyActivity {
         spaceBetweenButtons.setVisibility(View.VISIBLE);
 
         schedule = getIntent().getParcelableExtra("schedule");
+        scheduleController.loadEditSchedulePage(schedule);
 
-        nameInput.setText(schedule._name);
-        volumeInput.setText(String.valueOf(schedule.volume));
-        waterText.setText(String.valueOf(schedule.ratio.get(0)));
-        mixer1Text.setText(String.valueOf(schedule.ratio.get(1)));
-        mixer2Text.setText(String.valueOf(schedule.ratio.get(2)));
-        mixer3Text.setText(String.valueOf(schedule.ratio.get(3)));
-        area1Text.setText(String.valueOf(schedule.ratio.get(4)));
-        area2Text.setText(String.valueOf(schedule.ratio.get(5)));
-        area3Text.setText(String.valueOf(schedule.ratio.get(6)));
+        scheduleController.setDateTimeForEditing(schedule);
+    }
 
-        scheduleController.setDateTimeForEditting(schedule);
+    public void updateNameText(String name) {
+        nameInput.setText(name);
+    }
+
+    public void updateVolumeText(String volume) {
+        volumeInput.setText(volume);
     }
 
     public void updateCheckBox(List<Integer> weekday){
@@ -254,11 +254,13 @@ public class ScheduleActivity extends MyActivity {
         mixerInputDialog.dismiss();
     }
 
-    public void openTimePickerDialog(){
+    public void openTimePickerDialog(int hourOfDay, int minute){
+        timePickerDialog.updateTime(hourOfDay, minute);
         timePickerDialog.show();
     }
 
-    public void openDatePickerDialog(){
+    public void openDatePickerDialog(int year, int month, int dayOfMonth){
+        datePickerDialog.updateDate(year, month, dayOfMonth);
         datePickerDialog.show();
     }
 
@@ -268,15 +270,20 @@ public class ScheduleActivity extends MyActivity {
         }
     }
 
-    public void updateTimeDisplay(String hour, String minute){
-        if (hour.length() == 1) hour = "0" + hour;
-        if (minute.length() == 1) minute = "0" + minute;
-        hourText.setText(hour);
-        minuteText.setText(minute);
+    public void updateTimeDisplay(int hour, int minute){
+        hourText.setText(String.format(hour < 10 ? "0%s" : "%s", hour));
+        minuteText.setText(String.format(minute < 10 ? "0%s" : "%s", minute));
     }
 
-    public void updateDateDisplay(String dateString){
-        dateInfoText.setText(dateString);
+    public void updateDateDisplay(int year, int month, int day){
+        String displayText = String.format(String.format(day < 10 ? "0%s" : "%s", day)) + "/" +
+                String.format(month < 10 ? "0%s" : "%s", month) + "/" +
+                year;
+        dateInfoText.setText(displayText);
+    }
+
+    public void updateWeekdayDisplay(String text){
+        dateInfoText.setText(text);
     }
 
     public void updateCurrentTime(String time){

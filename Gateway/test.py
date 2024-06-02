@@ -73,6 +73,10 @@ def test(cmd):
         print("SELECTOR 2: OFF")
     elif cmd == selector3_OFF:
         print("SELECTOR 3: OFF")
+    elif cmd == soil_temperature:
+        print("Get temperature")
+    elif cmd == soil_moisture:
+        print("Get soil moisture")
     else:
         print("UNKNOWN MESSAGE!")
 

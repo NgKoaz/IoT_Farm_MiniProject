@@ -53,6 +53,9 @@ class Uart:
         self.port = self.getPort()
         # Args: isSuccessful
         self.onProcessDone = None
+        self.onUartIsDown = None
+
+        self.scheduler1.SCH_AddTask(Task(pTask=self.trackError, delay=0, period=3))
 
         try:
             self.ser = serial.Serial(port=self.port, baudrate=115200)
@@ -78,8 +81,22 @@ class Uart:
         # return "/dev/ttyUSB1"
         return "COM2"
 
+    def setOnUartIsDown(self, onUartIsDown):
+        self.onUartIsDown = onUartIsDown
+
     def setOnProcessDone(self, onProcessDone):
         self.onProcessDone = onProcessDone
+
+    def trackError(self):
+        if self.nonAck >= self.MAX_NON_ACK:
+            if self.onUartIsDown:
+                self.onUartIsDown()
+            else:
+                print("[ERROR] CAN'T GET ACK, THE COMMUNICATION LINE MAY BE TAKEN DOWN!")
+                print("[ERROR] CAN'T GET ACK, THE COMMUNICATION LINE MAY BE TAKEN DOWN!")
+                print("[ERROR] CAN'T GET ACK, THE COMMUNICATION LINE MAY BE TAKEN DOWN!")
+                # Halt program
+                time.sleep(100000000)
 
     def setMixer1(self, args):
         state = args.payload["state"]
@@ -278,9 +295,9 @@ class Uart:
         task = Task(pTask=self.setMixer3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0, period=0)
         self.scheduler1.SCH_AddTask(task)
 
-        delayTurnOffArea1 = int(volume / totalRatioIn * area1 / self.MILLILITER_TO_SECOND)
-        delayTurnOffArea2 = int(volume / totalRatioIn * area2 / self.MILLILITER_TO_SECOND)
-        delayTurnOffArea3 = int(volume / totalRatioIn * area3 / self.MILLILITER_TO_SECOND)
+        delayTurnOffArea1 = int(volume / totalRatioOut * area1 / self.MILLILITER_TO_SECOND)
+        delayTurnOffArea2 = int(volume / totalRatioOut * area2 / self.MILLILITER_TO_SECOND)
+        delayTurnOffArea3 = int(volume / totalRatioOut * area3 / self.MILLILITER_TO_SECOND)
         delayPumpOut = max(delayTurnOffArea1, delayTurnOffArea2, delayTurnOffArea3)
 
         task = Task(pTask=self.trackingAckSection1,
@@ -291,7 +308,6 @@ class Uart:
                     delay=max_duration_in_section_1 + self.WAITING_ACK * 10,
                     period=0)
         self.scheduler1.SCH_AddTask(task)
-
         return True
 
     def trackingAckSection1(self, args):
@@ -343,6 +359,7 @@ class Uart:
             print("OK")
             self.totalAck += 1
         else:
+            self.nonAck += 1
             print("NON-OK, PREPARE FOR RESEND!")
             # Delete turn off task
             taskTurnOffId = args.payload["taskTurnOffId"]

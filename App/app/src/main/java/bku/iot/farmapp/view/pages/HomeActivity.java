@@ -4,7 +4,6 @@ package bku.iot.farmapp.view.pages;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.List;
@@ -12,7 +11,7 @@ import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.HomeController;
 import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.view.common.MyActivity;
-import bku.iot.farmapp.view.widgets.recyclerView.MyAdapter;
+import bku.iot.farmapp.view.widgets.recyclerView.ScheduleListAdapter;
 
 
 public class HomeActivity extends MyActivity {
@@ -23,7 +22,7 @@ public class HomeActivity extends MyActivity {
     private TextView tempValueText, moisValueText;
     private ImageView historyTaskButton, addScheduleButton;
     private RecyclerView recyclerView;
-    private MyAdapter myAdapter;
+    private ScheduleListAdapter scheduleListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,17 +62,22 @@ public class HomeActivity extends MyActivity {
     protected void onBindViews() {
         super.onBindViews();
         homeController.refreshRecyclerView();
+        homeController.startThreadUpdateClock();
     }
 
     public void updateScheduleList(List<Schedule> scheduleList){
-        if (myAdapter == null){
-            myAdapter = new MyAdapter(this, scheduleList, (view, isCheck, schedule, position) -> {
-                homeController.handleSwitch(view, isCheck, schedule, position);
+        if (scheduleListAdapter == null){
+            scheduleListAdapter = new ScheduleListAdapter(this, scheduleList, (buttonView, isCheck, schedule, position) -> {
+                homeController.handleSwitch(buttonView, isCheck, schedule, position);
             });
-            recyclerView.setAdapter(myAdapter);
+            recyclerView.setAdapter(scheduleListAdapter);
         } else {
-            myAdapter.notifyDataSetChanged();
+            scheduleListAdapter.notifyDataSetChanged();
         }
+    }
+
+    public void updateAdapterByPosition(int position) {
+        scheduleListAdapter.notifyItemChanged(position);
     }
 
     public void updateTimeText(String time){

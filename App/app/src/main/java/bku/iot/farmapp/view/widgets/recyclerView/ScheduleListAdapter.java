@@ -2,9 +2,9 @@ package bku.iot.farmapp.view.widgets.recyclerView;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -16,13 +16,14 @@ import bku.iot.farmapp.data.model.Schedule;
 import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.pages.ScheduleActivity;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapter.ViewHolder> {
 
     private final List<Schedule> dataList;
     private final MyActivity myActivity;
     private SwitchListener switchListener;
+    private boolean inUpdateProcess = false;
 
-    public MyAdapter(MyActivity myActivity, List<Schedule> dataList, SwitchListener switchListener) {
+    public ScheduleListAdapter(MyActivity myActivity, List<Schedule> dataList, SwitchListener switchListener) {
         this.myActivity = myActivity;
         this.dataList = dataList;
         this.switchListener = switchListener;
@@ -37,6 +38,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        inUpdateProcess = true;
         if (position % 2 == 1)
             holder.root.setBackgroundResource(R.drawable.bg_schedule_info_odd);
         else
@@ -53,9 +55,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             myActivity.startNewActivity(ScheduleActivity.class, extras);
         });
 
-        holder.aSwitch.setOnClickListener(view -> {
-            switchListener.onClicked(view, schedule.isOn != 1 , schedule, position);
+        holder.aSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!inUpdateProcess && !holder.debouceSwitch)
+                switchListener.onClicked(buttonView, schedule.isOn != 1, schedule, position);
         });
+
+        inUpdateProcess = false;
     }
 
     @Override
@@ -67,6 +72,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         private final View root;
         private final TextView nameText, timeText, dayText;
         private final Switch aSwitch;
+        private boolean debouceSwitch = false;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -131,7 +137,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     }
 
     public interface SwitchListener {
-        void onClicked(View buttonView, boolean isCheck, Schedule schedule, int position);
+        void onClicked(CompoundButton buttonView, boolean isCheck, Schedule schedule, int position);
     }
 
 }

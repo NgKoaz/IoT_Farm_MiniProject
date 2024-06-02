@@ -4,16 +4,22 @@ package bku.iot.farmapp.view.pages;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
+
+import java.util.List;
+
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.HistoryController;
+import bku.iot.farmapp.data.model.HistorySchedule;
 import bku.iot.farmapp.view.common.MyActivity;
 import bku.iot.farmapp.view.widgets.appbar.AppBar;
+import bku.iot.farmapp.view.widgets.recyclerView.HistoryListAdapter;
 
 
 public class HistoryActivity extends MyActivity {
     private HistoryController historyController;
     private AppBar appbar;
     private RecyclerView recyclerView;
+    private HistoryListAdapter historyListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +38,20 @@ public class HistoryActivity extends MyActivity {
 
         recyclerView = findViewById(R.id.history_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
 
-//        MyAdapter myAdapter = new MyAdapter(this, list, false);
-//        recyclerView.setAdapter(myAdapter);
+    @Override
+    protected void onBindViews() {
+        super.onBindViews();
+        historyController.loadHistoryView();
+    }
 
+    public void updateHistoryView(List<HistorySchedule> historyScheduleList) {
+        if (historyListAdapter == null) {
+            historyListAdapter = new HistoryListAdapter(this, historyScheduleList);
+            recyclerView.setAdapter(historyListAdapter);
+        } else {
+            historyListAdapter.notifyDataSetChanged();
+        }
     }
 }

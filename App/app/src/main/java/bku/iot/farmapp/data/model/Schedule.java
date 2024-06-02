@@ -15,9 +15,9 @@ public class Schedule implements Parcelable {
     public String type = "";
     public String _name = "";
     public int volume;
-    public List<Integer> ratio;
+    public List<Integer> ratio = new ArrayList<>();;
     public String date = "";
-    public List<Integer> weekday;
+    public List<Integer> weekday = new ArrayList<>();
     public String _time = "";
     public int isOn = 0;
     public String error = "";

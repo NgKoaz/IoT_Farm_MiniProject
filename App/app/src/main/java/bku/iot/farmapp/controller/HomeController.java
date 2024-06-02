@@ -5,26 +5,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.View;
 import android.widget.CompoundButton;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-
-
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import bku.iot.farmapp.data.enums.ActivityResultCode;
 import bku.iot.farmapp.data.enums.MqttTopic;
 import bku.iot.farmapp.data.enums.SensorType;
@@ -46,8 +42,6 @@ public class HomeController implements MyMqttClient.MessageObserver {
     private final ActivityResultLauncher<Intent> activityResultLauncher;
     private final Handler mHandler;
     private final List<Schedule> scheduleList = new ArrayList<>();
-    private boolean debounce = false;
-    public boolean inUpdate = false;
 
     public HomeController(HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
@@ -208,9 +202,6 @@ public class HomeController implements MyMqttClient.MessageObserver {
     private void updateScheduleInList(Schedule newSchedule){
         for (Schedule oldSchedule : scheduleList) {
             if (oldSchedule.scheduleId.equals(newSchedule.scheduleId)) {
-                if (oldSchedule.isOn != newSchedule.isOn) {
-                    debounce = true;
-                }
                 oldSchedule.shallowCopy(newSchedule);
                 break;
             }
@@ -223,11 +214,23 @@ public class HomeController implements MyMqttClient.MessageObserver {
         sortScheduleList();
     }
 
+    private String getUserEmail(){
+        if (MyFirebaseAuth.gI().getCurrentUser() == null) {
+            return "";
+        }
+        return MyFirebaseAuth.gI().getCurrentUser().getEmail();
+    }
+
     private void handleScheduleResponseMessage(JSONObject jsonObject){
         try {
             Schedule schedule = new Schedule(jsonObject);
 
-            if (!schedule.error.isEmpty()) return;
+            if (!schedule.email.equals(getUserEmail()) && !schedule.error.isEmpty()) return;
+
+            if (!schedule.error.isEmpty()) {
+                mHandler.post(() -> homeActivity.showToast(schedule.error));
+                return;
+            }
 
             switch (schedule.type) {
                 case "add":
@@ -249,16 +252,8 @@ public class HomeController implements MyMqttClient.MessageObserver {
         }
     }
 
-    public void handleSwitch(View view, boolean isCheck, Schedule schedule, int position) {
-        if (inUpdate) {
-            return;
-        }
-        if (debounce) {
-            debounce = false;
-            return;
-        }
-        homeActivity.showLoading();
-        CompoundButton buttonView = (CompoundButton) view;
+    public void handleSwitch(CompoundButton buttonView, boolean isCheck, Schedule schedule, int position) {
+        mHandler.post(homeActivity::showLoading);
         schedule.type = "update";
         schedule.setIsOn(isCheck ? 1 : 0);
         publishAndWaitAck(schedule, (isAck, error) -> {
@@ -266,16 +261,14 @@ public class HomeController implements MyMqttClient.MessageObserver {
                 mHandler.post(() -> {
                     homeActivity.showToast("Time out!");
                     schedule.setIsOn(!isCheck ? 1 : 0);
-                    debounce = true;
-                    buttonView.setChecked(!isCheck);
+                    homeActivity.updateAdapterByPosition(position);
                     homeActivity.dismissLoading();
                 });
             } else if (!error.isEmpty()) {
                 mHandler.post(() -> {
                     homeActivity.showToast(error);
                     schedule.setIsOn(!isCheck ? 1 : 0);
-                    debounce = true;
-                    buttonView.setChecked(!isCheck);
+                    homeActivity.updateAdapterByPosition(position);;
                     homeActivity.dismissLoading();
                 });
             } else {
@@ -293,13 +286,16 @@ public class HomeController implements MyMqttClient.MessageObserver {
                     if (topic.equals(MqttTopic.scheduleResponse)) {
                         try {
                             JSONObject jsonObject = new JSONObject(payload);
+                            String scheduleId = jsonObject.getString("scheduleId");
                             String payloadEmail = jsonObject.getString("email");
                             String payloadType = jsonObject.getString("type");
 
                             if (schedule.email.equals(payloadEmail) && schedule.type.equals(payloadType)) {
-                                isAck.set(true);
-                                MyMqttClient.gI().unregisterObserver(this);
-                                listener.onComplete(isAck.get(), jsonObject.getString("error"));
+                                if (!schedule.type.equals("update") || schedule.scheduleId.equals(scheduleId)) {
+                                    isAck.set(true);
+                                    MyMqttClient.gI().unregisterObserver(this);
+                                    listener.onComplete(isAck.get(), jsonObject.getString("error"));
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -351,23 +347,24 @@ public class HomeController implements MyMqttClient.MessageObserver {
         homeActivity.startNewActivity(ScheduleActivity.class, extras);
     }
 
-    public void updateTimeDisplay(JSONObject jsonObject){
-        try {
-            String tempHour = String.valueOf(jsonObject.get("hour"));
-            String hour = (tempHour.length() <= 1) ? "0" + tempHour : tempHour;
+    public void startThreadUpdateClock() {
+        Thread thread = new Thread(() -> {
+            while (true) {
+                updateTimeDisplay();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        thread.start();
+    }
 
-            String tempMinute = String.valueOf(jsonObject.get("minute"));
-            String minute = (tempMinute.length() <= 1) ? "0" + tempMinute : tempMinute;
-
-            String day = String.valueOf(jsonObject.get("day"));
-            String month = String.valueOf(jsonObject.get("month"));
-            String year = String.valueOf(jsonObject.get("year"));
-
-            mHandler.post(() -> homeActivity.updateTimeText(String.format("%s:%s %s/%s/%s", hour, minute, day, month, year)));
-        } catch (JSONException e){
-            e.printStackTrace();
-            Log.e(TAG, "updateTimeDisplay() is not in correct form");
-        }
+    public void updateTimeDisplay(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm dd/MM/yy", Locale.getDefault());
+        String currentTime = dateFormat.format(new Date());
+        mHandler.post(() -> homeActivity.updateTimeText(currentTime));
     }
 
     @Override
@@ -381,9 +378,6 @@ public class HomeController implements MyMqttClient.MessageObserver {
                     break;
                 case MqttTopic.scheduleResponse:
                     handleScheduleResponseMessage(jsonObject);
-                    break;
-                case MqttTopic.currentTime:
-                    updateTimeDisplay(jsonObject);
                     break;
                 default:
             }

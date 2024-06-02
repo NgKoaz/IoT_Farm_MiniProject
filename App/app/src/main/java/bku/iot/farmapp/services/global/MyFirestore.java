@@ -54,7 +54,7 @@ public class MyFirestore {
         CollectionReference brokersCollectionRef =
                 db.collection("brokers")
                         .document(broker + "-" + username + "-" + password)
-                        .collection("historySchedule");
+                        .collection("history");
         brokersCollectionRef.get().addOnCompleteListener(listener);
     }
 
