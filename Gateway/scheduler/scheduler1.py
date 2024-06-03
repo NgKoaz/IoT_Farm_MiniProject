@@ -21,8 +21,6 @@ class Task:
         self.period = int(period / Scheduler1.TIMER_CYCLE)
         self.taskId = 0
 
-        print(self.delay)
-
     def setTaskId(self, newId: int):
         self.taskId = newId
 

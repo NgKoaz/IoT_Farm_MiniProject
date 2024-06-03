@@ -199,6 +199,8 @@ class Main:
             del js["error"]
             self.myFirestore.updateSchedule(schedule.scheduleId, js)
             self.publishSchedule(schedule)
+            sendMessage(title="[ERROR] Other tasks is running!",
+                        body="Your schedule is conflicted! Schedule just run will turn off!")
 
     def onMessage(self, topic, payload):
         topic = topic.split("/")[-1]
