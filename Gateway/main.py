@@ -303,11 +303,8 @@ class Main:
             counter -= 1
             if counter <= 0:
                 counter = 5
-                # self.publishSensorData(SensorData(SensorDataType.TEMPERATURE, self.uart.tempValue))
-                # self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, self.uart.moisValue))
-                # print("Temp: " + str(self.uart.tempValue))
-                # print("Mois: " + str(self.uart.moisValue))
-
+                self.publishSensorData(SensorData(SensorDataType.TEMPERATURE, self.uart.tempValue))
+                self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, self.uart.moisValue))
             TimeManager.sleep(1)
 
 

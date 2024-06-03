@@ -8,6 +8,10 @@ from utils.time_manager import TimeManager
 
 
 class Uart:
+    class Device:
+        TEMPERATURE_SENSOR = 0
+        SOIL_MOISTURE_SENSOR = 1
+
     WAITING_ACK = 2
     MAX_NON_ACK = 9
     MILLILITER_TO_SECOND = 200   # Pump 10ml / 1s
@@ -96,7 +100,7 @@ class Uart:
                 print("[ERROR] CAN'T GET ACK, THE COMMUNICATION LINE MAY BE TAKEN DOWN!")
                 print("[ERROR] CAN'T GET ACK, THE COMMUNICATION LINE MAY BE TAKEN DOWN!")
                 # Halt program
-                time.sleep(100000000)
+                time.sleep(10000)
 
     def setMixer1(self, args):
         state = args.payload["state"]
@@ -377,7 +381,6 @@ class Uart:
                     delay=self.WAITING_ACK,
                     period=0)
         self.scheduler1.SCH_AddTask(task)
-        time.sleep(0.1)
 
     def readMoisture(self):
         self.ser.write(self.soil_moisture)
