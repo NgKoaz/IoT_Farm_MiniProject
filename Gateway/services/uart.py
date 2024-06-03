@@ -9,7 +9,7 @@ from utils.time_manager import TimeManager
 
 class Uart:
     WAITING_ACK = 2
-    MAX_NON_ACK = 21
+    MAX_NON_ACK = 9
     MILLILITER_TO_SECOND = 200   # Pump 10ml / 1s
     NUMBER_ACK_AT_SECTION1 = 8
 

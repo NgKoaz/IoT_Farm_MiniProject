@@ -3,6 +3,7 @@ package bku.iot.farmapp;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import bku.iot.farmapp.services.global.MyFirebaseAuth;
 import bku.iot.farmapp.services.local.LocalStorage;
@@ -17,6 +18,8 @@ public class MainController {
         this.mainActivity = mainActivity;
 
         autoSignIn();
+
+        subscribeNotifyTopic();
     }
 
     private void autoSignIn(){
@@ -43,6 +46,16 @@ public class MainController {
                 mainActivity.startNewActivity(SignInActivity.class, null);
                 mainActivity.finish();
             }
+        });
+    }
+
+    private void subscribeNotifyTopic() {
+        FirebaseMessaging.getInstance().subscribeToTopic("notify").addOnCompleteListener(task -> {
+            String msg = "Subscribed to `notify` Topic";
+            if (!task.isSuccessful()) {
+                msg = "Subscription failed";
+            }
+            Log.d(TAG, msg);
         });
     }
 }

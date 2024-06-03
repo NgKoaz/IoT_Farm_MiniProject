@@ -1,5 +1,12 @@
-array1 = [1, 2, 3, 4]
-array2 = [1, 2, 3, 4, 5]
+import firebase_admin
+from firebase_admin import messaging, credentials
 
-are_equal = array1 == array2
-print("Arrays are equal:", are_equal)
+
+
+
+
+
+
+
+
+

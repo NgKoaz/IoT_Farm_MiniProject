@@ -36,7 +36,6 @@ import bku.iot.farmapp.view.pages.SignInActivity;
 
 
 public class HomeController implements MyMqttClient.MessageObserver {
-
     private final String TAG = HomeController.class.getSimpleName();
     private final HomeActivity homeActivity;
     private final ActivityResultLauncher<Intent> activityResultLauncher;
@@ -54,7 +53,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
         // Connect to default MQTT Broker
         connectToMqttBroker(
                 "tcp://mqtt.ohstem.vn",
-                "FarmApp_IOT3",
+                "FarmApp_IOT",
                 ""
         );
 
@@ -176,7 +175,6 @@ public class HomeController implements MyMqttClient.MessageObserver {
         List<String> topicList = new LinkedList<>();
         topicList.add("V1");
         topicList.add("V3");
-        topicList.add("V4");
         MyMqttClient.gI().subscribeTopics(topicList);
     }
 
@@ -308,7 +306,7 @@ public class HomeController implements MyMqttClient.MessageObserver {
             Thread thread = new Thread(() -> {
                 Log.d(TAG, "Start sleep!");
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

@@ -12,6 +12,7 @@ import bku.iot.farmapp.view.common.Utils;
 
 public class MixerInputDialog extends MyDialog {
     private TextInputEditText waterInput, mixer1Input, mixer2Input, mixer3Input;
+    private int water, mixer1, mixer2, mixer3;
     private Button closeButton, okButton;
     private View.OnClickListener okListener;
 

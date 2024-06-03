@@ -10,7 +10,7 @@ class TimeManager:
     def sleep(duration):
         start = time.time()
         while time.time() - start < duration:
-            time.sleep(0.007)
+            time.sleep(0.01)
 
     def start(self):
         self.startPoint = time.time()

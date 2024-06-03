@@ -9,7 +9,7 @@ from model.mqtt.mqtt_topic import MqttTopic
 from model.mqtt.schedule import Schedule, ScheduleType
 from model.mqtt.sensor_data import SensorData, SensorDataType
 from services.mqtt import Mqtt
-from services.my_firestore import MyFirestore
+from services.my_firestore import MyFirestore, sendMessage
 from utils.time_manager import TimeManager
 from scheduler.scheduler2 import Scheduler2, ScheduleTask
 from scheduler.scheduler1 import Scheduler1, Task, TaskArgument
@@ -71,12 +71,15 @@ class Main:
         # For start time history
         self.scheduleStartTime = ""
 
+        # Gateway occur error ?
+        self.isErrorOccur = False
+
         # Create scheduler for handling schedule from app.
         self.scheduler1 = Scheduler1()
         # Initialize Uart
         self.uart = Uart(self.scheduler1)
         self.uart.setOnProcessDone(self.onProcessDone)
-
+        self.uart.setOnUartIsDown(self.onUartIsDown)
         # Add 2 tasks for reading sensor
         # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=0, period=2))
         # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=0.02, period=2))
@@ -95,6 +98,16 @@ class Main:
 
         # We need one infinity loop to maintain program
         self.loop()
+
+    def onUartIsDown(self):
+        print("<==============ERROR================>")
+        print("[ERROR] Can't communication with sensors!")
+        print("<==============ERROR================>")
+        sendMessage(title="[ERROR] Some devices are down!", body="Please, go to check those sensors!\nWe also make "
+                                                                 "the gateway"
+                                                         "down, re-run gateway when those sensors work well again!")
+        self.isErrorOccur = True
+        TimeManager.sleep(1000)
 
     def onProcessDone(self, isSuccessful):
         if isSuccessful:
@@ -119,7 +132,10 @@ class Main:
             print("<==============ERROR================>")
             print("[ERROR] Irrigation process hasn't run like expectation!")
             print("<==============ERROR================>")
-            exit()
+            sendMessage(title="[ERROR] Irrigation process hasn't run like expectation!",
+                        body="Please, talk to technician to fix this thing!")
+            self.isErrorOccur = True
+            TimeManager.sleep(1000)
 
     def onTaskDone(self, schedule: Schedule):
         schedule.isOn = 0
@@ -283,7 +299,7 @@ class Main:
 
     def loop(self):
         counter = 5
-        while True:
+        while not self.isErrorOccur:
             counter -= 1
             if counter <= 0:
                 counter = 5
@@ -291,6 +307,7 @@ class Main:
                 # self.publishSensorData(SensorData(SensorDataType.SOIL_MOISTURE, self.uart.moisValue))
                 # print("Temp: " + str(self.uart.tempValue))
                 # print("Mois: " + str(self.uart.moisValue))
+
             TimeManager.sleep(1)
 
 

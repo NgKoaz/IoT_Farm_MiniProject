@@ -4,9 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
 import android.view.WindowManager;
-
 import androidx.annotation.NonNull;
 
 public class MyDialog extends Dialog {
@@ -25,6 +23,7 @@ public class MyDialog extends Dialog {
 
         initViews();
         setEvents();
+        onBindViews();
     }
 
     protected void initViews() {
@@ -32,6 +31,10 @@ public class MyDialog extends Dialog {
     }
 
     protected void setEvents() {
+
+    }
+
+    protected void onBindViews() {
 
     }
 }

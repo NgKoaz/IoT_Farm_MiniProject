@@ -5,7 +5,6 @@ import android.os.Looper;
 import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,7 +21,7 @@ import bku.iot.farmapp.view.pages.ScheduleActivity;
 
 public class ScheduleController {
     private final String TAG = ScheduleController.class.getSimpleName();
-    private final int WAIT_ACK_DURATION = 5000; // 3000ms
+    private final int WAIT_ACK_DURATION = 3000; // 3000ms
     private int waterRatio = 0, mixer1Ratio = 0, mixer2Ratio = 0, mixer3Ratio = 0;
     private int area1Ratio = 0, area2Ratio = 0, area3Ratio = 0;
     private int hour, minute;
@@ -30,8 +29,8 @@ public class ScheduleController {
     private int day, month, year;
     private List<Integer> weekday = new ArrayList<>();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private int curHour, curMinute, curDay, curMonth, curYear;
     private final ScheduleActivity scheduleActivity;
+    private boolean isDateTimeSetDefault = false;
 
     public ScheduleController(ScheduleActivity scheduleActivity) {
         this.scheduleActivity = scheduleActivity;
@@ -41,8 +40,19 @@ public class ScheduleController {
         scheduleActivity.openTimePickerDialog(hour, minute);
     }
 
-    private boolean isValidDateTime() {
+    private boolean isValidDateTime(int year, int month, int day, int hour, int minute) {
         if (isDate == 0) return true;
+
+        Calendar currentTime = Calendar.getInstance();
+        int curHour, curMinute, curDay, curMonth, curYear;
+
+        curHour = currentTime.get(Calendar.HOUR_OF_DAY);
+        curMinute = currentTime.get(Calendar.MINUTE);
+
+        curDay = currentTime.get(Calendar.DAY_OF_MONTH);
+        curMonth = currentTime.get(Calendar.MONTH) + 1;
+        curYear = currentTime.get(Calendar.YEAR);
+
 
         // Compare year
         if (year < curYear)
@@ -67,35 +77,27 @@ public class ScheduleController {
         else if (hour > curHour)
             return true;
 
-        if (minute <= curMinute)
-            return false;
-        return true;
+        return minute > curMinute;
     }
 
     public void setDefaultDateTime() {
-        Calendar currentTime = Calendar.getInstance();
-
-        hour = currentTime.get(Calendar.HOUR_OF_DAY);
-        minute = currentTime.get(Calendar.MINUTE);
-
-        day = currentTime.get(Calendar.DAY_OF_MONTH);
-        month = currentTime.get(Calendar.MONTH) + 1;
-        year = currentTime.get(Calendar.YEAR);
+        isDateTimeSetDefault = true;
 
         // Set date is default instead of weekdays.
         isDate = 1;
 
+        hour = 6;
+        minute = 0;
+
+        setDefaultDateByTime(hour, minute);
         // Clear weekday value, because we set day.
         weekday.clear();
-
         // Update UI
         scheduleActivity.updateTimeDisplay(hour, minute);
-        scheduleActivity.updateDateDisplay(year, month, day);
-        scheduleActivity.clearWeekdayCheck();
     }
 
     public void setDateTimeForEditing(Schedule schedule){
-        // Set default time
+        // Set time from old schedule
         String[] timeParts = schedule._time.split(":");
         hour = Integer.parseInt(timeParts[0]);
         minute = Integer.parseInt(timeParts[1]);
@@ -120,15 +122,61 @@ public class ScheduleController {
             scheduleActivity.updateWeekdayDisplay("Each");
             scheduleActivity.updateCheckBox(this.weekday);
         }
+
+        isDateTimeSetDefault = !isValidDateTime(year, month, day, hour, minute);
+    }
+
+    private void setDefaultDateByTime(int hour, int minute) {
+        isDateTimeSetDefault = true;
+        boolean isMoveOneDay = false;
+        Calendar currentTime = Calendar.getInstance();
+
+        int curHour = currentTime.get(Calendar.HOUR_OF_DAY);
+        int curMinute = currentTime.get(Calendar.MINUTE);
+
+        if (hour < curHour || (hour == curHour && minute <= curMinute)) {
+            isMoveOneDay = true;
+        }
+
+        if (isMoveOneDay) {
+            currentTime.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        isDate = 1;
+        year = currentTime.get(Calendar.YEAR);
+        month = currentTime.get(Calendar.MONTH) + 1;
+        day = currentTime.get(Calendar.DAY_OF_MONTH);
+
+        // Clear weekday
+        weekday.clear();
+
+        // Update UI
+        scheduleActivity.clearWeekdayCheck();
+        scheduleActivity.updateDateDisplay(year, month, day);
     }
 
     public void setTime(int hour, int minute){
+        if (!isDateTimeSetDefault && !isValidDateTime(year, month, day, hour, minute)) {
+            mHandler.post(() -> scheduleActivity.showToast("The time set is in the past!"));
+            return;
+        }
+
         this.hour = hour;
         this.minute = minute;
         scheduleActivity.updateTimeDisplay(hour, minute);
+        if (isDateTimeSetDefault) {
+            setDefaultDateByTime(hour, minute);
+        }
     }
 
     public void setDate(int year, int month, int day){
+        if (!isValidDateTime(year, month, day, hour, minute)) {
+            mHandler.post(() -> scheduleActivity.showToast("The time set is in the past!"));
+            return;
+        }
+
+        isDateTimeSetDefault = false;
+
         isDate = 1;
         this.year = year;
         this.month = month;
@@ -142,17 +190,24 @@ public class ScheduleController {
         scheduleActivity.updateDateDisplay(year, month, day);
     }
 
-    // weekday params has been taken from Weekdays class
     public void setWeekday(boolean isChecked, int numWeekday){
+        isDateTimeSetDefault = false;
+
+        isDate = 0;
         if (isChecked) {
-            this.weekday.add(numWeekday);
-            this.weekday.sort((o1, o2) -> {
+            if (!weekday.contains(numWeekday)) {
+                weekday.add(numWeekday);
+            }
+            weekday.sort((o1, o2) -> {
                 int o11 = o1;
                 int o22 = o2;
                 return o11 - o22;
             });
+        } else {
+            if (weekday.contains(numWeekday)) {
+                weekday.remove(Integer.valueOf(numWeekday));
+            }
         }
-        this.isDate = 0;
         scheduleActivity.updateWeekdayDisplay("Each");
     }
 
@@ -217,13 +272,17 @@ public class ScheduleController {
     }
 
     private boolean checkSchedule() {
-        if (!isValidDateTime()) {
+        if (!isValidDateTime(year, month, day, hour, minute)) {
             mHandler.post(() -> scheduleActivity.showToast("The time you set is in the past!"));
             return false;
         }
         String userEmail = getUserEmail();
         if (userEmail.equals("")) {
             mHandler.post(() -> scheduleActivity.showToast("Not found your email, please re-sign in"));
+            return false;
+        }
+        if (isDate == 0 && weekday.isEmpty()) {
+            mHandler.post(() -> scheduleActivity.showToast("Please set date or weekday!"));
             return false;
         }
         return true;
@@ -377,13 +436,16 @@ public class ScheduleController {
                     if (topic.equals(MqttTopic.scheduleResponse)) {
                         try {
                             JSONObject jsonObject = new JSONObject(payload);
+                            String scheduleId = jsonObject.getString("scheduleId");
                             String payloadEmail = jsonObject.getString("email");
                             String payloadType = jsonObject.getString("type");
 
                             if (schedule.email.equals(payloadEmail) && schedule.type.equals(payloadType)) {
-                                isAck.set(true);
-                                MyMqttClient.gI().unregisterObserver(this);
-                                listener.onComplete(isAck.get(), jsonObject.getString("error"));
+                                if (!schedule.type.equals("update") || schedule.scheduleId.equals(scheduleId)) {
+                                    isAck.set(true);
+                                    MyMqttClient.gI().unregisterObserver(this);
+                                    listener.onComplete(isAck.get(), jsonObject.getString("error"));
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

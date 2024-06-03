@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -131,30 +132,21 @@ public class ScheduleActivity extends MyActivity {
             scheduleController.openDatePickerDialog();
         });
         deleteButton.setOnClickListener(v -> {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
                 scheduleController.deleteSchedule(schedule);
-            });
         });
         saveButton.setOnClickListener(v -> {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
-                scheduleController.addSchedule(
-                        Utils.getStringFromInputEditText(nameInput),
-                        Utils.getStringFromInputEditText(volumeInput)
-                );
-            });
+            scheduleController.addSchedule(
+                    Utils.getStringFromInputEditText(nameInput),
+                    Utils.getStringFromInputEditText(volumeInput)
+            );
         });
 
         updateButton.setOnClickListener(v -> {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
                 scheduleController.updateSchedule(
                         schedule,
                         Utils.getStringFromInputEditText(nameInput),
                         Utils.getStringFromInputEditText(volumeInput)
-                    );
-            });
+                );
         });
 
         // Weekday checkboxes
@@ -260,7 +252,7 @@ public class ScheduleActivity extends MyActivity {
     }
 
     public void openDatePickerDialog(int year, int month, int dayOfMonth){
-        datePickerDialog.updateDate(year, month, dayOfMonth);
+        datePickerDialog.updateDate(year, month - 1, dayOfMonth);
         datePickerDialog.show();
     }
 
@@ -276,9 +268,23 @@ public class ScheduleActivity extends MyActivity {
     }
 
     public void updateDateDisplay(int year, int month, int day){
+        Calendar currentTime = Calendar.getInstance();
+
+        int curDay = currentTime.get(Calendar.DAY_OF_MONTH);
+        int curMonth = currentTime.get(Calendar.MONTH) + 1;
+        int curYear = currentTime.get(Calendar.YEAR);
+        boolean isToday = curDay == day && curMonth == month && curYear == year;
+
+        currentTime.add(Calendar.DAY_OF_YEAR, 1);
+
+        int tomorrowDay = currentTime.get(Calendar.DAY_OF_MONTH);
+        int tomorrowMonth = currentTime.get(Calendar.MONTH) + 1;
+        int tomorrowYear = currentTime.get(Calendar.YEAR);
+        boolean isTomorrow = tomorrowDay == day && tomorrowMonth == month && tomorrowYear == year;
+
         String displayText = String.format(String.format(day < 10 ? "0%s" : "%s", day)) + "/" +
                 String.format(month < 10 ? "0%s" : "%s", month) + "/" +
-                year;
+                year + ((isToday) ? " (Today)" : (isTomorrow) ? " (Tomorrow)" : "");
         dateInfoText.setText(displayText);
     }
 
@@ -289,4 +295,5 @@ public class ScheduleActivity extends MyActivity {
     public void updateCurrentTime(String time){
         currentTimeText.setText(time);
     }
+
 }

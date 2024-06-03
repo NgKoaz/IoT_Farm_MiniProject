@@ -1,11 +1,23 @@
 package bku.iot.farmapp.view.pages;
 
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.firebase.messaging.FirebaseMessaging;
+
 import java.util.List;
 import bku.iot.farmapp.R;
 import bku.iot.farmapp.controller.HomeController;
@@ -15,6 +27,8 @@ import bku.iot.farmapp.view.widgets.recyclerView.ScheduleListAdapter;
 
 
 public class HomeActivity extends MyActivity {
+
+    private final int REQUEST_CODE_NOTIFICATIONS = 111;
     private HomeController homeController;
     private ImageView settingButton;
     private TextView helloUserText;
@@ -43,6 +57,17 @@ public class HomeActivity extends MyActivity {
         addScheduleButton = findViewById(R.id.home_addScheduleButton);
         recyclerView = findViewById(R.id.home_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED) {
+            if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                        REQUEST_CODE_NOTIFICATIONS);
+            }
+        }
     }
 
     @Override
@@ -98,5 +123,18 @@ public class HomeActivity extends MyActivity {
         StringBuilder displayText = new StringBuilder("Hello, ");
         displayText.append(user);
         helloUserText.setText(displayText.toString());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_CODE_NOTIFICATIONS) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                showToast("Notification is allowed!");
+            } else {
+                showToast("Notification is denied! Please turn on notification in your setting instead!");
+            }
+        }
     }
 }
