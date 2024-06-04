@@ -29,28 +29,20 @@ class Uart:
 
         self.mixer1_ON = [1, 6, 0, 0, 0, 255, 201, 138]
         self.mixer1_OFF = [1, 6, 0, 0, 0, 0, 137, 202]
-
-        self.mixer2_ON = [2, 6, 0, 1, 0, 255, 201, 185]
-        self.mixer2_OFF = [2, 6, 0, 1, 0, 0, 137, 249]
-
-        self.mixer3_ON = [3, 6, 0, 2, 0, 255, 200, 104]
-        self.mixer3_OFF = [3, 6, 0, 2, 0, 0, 136, 40]
-
-        self.selector1_ON = [4, 6, 0, 3, 0, 255, 201, 223]
-        self.selector1_OFF = [4, 6, 0, 3, 0, 0, 137, 159]
-
-        self.selector2_ON = [5, 6, 0, 4, 0, 255, 200, 14]
-        self.selector2_OFF = [5, 6, 0, 4, 0, 0, 136, 78]
-
-        self.selector3_ON = [6, 6, 0, 5, 0, 255, 200, 61]
-        self.selector3_OFF = [6, 6, 0, 5, 0, 0, 136, 125]
-
-        self.pumpIn_ON = [7, 6, 0, 6, 0, 255, 201, 236]
-        self.pumpIn_OFF = [7, 6, 0, 6, 0, 0, 137, 172]
-
-        self.pumpOut_ON = [8, 6, 0, 7, 0, 255, 201, 19]
-        self.pumpOut_OFF = [8, 6, 0, 7, 0, 0, 137, 83]
-
+        self.mixer2_ON = [2, 6, 0, 0, 0, 255, 201, 185]
+        self.mixer2_OFF = [2, 6, 0, 0, 0, 0, 137, 249]
+        self.mixer3_ON = [3, 6, 0, 0, 0, 255, 200, 104]
+        self.mixer3_OFF = [3, 6, 0, 0, 0, 0, 136, 40]
+        self.selector1_ON = [4, 6, 0, 0, 0, 255, 201, 223]
+        self.selector1_OFF = [4, 6, 0, 0, 0, 0, 137, 159]
+        self.selector2_ON = [5, 6, 0, 0, 0, 255, 200, 14]
+        self.selector2_OFF = [5, 6, 0, 0, 0, 0, 136, 78]
+        self.selector3_ON = [6, 6, 0, 0, 0, 255, 200, 61]
+        self.selector3_OFF = [6, 6, 0, 0, 0, 0, 136, 125]
+        self.pumpIn_ON = [7, 6, 0, 0, 0, 255, 201, 236]
+        self.pumpIn_OFF = [7, 6, 0, 0, 0, 0, 137, 172]
+        self.pumpOut_ON = [8, 6, 0, 0, 0, 255, 201, 19]
+        self.pumpOut_OFF = [8, 6, 0, 0, 0, 0, 137, 83]
         self.soil_temperature = [1, 3, 0, 6, 0, 1, 100, 11]
         self.soil_moisture = [1, 3, 0, 7, 0, 1, 53, 203]
 
@@ -360,7 +352,6 @@ class Uart:
     def waitControlAck(self, args):
         res = self.waitAck(args)
         if res != -1:
-            print("OK")
             self.totalAck += 1
         else:
             self.nonAck += 1

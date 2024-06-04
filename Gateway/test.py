@@ -5,28 +5,20 @@ ser = serial.Serial(port="COM3", baudrate=115200)
 
 mixer1_ON = [1, 6, 0, 0, 0, 255, 201, 138]
 mixer1_OFF = [1, 6, 0, 0, 0, 0, 137, 202]
-
-mixer2_ON = [2, 6, 0, 1, 0, 255, 201, 185]
-mixer2_OFF = [2, 6, 0, 1, 0, 0, 137, 249]
-
-mixer3_ON = [3, 6, 0, 2, 0, 255, 200, 104]
-mixer3_OFF = [3, 6, 0, 2, 0, 0, 136, 40]
-
-selector1_ON = [4, 6, 0, 3, 0, 255, 201, 223]
-selector1_OFF = [4, 6, 0, 3, 0, 0, 137, 159]
-
-selector2_ON = [5, 6, 0, 4, 0, 255, 200, 14]
-selector2_OFF = [5, 6, 0, 4, 0, 0, 136, 78]
-
-selector3_ON = [6, 6, 0, 5, 0, 255, 200, 61]
-selector3_OFF = [6, 6, 0, 5, 0, 0, 136, 125]
-
-pumpIn_ON = [7, 6, 0, 6, 0, 255, 201, 236]
-pumpIn_OFF = [7, 6, 0, 6, 0, 0, 137, 172]
-
-pumpOut_ON = [8, 6, 0, 7, 0, 255, 201, 19]
-pumpOut_OFF = [8, 6, 0, 7, 0, 0, 137, 83]
-
+mixer2_ON = [2, 6, 0, 0, 0, 255, 201, 185]
+mixer2_OFF = [2, 6, 0, 0, 0, 0, 137, 249]
+mixer3_ON = [3, 6, 0, 0, 0, 255, 200, 104]
+mixer3_OFF = [3, 6, 0, 0, 0, 0, 136, 40]
+selector1_ON = [4, 6, 0, 0, 0, 255, 201, 223]
+selector1_OFF = [4, 6, 0, 0, 0, 0, 137, 159]
+selector2_ON = [5, 6, 0, 0, 0, 255, 200, 14]
+selector2_OFF = [5, 6, 0, 0, 0, 0, 136, 78]
+selector3_ON = [6, 6, 0, 0, 0, 255, 200, 61]
+selector3_OFF = [6, 6, 0, 0, 0, 0, 136, 125]
+pumpIn_ON = [7, 6, 0, 0, 0, 255, 201, 236]
+pumpIn_OFF = [7, 6, 0, 0, 0, 0, 137, 172]
+pumpOut_ON = [8, 6, 0, 0, 0, 255, 201, 19]
+pumpOut_OFF = [8, 6, 0, 0, 0, 0, 137, 83]
 soil_temperature = [1, 3, 0, 6, 0, 1, 100, 11]
 soil_moisture = [1, 3, 0, 7, 0, 1, 53, 203]
 
@@ -74,9 +66,9 @@ def test(cmd):
     elif cmd == selector3_OFF:
         print("SELECTOR 3: OFF")
     elif cmd == soil_temperature:
-        print("Get temperature")
+        pass
     elif cmd == soil_moisture:
-        print("Get soil moisture")
+        pass
     else:
         print("UNKNOWN MESSAGE!")
 

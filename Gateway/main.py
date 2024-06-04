@@ -81,8 +81,8 @@ class Main:
         self.uart.setOnProcessDone(self.onProcessDone)
         self.uart.setOnUartIsDown(self.onUartIsDown)
         # Add 2 tasks for reading sensor
-        # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=0, period=2))
-        # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=0.02, period=2))
+        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=0, period=2))
+        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=0.02, period=2))
 
         self.scheduler2 = Scheduler2()
         # self.scheduler2.setOnTaskDone(on_task_done=self.onTaskDone)
@@ -249,7 +249,7 @@ class Main:
                 schedule.error = "This schedule is executing, you can delete until it's done"
             elif self.myFirestore.isScheduleExist(schedule.scheduleId):
                 scheduleTask = ScheduleTask(pTask=self.taskScheduler2, schedule=schedule)
-                if scheduleTask.schedule.isOn == 1 and scheduleTask.isInTime():
+                if scheduleTask.schedule.isOn == 1 and scheduleTask.isInTime() and not scheduleTask.schedule.date:
                     schedule.error = "The time set is in the past!"
                 else:
                     if schedule.isOn == 1:

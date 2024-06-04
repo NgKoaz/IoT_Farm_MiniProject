@@ -318,7 +318,7 @@ public class ScheduleController {
                 name,
                 Integer.parseInt(volume),
                 ratio,
-                getDateIsSetInStringType(),
+                (isDate == 1) ? getDateIsSetInStringType() : "",
                 this.weekday,
                 getTimeIsSetInStringType()
         );
@@ -372,7 +372,7 @@ public class ScheduleController {
         ratio.add(area2Ratio);
         ratio.add(area3Ratio);
         schedule.ratio = ratio;
-        schedule.date = getDateIsSetInStringType();
+        schedule.date = (isDate == 1) ? getDateIsSetInStringType() : "";
         schedule.weekday = weekday;
         schedule._time = getTimeIsSetInStringType();
         schedule.isOn = 1;
