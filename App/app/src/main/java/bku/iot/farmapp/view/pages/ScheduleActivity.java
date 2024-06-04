@@ -252,7 +252,9 @@ public class ScheduleActivity extends MyActivity {
     }
 
     public void openDatePickerDialog(int year, int month, int dayOfMonth){
-        datePickerDialog.updateDate(year, month - 1, dayOfMonth);
+        if (dayOfMonth > 0 && year > 2023 || month > 0) {
+            datePickerDialog.updateDate(year, month - 1, dayOfMonth);
+        }
         datePickerDialog.show();
     }
 

@@ -252,8 +252,8 @@ class Main:
                 if scheduleTask.schedule.isOn == 1 and scheduleTask.isInTime() and scheduleTask.schedule.date:
                     schedule.error = "The time set is in the past!"
                 else:
+                    self.scheduler2.SCH_DeleteScheduleTask(schedule.scheduleId)
                     if schedule.isOn == 1:
-                        self.scheduler2.SCH_DeleteScheduleTask(schedule.scheduleId)
                         self.scheduler2.SCH_AddTask(scheduleTask)
 
                     js = json.loads(schedule.toJsonString())
