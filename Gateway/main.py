@@ -190,15 +190,15 @@ class Main:
 
         else:
             print("[ERROR] Other tasks is running!")
-            schedule.isOn = 0
-            schedule.type = ScheduleType.UPDATE
-            schedule.error = "Other tasks is running!"
-            js = json.loads(schedule.toJsonString())
-            del js["email"]
-            del js["type"]
-            del js["error"]
-            self.myFirestore.updateSchedule(schedule.scheduleId, js)
-            self.publishSchedule(schedule)
+            if schedule.date:
+                schedule.isOn = 0
+                schedule.type = ScheduleType.UPDATE
+                js = json.loads(schedule.toJsonString())
+                del js["email"]
+                del js["type"]
+                del js["error"]
+                self.myFirestore.updateSchedule(schedule.scheduleId, js)
+                self.publishSchedule(schedule)
             sendMessage(title="[ERROR] Other tasks is running!",
                         body="Your schedule is conflicted! Schedule just run will turn off!")
 
@@ -218,7 +218,7 @@ class Main:
 
         # Add schedule Task here
         scheduleTask = ScheduleTask(pTask=self.taskScheduler2, schedule=schedule)
-        if scheduleTask.isInTime():
+        if scheduleTask.isInTime() and scheduleTask.schedule.date:
             schedule.error = "The time set is in the past!"
         else:
             self.scheduler2.SCH_AddTask(scheduleTask)
@@ -249,7 +249,7 @@ class Main:
                 schedule.error = "This schedule is executing, you can delete until it's done"
             elif self.myFirestore.isScheduleExist(schedule.scheduleId):
                 scheduleTask = ScheduleTask(pTask=self.taskScheduler2, schedule=schedule)
-                if scheduleTask.schedule.isOn == 1 and scheduleTask.isInTime() and not scheduleTask.schedule.date:
+                if scheduleTask.schedule.isOn == 1 and scheduleTask.isInTime() and scheduleTask.schedule.date:
                     schedule.error = "The time set is in the past!"
                 else:
                     if schedule.isOn == 1:
