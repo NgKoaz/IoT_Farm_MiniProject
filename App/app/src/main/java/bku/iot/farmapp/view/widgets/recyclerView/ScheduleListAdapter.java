@@ -86,7 +86,7 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
         public void bind(Schedule schedule) {
             nameText.setText(schedule._name);
             timeText.setText(schedule._time);
-            if (schedule.weekday != null && schedule.weekday.size() > 1){
+            if (schedule.weekday != null && schedule.weekday.size() > 0){
                 if (schedule.weekday.size() == 7) {
                     dayText.setText("Everyday");
                     return;
