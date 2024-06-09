@@ -1,7 +1,9 @@
+import random
 import threading
 import time
 import serial.tools.list_ports
-
+import os
+from dotenv import load_dotenv
 from model.mqtt.schedule import Schedule
 from scheduler.scheduler1 import Scheduler1, Task, TaskArgument
 from utils.time_manager import TimeManager
@@ -12,12 +14,15 @@ class Uart:
         TEMPERATURE_SENSOR = 0
         SOIL_MOISTURE_SENSOR = 1
 
-    WAITING_ACK = 2
-    MAX_NON_ACK = 9
+    WAITING_ACK = 3
+    MAX_NON_ACK = 18
     MILLILITER_TO_SECOND = 50   # Pump 50ml / 1s
     NUMBER_ACK_AT_SECTION1 = 8
 
     def __init__(self, scheduler1: Scheduler1):
+        load_dotenv()
+        self.isRandom = int(os.getenv("RANDOM_VALUE"))
+
         self.scheduler1 = scheduler1
         self._lock = threading.Lock()
         self.rawDataBuffer = []
@@ -107,6 +112,7 @@ class Uart:
         else:
             data = self.mixer1_OFF
         self.ser.write(data)
+        print("Write: ", data)
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId, setFunction=self.setMixer1, argsSetFunction=args),
                     delay=self.WAITING_ACK,
@@ -126,6 +132,7 @@ class Uart:
             data = self.mixer2_OFF
 
         self.ser.write(data)
+        print("Write: ", data)
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId, setFunction=self.setMixer2, argsSetFunction=args),
                     delay=self.WAITING_ACK,
@@ -145,6 +152,7 @@ class Uart:
             data = self.mixer3_OFF
 
         self.ser.write(data)
+        print("Write: ", data)
 
         # Ack Task
         task = Task(pTask=self.waitControlAck,
@@ -166,6 +174,8 @@ class Uart:
             data = self.pumpIn_OFF
 
         self.ser.write(data)
+        print("Write: ", data)
+
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId, setFunction=self.setPumpIn, argsSetFunction=args),
                     delay=self.WAITING_ACK,
@@ -184,6 +194,8 @@ class Uart:
         else:
             data = self.pumpOut_OFF
         self.ser.write(data)
+        print("Write: ", data)
+
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId,
                                       setFunction=self.setPumpOut, argsSetFunction=args),
@@ -203,6 +215,8 @@ class Uart:
         else:
             data = self.selector1_OFF
         self.ser.write(data)
+        print("Write: ", data)
+
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId,
                                       setFunction=self.setSelector1, argsSetFunction=args),
@@ -222,6 +236,8 @@ class Uart:
         else:
             data = self.selector2_OFF
         self.ser.write(data)
+        print("Write: ", data)
+
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId,
                                       setFunction=self.setSelector2, argsSetFunction=args),
@@ -241,6 +257,8 @@ class Uart:
         else:
             data = self.selector3_OFF
         self.ser.write(data)
+        print("Write: ", data)
+
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId,
                                       setFunction=self.setSelector3, argsSetFunction=args),
@@ -281,15 +299,15 @@ class Uart:
         self.scheduler1.SCH_AddTask(task)
 
         delayTurnOffTask = int(volume / totalRatioIn * mixer1 / self.MILLILITER_TO_SECOND)
-        task = Task(pTask=self.setMixer1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0, period=0)
+        task = Task(pTask=self.setMixer1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=1, period=0)
         self.scheduler1.SCH_AddTask(task)
 
         delayTurnOffTask = int(volume / totalRatioIn * mixer2 / self.MILLILITER_TO_SECOND)
-        task = Task(pTask=self.setMixer2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0, period=0)
+        task = Task(pTask=self.setMixer2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=2, period=0)
         self.scheduler1.SCH_AddTask(task)
 
         delayTurnOffTask = int(volume / totalRatioIn * mixer3 / self.MILLILITER_TO_SECOND)
-        task = Task(pTask=self.setMixer3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0, period=0)
+        task = Task(pTask=self.setMixer3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=3, period=0)
         self.scheduler1.SCH_AddTask(task)
 
         delayTurnOffArea1 = int(volume / totalRatioOut * area1 / self.MILLILITER_TO_SECOND)
@@ -320,13 +338,13 @@ class Uart:
             task = Task(pTask=self.setPumpOut, args=TaskArgument(state=1, delayTurnOffTask=delayPumpOut + self.WAITING_ACK * 3), delay=0,
                         period=0)
             self.scheduler1.SCH_AddTask(task)
-            task = Task(pTask=self.setSelector1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea1), delay=2,
+            task = Task(pTask=self.setSelector1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea1), delay=1,
                         period=0)
             self.scheduler1.SCH_AddTask(task)
             task = Task(pTask=self.setSelector2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea2), delay=2,
                         period=0)
             self.scheduler1.SCH_AddTask(task)
-            task = Task(pTask=self.setSelector3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea3), delay=2,
+            task = Task(pTask=self.setSelector3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea3), delay=3,
                         period=0)
             self.scheduler1.SCH_AddTask(task)
 
@@ -400,26 +418,35 @@ class Uart:
             for entry in self.buffer:
                 if entry[0] == addr and entry[1] == func:
                     result = self.decodeModbus(entry)
+                    if self.isRandom == 1 and addr == 1 and func == 3:
+                        result = random.randint(22, 33)
             # Check and delete redundant ACK
             self.buffer = [entry for entry in self.buffer if not (entry[0] == addr and entry[1] == func)]
         return result
 
     def loop(self):
         while True:
-            if self.rawDataBuffer:
-                if self.rawDataBuffer[0] == 0:
-                    self.rawDataBuffer.pop(0)
-                elif len(self.rawDataBuffer) >= 7 and self.rawDataBuffer[0] == 1 and self.rawDataBuffer[1] == 3:
-                    self.buffer.append(self.rawDataBuffer[:7])
-                    self.rawDataBuffer = self.rawDataBuffer[7:]
-                elif len(self.rawDataBuffer) >= 8:
-                    self.buffer.append(self.rawDataBuffer[:8])
-                    self.rawDataBuffer = self.rawDataBuffer[8:]
+            with self._lock:
+                if self.rawDataBuffer:
+                    if self.rawDataBuffer[0] == 0:
+                        self.rawDataBuffer.pop(0)
+                    elif len(self.rawDataBuffer) >= 7 and self.rawDataBuffer[0] == 1 and self.rawDataBuffer[1] == 3:
+                        self.buffer.append(self.rawDataBuffer[:7])
+                        self.rawDataBuffer = self.rawDataBuffer[7:]
+                        print("BUFFER: ", self.buffer)
+                        print("RAW DATA BUFFER 1: ", self.rawDataBuffer)
+                    elif len(self.rawDataBuffer) >= 8 and self.rawDataBuffer[0] < 9:
+                        self.buffer.append(self.rawDataBuffer[:8])
+                        self.rawDataBuffer = self.rawDataBuffer[8:]
+                        print("BUFFER: ", self.buffer)
+                        print("RAW DATA BUFFER 2: ", self.rawDataBuffer)
+                    else:
+                        self.rawDataBuffer.clear()
 
             numBytes = self.ser.inWaiting()
             if numBytes:
-                with self._lock:
-                    self.rawDataBuffer.extend(self.ser.read(numBytes))
+                self.rawDataBuffer.extend(self.ser.read(numBytes))
+                print("RAW DATA BUFFER: ", self.rawDataBuffer)
             else:
                 if not self.rawDataBuffer:
                     TimeManager.sleep(0.2)

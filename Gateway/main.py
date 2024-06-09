@@ -81,8 +81,8 @@ class Main:
         self.uart.setOnProcessDone(self.onProcessDone)
         self.uart.setOnUartIsDown(self.onUartIsDown)
         # Add 2 tasks for reading sensor
-        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=0, period=3))
-        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=1.5, period=3))
+        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=2.5, period=10))
+        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=4.5, period=10))
 
         self.scheduler2 = Scheduler2()
         # self.scheduler2.setOnTaskDone(on_task_done=self.onTaskDone)
