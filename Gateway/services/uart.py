@@ -349,15 +349,27 @@ class Uart:
             # task = Task(pTask=self.setPumpOut, args=TaskArgument(state=1, delayTurnOffTask=delayPumpOut + self.WAITING_ACK * 3), delay=0,
             #             period=0)
             # self.scheduler1.SCH_AddTask(task)
-            task = Task(pTask=self.setSelector1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea1), delay=0,
-                        period=0)
-            self.scheduler1.SCH_AddTask(task)
-            task = Task(pTask=self.setSelector2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea2), delay=0,
-                        period=0)
-            self.scheduler1.SCH_AddTask(task)
-            task = Task(pTask=self.setSelector3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea3), delay=0,
-                        period=0)
-            self.scheduler1.SCH_AddTask(task)
+            if delayTurnOffArea1 > 0:
+                task = Task(pTask=self.setSelector1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea1),
+                            delay=0,
+                            period=0)
+                self.scheduler1.SCH_AddTask(task)
+            else:
+                self.totalAck += 1
+
+            if delayTurnOffArea2 > 0:
+                task = Task(pTask=self.setSelector2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea2), delay=0,
+                            period=0)
+                self.scheduler1.SCH_AddTask(task)
+            else:
+                self.totalAck += 1
+
+            if delayTurnOffArea3 > 0:
+                task = Task(pTask=self.setSelector3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea3), delay=0,
+                            period=0)
+                self.scheduler1.SCH_AddTask(task)
+            else:
+                self.totalAck += 1
 
             task = Task(pTask=self.trackingAckSection2,
                         args=TaskArgument(
