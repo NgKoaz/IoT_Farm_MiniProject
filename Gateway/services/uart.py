@@ -14,7 +14,7 @@ class Uart:
         TEMPERATURE_SENSOR = 0
         SOIL_MOISTURE_SENSOR = 1
 
-    WAITING_ACK = 3
+    WAITING_ACK = 2
     MAX_NON_ACK = 18
     MILLILITER_TO_SECOND = 50   # Pump 50ml / 1s
     NUMBER_ACK_AT_SECTION1 = 8
