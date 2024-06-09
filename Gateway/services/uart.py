@@ -74,9 +74,9 @@ class Uart:
             if "USB" in strPort:
                 splitPort = strPort.split(" ")
                 commPort = (splitPort[0])
-        # return commPort
+        return commPort
         # return "/dev/ttyUSB1"
-        return "COM2"
+        # return "COM2"
 
     def setOnUartIsDown(self, onUartIsDown):
         self.onUartIsDown = onUartIsDown

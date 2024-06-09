@@ -59,7 +59,7 @@ class Main:
         # Load environment variables
         load_dotenv()
         self.BROKER = os.getenv("BROKER")
-        self.USERNAME = os.getenv("USER")
+        self.USERNAME = os.getenv("_USER")
         self.PASSWORD = os.getenv("KEY")
         print(self.BROKER, self.USERNAME, self.PASSWORD)
 
