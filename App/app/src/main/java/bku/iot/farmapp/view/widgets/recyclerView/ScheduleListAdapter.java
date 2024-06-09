@@ -95,7 +95,7 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
                 sb.append(getWeekday(schedule.weekday.get(0)));
                 for (int i = 1; i < schedule.weekday.size(); i++) {
                     sb.append(", ");
-                    sb.append(getWeekday(i));
+                    sb.append(getWeekday(schedule.weekday.get(i)));
                 }
                 dayText.setText(sb.toString());
             } else {

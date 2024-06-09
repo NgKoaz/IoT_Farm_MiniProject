@@ -81,8 +81,8 @@ class Main:
         self.uart.setOnProcessDone(self.onProcessDone)
         self.uart.setOnUartIsDown(self.onUartIsDown)
         # Add 2 tasks for reading sensor
-        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=1, period=5))
-        self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=3, period=5))
+        # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readTemperature, delay=1, period=5))
+        # self.scheduler1.SCH_AddTask(Task(pTask=self.uart.readMoisture, delay=3, period=5))
 
         self.scheduler2 = Scheduler2()
         # self.scheduler2.setOnTaskDone(on_task_done=self.onTaskDone)
@@ -111,7 +111,7 @@ class Main:
 
     def onProcessDone(self, isSuccessful):
         if isSuccessful:
-            print("Process ran successfully!")
+            print(f"Process ran successfully! ScheduleId: {self.scheduleIdRunning}")
             doc = self.myFirestore.getSchedule(self.scheduleIdRunning)
             self.scheduleIdRunning = ""
             if doc.exists:
@@ -183,11 +183,10 @@ class Main:
         if not self.scheduleIdRunning:
             self.scheduleIdRunning = schedule.scheduleId
             self.scheduleStartTime = f"{schedule.time} {datetime.datetime.now().strftime('%d-%m-%Y')}"
-            print("SCHEDULER 2 TASK RUN: " + schedule.scheduleId)
             if not self.uart.initializeIrrigationProcess(schedule):
                 self.scheduleIdRunning = ""
                 self.scheduleStartTime = ""
-
+            print("SCHEDULER 2 TASK RUN: " + schedule.scheduleId)
         else:
             print("[ERROR] Other tasks is running!")
             if schedule.date:
@@ -211,22 +210,68 @@ class Main:
             thread.daemon = True
             thread.start()
 
+    def checkParamsSchedule(self, schedule: Schedule):
+        volume = int(schedule.volume)
+        water = int(schedule.ratio[0])
+        mixer1 = int(schedule.ratio[1])
+        mixer2 = int(schedule.ratio[2])
+        mixer3 = int(schedule.ratio[3])
+        totalRatioIn = water + mixer1 + mixer2 + mixer3
+        area1 = int(schedule.ratio[4])
+        area2 = int(schedule.ratio[5])
+        area3 = int(schedule.ratio[6])
+        totalRatioOut = area1 + area2 + area3
+
+        if water == 0 and mixer1 == 0 and mixer2 == 0 and mixer3 == 0:
+            return False
+        if area1 == 0 and area2 == 0 and area3 == 0:
+            return False
+
+        waterDuration = int(volume / totalRatioIn * water / self.uart.MILLILITER_TO_SECOND)
+        mixer1Duration = int(volume / totalRatioIn * mixer1 / self.uart.MILLILITER_TO_SECOND)
+        mixer2Duration = int(volume / totalRatioIn * mixer2 / self.uart.MILLILITER_TO_SECOND)
+        mixer3Duration = int(volume / totalRatioIn * mixer3 / self.uart.MILLILITER_TO_SECOND)
+        area1Duration = int(volume / totalRatioOut * area1 / self.uart.MILLILITER_TO_SECOND)
+        area2Duration = int(volume / totalRatioOut * area2 / self.uart.MILLILITER_TO_SECOND)
+        area3Duration = int(volume / totalRatioOut * area3 / self.uart.MILLILITER_TO_SECOND)
+
+        minimumDuration = self.uart.WAITING_ACK * 2
+
+        if water != 0 and waterDuration < minimumDuration:
+            return False
+        elif mixer1 != 0 and mixer1Duration < minimumDuration:
+            return False
+        elif mixer2 != 0 and mixer2Duration < minimumDuration:
+            return False
+        elif mixer3 != 0 and mixer3Duration < minimumDuration:
+            return False
+        elif area1 != 0 and area1Duration < minimumDuration:
+            return False
+        elif area2 != 0 and area2Duration < minimumDuration:
+            return False
+        elif area3 != 0 and area3Duration < minimumDuration:
+            return False
+        return True
+
     def addScheduleRequest(self, schedule: Schedule):
         cur_time = datetime.datetime.now()
         formatted_time = cur_time.strftime("%Y-%m-%d %H:%M:%S.%f")
         schedule.setId(formatted_time)
 
-        # Add schedule Task here
-        scheduleTask = ScheduleTask(pTask=self.taskScheduler2, schedule=schedule)
-        if scheduleTask.isInTime() and scheduleTask.schedule.date:
-            schedule.error = "The time set is in the past!"
+        if self.checkParamsSchedule(schedule):
+            # Add schedule Task here
+            scheduleTask = ScheduleTask(pTask=self.taskScheduler2, schedule=schedule)
+            if scheduleTask.isInTime() and scheduleTask.schedule.date:
+                schedule.error = "The time set is in the past!"
+            else:
+                self.scheduler2.SCH_AddTask(scheduleTask)
+                js = json.loads(schedule.toJsonString())
+                del js["email"]
+                del js["type"]
+                del js["error"]
+                self.myFirestore.putSchedule(formatted_time, js)
         else:
-            self.scheduler2.SCH_AddTask(scheduleTask)
-            js = json.loads(schedule.toJsonString())
-            del js["email"]
-            del js["type"]
-            del js["error"]
-            self.myFirestore.putSchedule(formatted_time, js)
+            schedule.error = "Some params is too small (too low water pump in or pump out)\nto process irrigation!"
 
         self.publishSchedule(schedule)
 
@@ -245,24 +290,27 @@ class Main:
 
     def updateSchedule(self, schedule: Schedule):
         if schedule.scheduleId:
-            if self.scheduleIdRunning == schedule.scheduleId:
-                schedule.error = "This schedule is executing, you can delete until it's done"
-            elif self.myFirestore.isScheduleExist(schedule.scheduleId):
-                scheduleTask = ScheduleTask(pTask=self.taskScheduler2, schedule=schedule)
-                if scheduleTask.schedule.isOn == 1 and scheduleTask.isInTime() and scheduleTask.schedule.date:
-                    schedule.error = "The time set is in the past!"
-                else:
-                    self.scheduler2.SCH_DeleteScheduleTask(schedule.scheduleId)
-                    if schedule.isOn == 1:
-                        self.scheduler2.SCH_AddTask(scheduleTask)
+            if self.checkParamsSchedule(schedule):
+                if self.scheduleIdRunning == schedule.scheduleId:
+                    schedule.error = "This schedule is executing, you can delete until it's done"
+                elif self.myFirestore.isScheduleExist(schedule.scheduleId):
+                    scheduleTask = ScheduleTask(pTask=self.taskScheduler2, schedule=schedule)
+                    if scheduleTask.schedule.isOn == 1 and scheduleTask.isInTime() and scheduleTask.schedule.date:
+                        schedule.error = "The time set is in the past!"
+                    else:
+                        self.scheduler2.SCH_DeleteScheduleTask(schedule.scheduleId)
+                        if schedule.isOn == 1:
+                            self.scheduler2.SCH_AddTask(scheduleTask)
 
-                    js = json.loads(schedule.toJsonString())
-                    del js["email"]
-                    del js["type"]
-                    del js["error"]
-                    self.myFirestore.updateSchedule(schedule.scheduleId, js)
+                        js = json.loads(schedule.toJsonString())
+                        del js["email"]
+                        del js["type"]
+                        del js["error"]
+                        self.myFirestore.updateSchedule(schedule.scheduleId, js)
+                else:
+                    schedule.error = "This schedule doesn't exist!"
             else:
-                schedule.error = "This schedule doesn't exist!"
+                schedule.error = "Some params is too small (too low water pump in or pump out) to process irrigation!"
             self.publishSchedule(schedule)
         else:
             print("[ERROR] updateSchedule but scheduleId is empty!")

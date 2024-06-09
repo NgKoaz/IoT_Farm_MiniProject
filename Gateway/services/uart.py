@@ -18,6 +18,8 @@ class Uart:
     MAX_NON_ACK = 18
     MILLILITER_TO_SECOND = 50   # Pump 50ml / 1s
     NUMBER_ACK_AT_SECTION1 = 8
+    NUMBER_ACK_AT_SECTION2 = 3
+    NUMBER_ACK_AT_SECTION3 = 5
 
     def __init__(self, scheduler1: Scheduler1):
         load_dotenv()
@@ -112,7 +114,7 @@ class Uart:
         else:
             data = self.mixer1_OFF
         self.ser.write(data)
-        print("Write: ", data)
+        print("Mixer 1: ", data)
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId, setFunction=self.setMixer1, argsSetFunction=args),
                     delay=self.WAITING_ACK,
@@ -132,7 +134,7 @@ class Uart:
             data = self.mixer2_OFF
 
         self.ser.write(data)
-        print("Write: ", data)
+        print("Mixer 2: ", data)
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId, setFunction=self.setMixer2, argsSetFunction=args),
                     delay=self.WAITING_ACK,
@@ -152,7 +154,7 @@ class Uart:
             data = self.mixer3_OFF
 
         self.ser.write(data)
-        print("Write: ", data)
+        print("Mixer 3: ", data)
 
         # Ack Task
         task = Task(pTask=self.waitControlAck,
@@ -174,7 +176,7 @@ class Uart:
             data = self.pumpIn_OFF
 
         self.ser.write(data)
-        print("Write: ", data)
+        print("Pump In: ", data)
 
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId, setFunction=self.setPumpIn, argsSetFunction=args),
@@ -194,7 +196,7 @@ class Uart:
         else:
             data = self.pumpOut_OFF
         self.ser.write(data)
-        print("Write: ", data)
+        print("Pump Out: ", data)
 
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId,
@@ -208,14 +210,14 @@ class Uart:
         taskTurnOffId = None
         if state:
             data = self.selector1_ON
-            # OFF task
-            delayTurnOffTask = args.payload["delayTurnOffTask"]
-            task = Task(pTask=self.setSelector1, args=TaskArgument(state=0), delay=delayTurnOffTask, period=0)
-            taskTurnOffId = self.scheduler1.SCH_AddTask(task)
+            # # OFF task
+            # delayTurnOffTask = args.payload["delayTurnOffTask"]
+            # task = Task(pTask=self.setSelector1, args=TaskArgument(state=0), delay=delayTurnOffTask, period=0)
+            # taskTurnOffId = self.scheduler1.SCH_AddTask(task)
         else:
             data = self.selector1_OFF
         self.ser.write(data)
-        print("Write: ", data)
+        print("Selector 1: ", data)
 
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId,
@@ -229,14 +231,14 @@ class Uart:
         taskTurnOffId = None
         if state:
             data = self.selector2_ON
-            # OFF task
-            delayTurnOffTask = args.payload["delayTurnOffTask"]
-            task = Task(pTask=self.setSelector2, args=TaskArgument(state=0), delay=delayTurnOffTask, period=0)
-            taskTurnOffId = self.scheduler1.SCH_AddTask(task)
+            # # OFF task
+            # delayTurnOffTask = args.payload["delayTurnOffTask"]
+            # task = Task(pTask=self.setSelector2, args=TaskArgument(state=0), delay=delayTurnOffTask, period=0)
+            # taskTurnOffId = self.scheduler1.SCH_AddTask(task)
         else:
             data = self.selector2_OFF
         self.ser.write(data)
-        print("Write: ", data)
+        print("Selector 2: ", data)
 
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId,
@@ -250,14 +252,14 @@ class Uart:
         taskTurnOffId = None
         if state:
             data = self.selector3_ON
-            # OFF task
-            delayTurnOffTask = args.payload["delayTurnOffTask"]
-            task = Task(pTask=self.setSelector3, args=TaskArgument(state=0), delay=delayTurnOffTask, period=0)
-            taskTurnOffId = self.scheduler1.SCH_AddTask(task)
+            # # OFF task
+            # delayTurnOffTask = args.payload["delayTurnOffTask"]
+            # task = Task(pTask=self.setSelector3, args=TaskArgument(state=0), delay=delayTurnOffTask, period=0)
+            # taskTurnOffId = self.scheduler1.SCH_AddTask(task)
         else:
             data = self.selector3_OFF
         self.ser.write(data)
-        print("Write: ", data)
+        print("Selector 3: ", data)
 
         task = Task(pTask=self.waitControlAck,
                     args=TaskArgument(addr=data[0], func=data[1], taskTurnOffId=taskTurnOffId,
@@ -271,10 +273,6 @@ class Uart:
         if len(schedule.ratio) < 7:
             print("[ERROR] Schedule has not enough value!")
             return False
-        for num in schedule.ratio:
-            if not num:
-                print("[ERROR] Ratio values are error!")
-                return False
 
         self.totalAck = 0
         self.nonAck = 0
@@ -295,37 +293,50 @@ class Uart:
         max_duration_in_section_1 = int(volume / totalRatioIn * max(water, mixer1, mixer2, mixer3) / self.MILLILITER_TO_SECOND)
 
         delayTurnOffTask = int(volume / totalRatioIn * water / self.MILLILITER_TO_SECOND)
-        task = Task(pTask=self.setPumpIn, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0, period=0)
-        self.scheduler1.SCH_AddTask(task)
+        if delayTurnOffTask > 0:
+            task = Task(pTask=self.setPumpIn, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0,
+                        period=0)
+            self.scheduler1.SCH_AddTask(task)
+        else:
+            self.totalAck += 2
 
         delayTurnOffTask = int(volume / totalRatioIn * mixer1 / self.MILLILITER_TO_SECOND)
-        task = Task(pTask=self.setMixer1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=1, period=0)
-        self.scheduler1.SCH_AddTask(task)
+        if delayTurnOffTask > 0:
+            task = Task(pTask=self.setMixer1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0, period=0)
+            self.scheduler1.SCH_AddTask(task)
+        else:
+            self.totalAck += 2
 
         delayTurnOffTask = int(volume / totalRatioIn * mixer2 / self.MILLILITER_TO_SECOND)
-        task = Task(pTask=self.setMixer2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=2, period=0)
-        self.scheduler1.SCH_AddTask(task)
+        if delayTurnOffTask > 0:
+            task = Task(pTask=self.setMixer2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0, period=0)
+            self.scheduler1.SCH_AddTask(task)
+        else:
+            self.totalAck += 2
 
         delayTurnOffTask = int(volume / totalRatioIn * mixer3 / self.MILLILITER_TO_SECOND)
-        task = Task(pTask=self.setMixer3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=3, period=0)
-        self.scheduler1.SCH_AddTask(task)
+        if delayTurnOffTask > 0:
+            task = Task(pTask=self.setMixer3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffTask), delay=0, period=0)
+            self.scheduler1.SCH_AddTask(task)
+        else:
+            self.totalAck += 2
 
         delayTurnOffArea1 = int(volume / totalRatioOut * area1 / self.MILLILITER_TO_SECOND)
         delayTurnOffArea2 = int(volume / totalRatioOut * area2 / self.MILLILITER_TO_SECOND)
         delayTurnOffArea3 = int(volume / totalRatioOut * area3 / self.MILLILITER_TO_SECOND)
         delayPumpOut = max(delayTurnOffArea1, delayTurnOffArea2, delayTurnOffArea3)
 
-        task = Task(pTask=self.trackingAckSection1,
+        task = Task(pTask=self.trackAckSection1,
                     args=TaskArgument(delayTurnOffArea1=delayTurnOffArea1,
                                       delayTurnOffArea2=delayTurnOffArea2,
                                       delayTurnOffArea3=delayTurnOffArea3,
                                       delayPumpOut=delayPumpOut),
-                    delay=max_duration_in_section_1 + self.WAITING_ACK * 10,
+                    delay=max_duration_in_section_1 + self.WAITING_ACK * 6,
                     period=0)
         self.scheduler1.SCH_AddTask(task)
         return True
 
-    def trackingAckSection1(self, args):
+    def trackAckSection1(self, args):
         if self.totalAck == self.NUMBER_ACK_AT_SECTION1:
             self.totalAck = 0
             print("PREPARE SECTION2 TASKS!")
@@ -335,36 +346,84 @@ class Uart:
             delayTurnOffArea3 = args.payload["delayTurnOffArea3"]
             delayPumpOut = args.payload["delayPumpOut"]
 
-            task = Task(pTask=self.setPumpOut, args=TaskArgument(state=1, delayTurnOffTask=delayPumpOut + self.WAITING_ACK * 3), delay=0,
+            # task = Task(pTask=self.setPumpOut, args=TaskArgument(state=1, delayTurnOffTask=delayPumpOut + self.WAITING_ACK * 3), delay=0,
+            #             period=0)
+            # self.scheduler1.SCH_AddTask(task)
+            task = Task(pTask=self.setSelector1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea1), delay=0,
                         period=0)
             self.scheduler1.SCH_AddTask(task)
-            task = Task(pTask=self.setSelector1, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea1), delay=1,
+            task = Task(pTask=self.setSelector2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea2), delay=0,
                         period=0)
             self.scheduler1.SCH_AddTask(task)
-            task = Task(pTask=self.setSelector2, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea2), delay=2,
-                        period=0)
-            self.scheduler1.SCH_AddTask(task)
-            task = Task(pTask=self.setSelector3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea3), delay=3,
+            task = Task(pTask=self.setSelector3, args=TaskArgument(state=1, delayTurnOffTask=delayTurnOffArea3), delay=0,
                         period=0)
             self.scheduler1.SCH_AddTask(task)
 
             task = Task(pTask=self.trackingAckSection2,
-                        delay=delayPumpOut + self.WAITING_ACK * 6,
+                        args=TaskArgument(
+                            delayPumpOut=delayPumpOut,
+                            delayTurnOffArea1=delayTurnOffArea1,
+                            delayTurnOffArea2=delayTurnOffArea2,
+                            delayTurnOffArea3=delayTurnOffArea3),
+                        delay=delayPumpOut + self.WAITING_ACK * 4,
                         period=0)
             self.scheduler1.SCH_AddTask(task)
 
         else:
-            print("NON-OK, HOLD THIS SECTION!")
+            print("NON-OK AT SECTION 1, TERMINATE!")
             if self.onProcessDone:
                 self.onProcessDone(False)
 
-    def trackingAckSection2(self):
-        if self.totalAck == self.NUMBER_ACK_AT_SECTION1:
-            print("OK-SECTION2")
+    def trackingAckSection2(self, args):
+        if self.totalAck == self.NUMBER_ACK_AT_SECTION2:
+            print("PREPARE SECTION 3 TASKS!")
+            self.totalAck = 0
+
+            delayPumpOut = args.payload["delayPumpOut"]
+            delayTurnOffArea1 = args.payload["delayTurnOffArea1"]
+            delayTurnOffArea2 = args.payload["delayTurnOffArea2"]
+            delayTurnOffArea3 = args.payload["delayTurnOffArea3"]
+
+            task = Task(pTask=self.setPumpOut,
+                        args=TaskArgument(state=1, delayTurnOffTask=delayPumpOut),
+                        delay=0,
+                        period=0)
+            self.scheduler1.SCH_AddTask(task)
+
+            # Delay for turn off
+            task = Task(pTask=self.setSelector1,
+                        args=TaskArgument(state=0),
+                        delay=delayTurnOffArea1,
+                        period=0)
+            self.scheduler1.SCH_AddTask(task)
+            task = Task(pTask=self.setSelector2,
+                        args=TaskArgument(state=0),
+                        delay=delayTurnOffArea2,
+                        period=0)
+            self.scheduler1.SCH_AddTask(task)
+            task = Task(pTask=self.setSelector3,
+                        args=TaskArgument(state=0),
+                        delay=delayTurnOffArea3,
+                        period=0)
+            self.scheduler1.SCH_AddTask(task)
+
+            task = Task(pTask=self.trackingAckSection3,
+                        delay=max(delayPumpOut, delayTurnOffArea1, delayTurnOffArea2, delayTurnOffArea3) + self.WAITING_ACK * 3,
+                        period=0)
+            self.scheduler1.SCH_AddTask(task)
+        else:
+            print("NON-OK AT SECTION 2, TERMINATE!")
+            if self.onProcessDone:
+                self.onProcessDone(False)
+
+    def trackingAckSection3(self):
+        if self.totalAck == self.NUMBER_ACK_AT_SECTION3:
+            print("OK AT SECTION 3!")
+            self.totalAck = 0
             if self.onProcessDone:
                 self.onProcessDone(True)
         else:
-            print("NON-OK-SECTION2")
+            print("NON-OK AT SECTION 3, TERMINATE!")
             if self.onProcessDone:
                 self.onProcessDone(False)
 
@@ -403,12 +462,12 @@ class Uart:
     def tempAck(self, args: TaskArgument):
         res = self.waitAck(args)
         if res != -1:
-            self.tempValue = res
+            self.tempValue = res / 100
 
     def moisAck(self, args: TaskArgument):
         res = self.waitAck(args)
         if res != -1:
-            self.moisValue = res
+            self.moisValue = res / 100
 
     def waitAck(self, args: TaskArgument):
         addr = args.payload["addr"]
@@ -419,7 +478,7 @@ class Uart:
                 if entry[0] == addr and entry[1] == func:
                     result = self.decodeModbus(entry)
                     if self.isRandom == 1 and addr == 1 and func == 3:
-                        result = random.randint(22, 33)
+                        result = random.randint(2200, 3100)
             # Check and delete redundant ACK
             self.buffer = [entry for entry in self.buffer if not (entry[0] == addr and entry[1] == func)]
         return result

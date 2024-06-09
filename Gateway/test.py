@@ -73,14 +73,12 @@ def test(cmd):
         print("UNKNOWN MESSAGE!")
 
 
-rawData = []
-buffer = []
-
-
 while True:
     numByte = ser.inWaiting()
-    if numByte:
-        rawData.extend([ser.read(numByte)])
-        process()
+    if numByte >= 8:
+        payload = [b for b in ser.read(8)]
+        print(payload)
+        test(payload)
+        ser.write(payload)
     else:
         time.sleep(0.2)
