@@ -14,12 +14,13 @@ class Uart:
 
     WAITING_ACK = 2
     MAX_NON_ACK = 9
-    MILLILITER_TO_SECOND = 200   # Pump 10ml / 1s
+    MILLILITER_TO_SECOND = 50   # Pump 50ml / 1s
     NUMBER_ACK_AT_SECTION1 = 8
 
     def __init__(self, scheduler1: Scheduler1):
         self.scheduler1 = scheduler1
         self._lock = threading.Lock()
+        self.rawDataBuffer = []
         self.buffer = []
         self.tempValue = 0
         self.moisValue = 0
@@ -54,7 +55,7 @@ class Uart:
         self.scheduler1.SCH_AddTask(Task(pTask=self.trackError, delay=0, period=3))
 
         try:
-            self.ser = serial.Serial(port=self.port, baudrate=115200)
+            self.ser = serial.Serial(port=self.port, baudrate=9600)
             print("Open successfully")
         except:
             print("Can not open the port")
@@ -405,12 +406,23 @@ class Uart:
 
     def loop(self):
         while True:
+            if self.rawDataBuffer:
+                if self.rawDataBuffer[0] == 0:
+                    self.rawDataBuffer.pop(0)
+                elif len(self.rawDataBuffer) >= 7 and self.rawDataBuffer[0] == 1 and self.rawDataBuffer[1] == 3:
+                    self.buffer.append(self.rawDataBuffer[:7])
+                    self.rawDataBuffer = self.rawDataBuffer[7:]
+                elif len(self.rawDataBuffer) >= 8:
+                    self.buffer.append(self.rawDataBuffer[:8])
+                    self.rawDataBuffer = self.rawDataBuffer[8:]
+
             numBytes = self.ser.inWaiting()
-            if numBytes >= 8:
+            if numBytes:
                 with self._lock:
-                    self.buffer.append([b for b in self.ser.read(8)])
+                    self.rawDataBuffer.extend(self.ser.read(numBytes))
             else:
-                TimeManager.sleep(0.2)
+                if not self.rawDataBuffer:
+                    TimeManager.sleep(0.2)
 
     @staticmethod
     def decodeModbus(data_array):
