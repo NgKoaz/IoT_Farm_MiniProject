@@ -5,8 +5,9 @@ How to git: https://youtu.be/padDE9j1cxQ
 
 ## Demo ##
 
-Part1: https://youtu.be/dCZun4BNBK8
+Demo Part 1: https://youtu.be/4g_PwmeHiPc?feature=shared
 
-Part2: https://youtu.be/LdC5v_CqAV4
+Demo Part 2: https://youtu.be/tLtLS39AbH4?feature=shared
 
+Demo Part 3: https://youtu.be/8eCvzQ8HCLQ?feature=shared
 
